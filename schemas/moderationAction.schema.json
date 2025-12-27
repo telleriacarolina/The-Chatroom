@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ModerationAction",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "moderatorId": { "type": "string" },
+    "targetUserId": { "type": ["string","null"] },
+    "targetMessageId": { "type": ["string","null"] },
+    "targetItemId": { "type": ["string","null"] },
+    "actionType": { "type": "string", "enum": ["WARNING","MUTE","KICK","BAN_TEMP","BAN_PERMANENT","MESSAGE_DELETE","ITEM_REMOVE"] },
+    "reason": { "type": "string" },
+    "duration": { "type": ["integer","null"] },
+    "expiresAt": { "type": ["string","null"], "format": "date-time" },
+    "isActive": { "type": "boolean", "default": true },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id","moderatorId","actionType","reason","createdAt"]
+}

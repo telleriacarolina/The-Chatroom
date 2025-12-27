@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TempSession",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "userId": { "type": ["string", "null"] },
+    "temporaryUsername": { "type": "string", "minLength": 4, "maxLength": 10 },
+    "ageCategory": { "type": "string", "enum": ["18+", "18+RED"] },
+    "sessionToken": { "type": "string" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "temporaryUsername", "ageCategory", "sessionToken", "expiresAt", "createdAt"]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Session",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "description": "Unique session identifier" },
+    "userId": { "type": "string", "description": "Linked user id" },
+    "sessionToken": { "type": "string", "description": "Secure session token (JWT or UUID)" },
+    "ipAddress": { "type": ["string", "null"] },
+    "userAgent": { "type": ["string", "null"] },
+    "isActive": { "type": "boolean", "default": true },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "lastActivityAt": { "type": ["string", "null"], "format": "date-time" },
+    "stayOnlineEnabled": { "type": "boolean", "default": false }
+  },
+  "required": ["id", "userId", "sessionToken", "expiresAt", "createdAt"]
+}

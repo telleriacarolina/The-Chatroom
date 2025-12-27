@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MarketplaceItem",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "sellerId": { "type": "string" },
+    "title": { "type": "string", "maxLength": 100 },
+    "description": { "type": "string" },
+    "price": { "type": "number" },
+    "currency": { "type": "string", "enum": ["USD","EUR","GBP"] },
+    "category": { "type": "string", "enum": ["PHOTOS","VIDEOS","CUSTOM_CONTENT","SERVICES","OTHER"] },
+    "contentType": { "type": "string", "enum": ["SFW","NSFW"] },
+    "thumbnailUrl": { "type": "string", "format": "uri" },
+    "previewUrls": { "type": ["array","null"], "items": { "type": "string", "format": "uri" } },
+    "accessLevel": { "type": "string", "enum": ["MAIN_LOUNGE","RED_LOUNGE"] },
+    "status": { "type": "string", "enum": ["ACTIVE","SOLD","REMOVED","PENDING_REVIEW"], "default": "ACTIVE" },
+    "viewCount": { "type": "integer", "default": 0 },
+    "purchaseCount": { "type": "integer", "default": 0 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id","sellerId","title","description","price","currency","thumbnailUrl","accessLevel","createdAt"]
+}

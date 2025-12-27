@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UserReport",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "reporterId": { "type": "string" },
+    "reportedUserId": { "type": ["string","null"] },
+    "reportedMessageId": { "type": ["string","null"] },
+    "reportedItemId": { "type": ["string","null"] },
+    "reportReason": { "type": "string", "enum": ["SPAM","HARASSMENT","INAPPROPRIATE_CONTENT","UNDERAGE","SCAM","OTHER"] },
+    "reportDetails": { "type": ["string","null"] },
+    "status": { "type": "string", "enum": ["PENDING","REVIEWED","ACTION_TAKEN","DISMISSED"], "default": "PENDING" },
+    "reviewedBy": { "type": ["string","null"] },
+    "reviewedAt": { "type": ["string","null"], "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id","reporterId","reportReason","createdAt"]
+}

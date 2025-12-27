@@ -1,0 +1,40 @@
+{
+  "name": "the-chatroom",
+  "version": "0.1.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "next:dev": "next dev",
+    "next:build": "next build",
+    "next:start": "next start",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.264.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "uuid": "^9.0.0",
+    "cookie": "^0.6.1",
+    "twilio": "^4.18.0",
+    "prisma": "^5.11.0",
+    "@prisma/client": "^5.11.0"
+  }
+  ,
+  "optionalDependencies": {
+    "@aws-sdk/client-s3": "^3.450.0",
+    "@aws-sdk/s3-request-presigner": "^3.450.0",
+    "@vladmandic/face-api": "^1.7.12",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.0",
+    "tesseract.js": "^5.0.3",
+    "node-cron": "^3.0.3"
+  }
+}

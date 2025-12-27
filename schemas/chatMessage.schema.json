@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ChatMessage",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "loungeId": { "type": "string" },
+    "languageRoomId": { "type": "string" },
+    "userId": { "type": "string" },
+    "displayUsername": { "type": "string" },
+    "messageText": { "type": "string" },
+    "messageType": { "type": "string", "enum": ["TEXT","IMAGE","VIDEO","LINK","SYSTEM"] },
+    "attachmentUrl": { "type": ["string","null"], "format": "uri" },
+    "isEdited": { "type": "boolean", "default": false },
+    "editedAt": { "type": ["string","null"], "format": "date-time" },
+    "isDeleted": { "type": "boolean", "default": false },
+    "deletedAt": { "type": ["string","null"], "format": "date-time" },
+    "deletedBy": { "type": ["string","null"] },
+    "flagCount": { "type": "integer", "default": 0 },
+    "isFlagged": { "type": "boolean", "default": false },
+    "moderationStatus": { "type": "string", "enum": ["APPROVED","PENDING","REMOVED"], "default": "APPROVED" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id","loungeId","languageRoomId","userId","displayUsername","messageText","messageType","createdAt"]
+}

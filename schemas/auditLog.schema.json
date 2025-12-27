@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AuditLog",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "userId": { "type": ["string","null"] },
+    "eventType": { "type": "string", "enum": ["LOGIN","LOGOUT","VERIFICATION_ATTEMPT","MESSAGE_SENT","ITEM_PURCHASED","MODERATION_ACTION","ACCOUNT_DELETED"] },
+    "eventDetails": { "type": ["string","null"] },
+    "ipAddress": { "type": ["string","null"] },
+    "userAgent": { "type": ["string","null"] },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id","eventType","createdAt"]
+}

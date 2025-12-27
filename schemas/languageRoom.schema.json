@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LanguageRoom",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "loungeId": { "type": "string" },
+    "languageCode": { "type": "string" },
+    "languageName": { "type": "string" },
+    "flagEmoji": { "type": "string" },
+    "currentUserCount": { "type": "integer", "default": 0 },
+    "isActive": { "type": "boolean", "default": true },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "loungeId", "languageCode", "languageName", "flagEmoji", "createdAt"]
+}

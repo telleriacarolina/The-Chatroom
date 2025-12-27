@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "User",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "description": "Unique user identifier" },
+    "email": { "type": "string", "format": "email", "description": "User email (registered users)" },
+    "passwordHash": { "type": "string", "description": "Hashed password (bcrypt/argon2)" },
+    "permanentUsername": { "type": "string", "minLength": 4, "maxLength": 20 },
+    "preferredName": { "type": "string" },
+    "avatarUrl": { "type": "string", "format": "uri" },
+    "accountType": { "type": "string", "enum": ["REGISTERED", "GUEST"] },
+    "ageVerified": { "type": "boolean", "default": false },
+    "idVerified": { "type": "boolean", "default": false },
+    "idVerificationDate": { "type": ["string", "null"], "format": "date-time" },
+    "idVerificationProvider": { "type": ["string", "null"] },
+    "dateOfBirth": { "type": ["string", "null"], "format": "date", "description": "Sensitive: encrypt at rest" },
+    "accountStatus": { "type": "string", "enum": ["ACTIVE", "SUSPENDED", "BANNED", "DELETED"], "default": "ACTIVE" },
+    "banReason": { "type": ["string", "null"] },
+    "banExpiresAt": { "type": ["string", "null"], "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "lastSeenAt": { "type": ["string", "null"], "format": "date-time" },
+    "isOnline": { "type": "boolean", "default": false },
+    "stayOnline": { "type": "boolean", "default": false },
+    "stayOnlineUntil": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "required": ["id", "accountType", "createdAt", "updatedAt"],
+  "if": {
+    "properties": { "accountType": { "const": "REGISTERED" } }
+  },
+  "then": {
+    "required": ["email", "passwordHash", "permanentUsername"]
+  }
+}

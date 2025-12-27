@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Verification",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "userId": { "type": "string" },
+    "verificationType": { "type": "string", "enum": ["AGE_ONLY", "ID_FULL"] },
+    "verificationStatus": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "EXPIRED"] },
+    "documentType": { "type": "string", "enum": ["DRIVERS_LICENSE", "PASSPORT", "NATIONAL_ID", "STATE_ID"] },
+    "documentImageUrl": { "type": "string", "format": "uri" },
+    "selfieImageUrl": { "type": "string", "format": "uri" },
+    "verificationProvider": { "type": ["string", "null"] },
+    "verificationProviderResponse": { "type": ["string", "null"] },
+    "verifiedAt": { "type": ["string", "null"], "format": "date-time" },
+    "expiresAt": { "type": ["string", "null"], "format": "date-time" },
+    "rejectionReason": { "type": ["string", "null"] },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "userId", "verificationType", "verificationStatus", "documentImageUrl", "selfieImageUrl", "createdAt"]
+}
