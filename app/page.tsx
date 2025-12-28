@@ -1,5 +1,19 @@
-import Block from "@/components/chat/Block";
+'use client'
+
+import { useEffect } from 'react'
+import Block from "@/components/chat/Block"
+import { PwaPrompt } from "@/components/PwaPrompt"
+import { registerServiceWorker } from "@/lib/pwa"
 
 export default function Page() {
-  return <Block />;
+  useEffect(() => {
+    registerServiceWorker()
+  }, [])
+
+  return (
+    <>
+      <Block />
+      <PwaPrompt />
+    </>
+  )
 }
