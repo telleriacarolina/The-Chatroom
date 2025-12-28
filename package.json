@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "dev:debug": "nodemon --inspect server.js",
+    "socket:dev": "nodemon socket-server.js",
     "next:dev": "next dev",
     "next:build": "next build",
     "next:start": "next start",

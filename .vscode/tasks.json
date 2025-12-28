@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm install",
+      "type": "shell",
+      "command": "npm",
+      "args": ["install"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Next.js dev server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "next:dev"],
+      "isBackground": true,
+      "group": {
+        "kind": "build"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*ready.*",
+          "endsPattern": "^.*compiled.*"
+        }
+      }
+    },
+    {
+      "label": "install & start dev server",
+      "type": "shell",
+      "command": "npm install && npm run next:dev",
+      "isBackground": true,
+      "group": {
+        "kind": "build"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*added.*",
+          "endsPattern": "^.*ready.*"
+        }
+      }
+    }
+  ]
+}

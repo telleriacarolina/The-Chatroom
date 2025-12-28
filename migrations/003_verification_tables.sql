@@ -35,3 +35,17 @@ CREATE TABLE IF NOT EXISTS verification_retention_policy (
 );
 
 CREATE INDEX IF NOT EXISTS idx_retention_scheduled ON verification_retention_policy(deletion_scheduled_at) WHERE deleted_at IS NULL;
+
+-- Trigger to update `updated_at` on id_verifications
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_id_verifications_updated_at
+BEFORE UPDATE ON id_verifications
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
