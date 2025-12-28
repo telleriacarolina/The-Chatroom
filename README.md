@@ -128,23 +128,41 @@ npm run prisma:generate
 npm run prisma:migrate
 ```
 
-### 4. Run Development Servers
+### 4. Run the Application
 
+**Option A: All-in-One Script (Recommended)**
 ```bash
-# Run all services
-npm run dev
+# First time setup
+./start-all.sh --setup
 
-# Or run individually:
+# Start all services
+./start-all.sh
+
+# View logs
+./start-all.sh --logs
+
+# Get help
+./start-all.sh --help
+```
+
+**Option B: Individual Services**
+```bash
 npm run dev:api      # API server (http://localhost:3001)
 npm run dev:socket   # Socket.IO (http://localhost:3002)
 npm run dev:web      # Next.js (http://localhost:3000)
 ```
 
+**Option C: Standalone Single-File App**
+```bash
+node app-standalone.js
+```
+
 ### 5. Access Application
 
-- **Frontend:** http://localhost:3000
-- **API:** http://localhost:3001
-- **WebSocket:** http://localhost:3002
+- **🌐 Frontend:** http://localhost:3000
+- **📡 API:** http://localhost:3001
+- **🔌 WebSocket:** http://localhost:3002
+- **📊 Health Check:** http://localhost:3001/health
 
 ---
 
