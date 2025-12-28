@@ -1,9 +1,12 @@
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 
 export default function Block() {
   const [username, setUsername] = useState("");
@@ -11,6 +14,9 @@ export default function Block() {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
+  const [isLoadingLounges, setIsLoadingLounges] = useState(false);
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
@@ -111,7 +117,7 @@ export default function Block() {
     },
   };
 
-  const handleSetUsername = () => {
+  const handleSetUsername = async () => {
     const trimmedUsername = username.trim();
 
     if (!trimmedUsername) {
@@ -135,8 +141,27 @@ export default function Block() {
     }
 
     setError("");
-    setTempUsername(username);
-    setUsername("");
+    setIsLoading(true);
+
+    try {
+      // TODO: Replace with actual API call to /api/auth/guest
+      // const response = await fetch('/api/auth/guest', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ username: trimmedUsername })
+      // });
+      // if (!response.ok) throw new Error('Failed to create guest session');
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setTempUsername(username);
+      setUsername("");
+    } catch (err) {
+      setError("Failed to create guest session. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Start with username creation screen
@@ -170,16 +195,23 @@ export default function Block() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <Button onClick={handleSetUsername} className="w-full">
-              Enter
+            <Button onClick={handleSetUsername} className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating Session...
+                </>
+              ) : (
+                "Enter"
+              )}
             </Button>
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1">
+              <Button variant="outline" className="flex-1" disabled={isLoading}>
                 <LogIn className="w-4 h-4 mr-2" />
                 Sign In
               </Button>
-              <Button variant="outline" className="flex-1">
+              <Button variant="outline" className="flex-1" disabled={isLoading}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Sign Up
               </Button>
@@ -221,27 +253,42 @@ export default function Block() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(languageCategories).map(([key, lang]) => (
-                <Card
-                  key={key}
-                  className="hover:border-primary transition-colors cursor-pointer"
-                  onClick={() => setSelectedLanguage(key)}
-                >
-                  <CardHeader>
-                    <div className="text-4xl mb-2">{lang.flag}</div>
-                    <CardTitle className="text-lg">{lang.name}</CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      <span>{lang.lounges[0].members} online</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      {lang.lounges.length} lounges available
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
+            {isLoadingLanguages ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="w-12 h-12 mb-2" />
+                      <Skeleton className="h-6 w-24 mb-2" />
+                      <Skeleton className="h-4 w-32 mb-1" />
+                      <Skeleton className="h-3 w-28" />
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Object.entries(languageCategories).map(([key, lang]) => (
+                  <Card
+                    key={key}
+                    className="hover:border-primary transition-colors cursor-pointer"
+                    onClick={() => setSelectedLanguage(key)}
+                  >
+                    <CardHeader>
+                      <div className="text-4xl mb-2">{lang.flag}</div>
+                      <CardTitle className="text-lg">{lang.name}</CardTitle>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                        <span>{lang.lounges[0].members} online</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        {lang.lounges.length} lounges available
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -407,40 +454,64 @@ export default function Block() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {currentLanguage.lounges.map((lounge) => (
-              <Card
-                key={lounge.id}
-                className={`hover:border-primary transition-colors cursor-pointer ${
-                  lounge.isAll ? "border-2 border-primary" : ""
-                }`}
-                onClick={() => setSelectedLounge(lounge.id)}
-              >
-                <CardHeader className="py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-base">{lounge.name}</CardTitle>
-                        {lounge.isAll && (
-                          <Badge variant="default" className="mt-1">
-                            All Users Welcome
-                          </Badge>
-                        )}
+          {isLoadingLounges ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-5 h-5 rounded" />
+                        <div>
+                          <Skeleton className="h-5 w-48 mb-2" />
+                          {i === 0 && <Skeleton className="h-5 w-32" />}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="w-5 h-5" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>{lounge.members} online</span>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentLanguage.lounges.map((lounge) => (
+                <Card
+                  key={lounge.id}
+                  className={`hover:border-primary transition-colors cursor-pointer ${
+                    lounge.isAll ? "border-2 border-primary" : ""
+                  }`}
+                  onClick={() => setSelectedLounge(lounge.id)}
+                >
+                  <CardHeader className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <MessageSquare className="w-5 h-5 text-primary" />
+                        <div>
+                          <CardTitle className="text-base">{lounge.name}</CardTitle>
+                          {lounge.isAll && (
+                            <Badge variant="default" className="mt-1">
+                              All Users Welcome
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Users className="w-4 h-4" />
+                          <span>{lounge.members} online</span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="mt-6 p-4 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground">
