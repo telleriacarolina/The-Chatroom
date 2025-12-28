@@ -20,6 +20,8 @@ type LanguageCategory = {
   lounges: Lounge[];
 };
 
+type LanguageMap = Record<string, LanguageCategory>;
+
 export default function Block() {
   const [username, setUsername] = useState<string>("");
   const [tempUsername, setTempUsername] = useState<string>("");
@@ -32,7 +34,7 @@ export default function Block() {
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
   // Language categories with All Users Lounge + Country-specific lounges
-  const languageCategories: { [key: string]: LanguageCategory } = {
+  const languageCategories: LanguageMap = {
     english: {
       name: "English",
       flag: "🇬🇧",
@@ -152,12 +154,24 @@ export default function Block() {
   }, [isWaiting]);
 
   const handleSetUsername = () => {
-    if (!username.trim()) {
+    const trimmedUsername = username.trim();
+
+    if (!trimmedUsername) {
       setError("Please enter a username");
       return;
     }
 
-    if (existingUsernames.includes(username.trim())) {
+    if (trimmedUsername.length < 4) {
+      setError("Username must be at least 4 characters");
+      return;
+    }
+
+    if (trimmedUsername.length > 10) {
+      setError("Username must be no more than 10 characters");
+      return;
+    }
+
+    if (existingUsernames.includes(trimmedUsername)) {
       setError("This username is already taken. Please choose another.");
       return;
     }
@@ -165,9 +179,8 @@ export default function Block() {
     setError("");
     setIsWaiting(true);
 
-    // Simulate wait, then set username
     setTimeout(() => {
-      setTempUsername(username.trim());
+      setTempUsername(username);
       setUsername("");
     }, Math.floor(Math.random() * 30000) + 30000);
   };
@@ -181,7 +194,7 @@ export default function Block() {
             <div className="flex justify-center mb-4">
               <Loader2 className="w-16 h-16 text-primary animate-spin" />
             </div>
-            <CardTitle className="text-2xl">Welcome to The Chatroom! 🌍</CardTitle>
+            <CardTitle className="text-2xl">Enter The Chatroom! 🌍</CardTitle>
             <CardDescription>
               Please wait while we prepare your experience...
             </CardDescription>
@@ -347,7 +360,7 @@ export default function Block() {
             <div className="flex justify-center mb-4">
               <MessageSquare className="w-16 h-16 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Welcome to The Chatroom</CardTitle>
+            <CardTitle className="text-2xl">Enter The Chatroom</CardTitle>
             <CardDescription>
               Create your username to get started
             </CardDescription>
@@ -357,11 +370,15 @@ export default function Block() {
               <Label htmlFor="username">Choose Your Username</Label>
               <Input
                 id="username"
-                placeholder="Enter your username"
+                placeholder="Enter your username (4-10 characters)"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSetUsername()}
+                maxLength={10}
               />
+              <p className="text-xs text-muted-foreground">
+                Username must be between 4 and 10 characters
+              </p>
             </div>
 
             {error && <p className="text-sm text-destructive">{error}</p>}
@@ -574,7 +591,7 @@ export default function Block() {
     );
   }
 
-  const currentLanguage = languageCategories[selectedLanguage!];
+  const currentLanguage = languageCategories[selectedLanguage];
 
   return (
     <div className="container py-8">
