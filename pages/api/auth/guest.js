@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   const temp = await prisma.tempSession.create({ data: {
     temporaryUsername,
-    ageCategory: ageCategory === '18+RED' ? '_18PLUS_RED' : '_18PLUS',
+    ageCategory: ageCategory === '18+RED' ? 'EIGHTEEN_PLUS_RED' : 'EIGHTEEN_PLUS',
     sessionToken: token,
     expiresAt: new Date(Date.now() + 24*60*60*1000)
   }}).catch(e => { console.error(e); return null });
