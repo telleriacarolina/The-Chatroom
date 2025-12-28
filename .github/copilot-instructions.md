@@ -1,5 +1,14 @@
 # GitHub Copilot Instructions for The Chatroom
 
+## Quick Start for Contributors
+
+When working on this codebase:
+1. **Three servers required:** API (port 3001), Socket.IO (port 3002), Next.js (port 3000)
+2. **Mixed TypeScript/JavaScript:** Respect existing file types, use TypeScript for new features
+3. **Path aliases:** Use `@/*` imports, not relative paths across directories
+4. **Security:** Never commit secrets, always validate user inputs
+5. **Database changes:** Edit schema → migrate → generate → update code
+
 ## Project Overview
 
 The Chatroom is a real-time chat application with multi-tier authentication, language-specific lounges, user marketplace, moderation, and verification system. Built with Node.js, Express, Socket.IO, Next.js, and PostgreSQL.
@@ -84,6 +93,11 @@ npm run prisma:generate   # Generate Prisma client
 - **TypeScript strict mode:** Disabled (`strict: false`)
 - **Path aliases:** `@/*` maps to project root
 - **JSX:** Supported in both `.tsx` and `.jsx` files
+- **File type guidance:**
+  - Use TypeScript (`.ts`, `.tsx`) for new components and features when possible
+  - Respect existing file types when modifying existing code
+  - Backend code (routes, middleware, services) is primarily JavaScript
+  - Frontend components use both TypeScript and JavaScript
 
 ### Coding Standards
 
@@ -113,6 +127,14 @@ npm run prisma:generate   # Generate Prisma client
 - Use TypeScript for new components when possible
 - Follow existing component structure in `components/chat/` and `components/auth/`
 - Import UI components from their respective files (e.g., `@/components/ui/button`)
+
+### Next.js Routing
+
+- **Mixed routing approach:** Both Pages Router (`pages/`) and App Router (`app/`) are present
+- **Pages Router:** Primary routing mechanism, includes API routes in `pages/api/`
+- **App Router:** Minimal usage, contains basic page structure
+- **New routes:** Add to `pages/` directory to maintain consistency
+- **API endpoints:** Create in `pages/api/` or `routes/` for Express routes
 
 ### Database & Prisma
 
@@ -239,6 +261,10 @@ router.get('/endpoint', authenticate, async (req, res) => {
 2. Use `npm install -D <package>` for dev dependencies
 3. Update documentation if the dependency changes workflow
 4. Test that all servers still work after installation
+5. **Optional dependencies:** Some features (AWS S3, face recognition, OCR) use optional dependencies
+   - These are in `optionalDependencies` in `package.json`
+   - The app works without them; they enable advanced features
+   - Install individually if needed: `npm install <package>`
 
 ## Troubleshooting
 
@@ -250,6 +276,9 @@ router.get('/endpoint', authenticate, async (req, res) => {
 - **Database connection:** Ensure PostgreSQL is running
 - **Missing dependencies:** Run `npm install`
 - **Next.js build issues:** Clear `.next/` directory and rebuild
+- **Module not found errors:** Check path aliases in `tsconfig.json` and `jsconfig.json`
+- **Socket.IO connection issues:** Verify `SOCKET_PORT` is correct and Socket.IO server is running
+- **CSRF token errors:** Ensure CSRF token is obtained from `/api/auth/csrf` before authenticated requests
 
 ### Debugging
 
@@ -269,13 +298,15 @@ router.get('/endpoint', authenticate, async (req, res) => {
 
 ## Important Notes
 
-1. **Three servers:** Always remember this app requires three separate processes
+1. **Three servers:** Always remember this app requires three separate processes (API, Socket.IO, Next.js)
 2. **Mixed codebase:** Both TypeScript and JavaScript - respect existing file types
 3. **Path aliases:** Always use `@/*` imports, not relative paths across directories
 4. **Prisma workflow:** Schema change → migrate → generate → update code
 5. **Security first:** Never commit secrets, always validate inputs
 6. **Minimal changes:** Keep PRs focused and avoid unnecessary refactoring
 7. **Documentation:** Update relevant docs when making significant changes
+8. **Environment setup:** Copy `.env.example` to `.env` before starting development
+9. **Server startup order:** Start API server first, then Socket.IO, then Next.js frontend
 
 ## Getting Help
 
