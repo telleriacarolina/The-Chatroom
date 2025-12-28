@@ -2,11 +2,24 @@
 
 A real-time chat application with multi-tier authentication, language-specific lounges, user marketplace, moderation, and verification system. Built with Node.js, Express, Socket.IO, Next.js, and PostgreSQL.
 
-**📦 Monorepo Structure:** This project is organized as a monorepo with npm workspaces.
+**📦 Monorepo Structure:** This project is fully consolidated with all code in the `packages/` directory.
 
 ---
 
-## Packages
+## 📦 Packages
+
+```
+The-Chatroom/
+├── packages/
+│   ├── api/          # Backend REST API (Express + Prisma + PostgreSQL)
+│   ├── socket/       # WebSocket server (Socket.IO)
+│   ├── web/          # Frontend (Next.js 14 + React 18 + TypeScript)
+│   └── shared/       # Shared types, schemas, and utilities
+├── docs/             # Documentation
+└── package.json      # Workspace configuration
+```
+
+### Package Details
 
 - **[@chatroom/api](packages/api/)** - Backend REST API (Express, Prisma, JWT)
 - **[@chatroom/socket](packages/socket/)** - WebSocket server (Socket.IO)

@@ -45,7 +45,9 @@
     "tesseract.js": "^5.0.3"
   },
   "devDependencies": {
+    "@nx/workspace": "^22.3.3",
     "@types/react": "19.2.7",
+    "turbo": "^2.7.2",
     "typescript": "5.9.3"
   }
 }
