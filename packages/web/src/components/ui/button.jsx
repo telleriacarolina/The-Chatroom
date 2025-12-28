@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-export function Button({ children, className = '', variant = 'default', ...props }) {
-  const base = 'px-4 py-2 inline-flex items-center justify-center';
-=======
 import React from "react";
 import clsx from "clsx"; // optional, for cleaner conditional class merging
 
@@ -27,7 +23,6 @@ export function Button({
     lg: "px-6 py-3 text-lg",
   };
 
->>>>>>> origin/main
   return (
     <button
       className={clsx(base, variantClasses[variant], sizeClasses[size], className)}
