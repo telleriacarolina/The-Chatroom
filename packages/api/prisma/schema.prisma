@@ -32,8 +32,8 @@ enum VerificationStatus {
 }
 
 enum AgeCategory {
-  _18PLUS // 18+
-  _18PLUS_RED // 18+RED
+  EIGHTEEN_PLUS
+  EIGHTEEN_PLUS_RED
 }
 
 enum MessageType {
