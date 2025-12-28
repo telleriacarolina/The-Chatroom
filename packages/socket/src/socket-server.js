@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const logger = require('./utils/logger');
+const logger = require('./lib/logger');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,7 +14,7 @@ const io = new Server(server, {
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../../public')));
 
 io.on('connection', (socket) => {
   logger.info(`User connected: ${socket.id}`);

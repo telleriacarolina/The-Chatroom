@@ -1,0 +1,7 @@
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:#f7f7f8; margin:0; padding:0; }
+#chat { max-width:700px; margin:40px auto; background:#fff; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.08); padding:12px; }
+#messages { list-style-type:none; padding:8px 12px; margin:0; max-height:60vh; overflow:auto; }
+#messages li { padding:8px 10px; margin-bottom:6px; background:#eef2ff; border-radius:6px; }
+#form { display:flex; gap:8px; padding:12px; border-top:1px solid #eee; }
+#input { flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:6px; }
+button { padding:10px 14px; border-radius:6px; border:0; background:#4f46e5; color:#fff; cursor:pointer; }

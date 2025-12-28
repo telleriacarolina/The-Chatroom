@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/prisma';
-import logger from '@/utils/logger';
+import { prisma } from '../lib/prisma';
+import logger from '../utils/logger';
 
 /** Transition users from Online -> Away after 5 minutes inactivity */
 export async function transitionInactiveUsers() {
