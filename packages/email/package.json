@@ -1,0 +1,28 @@
+{
+  "name": "@chatroom/email",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "@chatroom/shared": "*",
+    "nodemailer": "^6.9.0",
+    "@sendgrid/mail": "^8.1.0",
+    "handlebars": "^4.7.8",
+    "mjml": "^4.14.0",
+    "juice": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/nodemailer": "^6.4.0",
+    "typescript": "^5.3.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0"
+  }
+}

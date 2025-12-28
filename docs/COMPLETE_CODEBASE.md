@@ -19,7 +19,7 @@ This document contains all the source code from The Chatroom project organized b
 
 ## Server Files
 
-### server/server.js
+### packages/api/src/server.js
 Main Express API server (port 3001)
 
 ```javascript
@@ -62,7 +62,7 @@ app.listen(PORT, () => {
 module.exports = app;
 ```
 
-### server/socket-server.js
+### packages/socket/src/socket-server.js
 Socket.IO real-time messaging server (port 3002)
 
 ```javascript
@@ -109,7 +109,7 @@ module.exports = server;
 
 ## API Routes
 
-### routes/auth.js
+### packages/api/src/routes/auth.js
 Authentication routes (signup, signin, guest, refresh, logout, change password)
 
 ```javascript
@@ -268,7 +268,7 @@ module.exports = router;
 
 ## Library Utilities
 
-### lib/jwt.ts
+### packages/api/src/lib/jwt.ts
 JWT token generation and verification
 
 ```typescript
@@ -294,7 +294,7 @@ export function verifyRefresh(token: string) {
 }
 ```
 
-### lib/crypto.js
+### packages/api/src/lib/crypto.js
 Phone number encryption using AES-256-GCM
 
 ```javascript
@@ -331,7 +331,7 @@ export function decryptPhone(payload) {
 }
 ```
 
-### lib/prisma.ts
+### packages/api/src/lib/prisma.ts
 Prisma ORM client initialization
 
 ```typescript
@@ -348,7 +348,7 @@ if (process.env.NODE_ENV !== 'production') global.prisma = prisma;
 export default prisma;
 ```
 
-### lib/twilio.ts
+### packages/api/src/lib/twilio.ts
 Twilio SMS integration
 
 ```typescript
@@ -375,7 +375,7 @@ export async function sendSms(to: string, body: string) {
 export default sendSms;
 ```
 
-### lib/utils.ts
+### packages/web/src/lib/utils.ts
 Utility functions for className merging
 
 ```typescript
@@ -391,7 +391,7 @@ export function cn(...inputs: ClassValue[]) {
 
 ## Middleware
 
-### middleware/rateLimiter.js
+### packages/api/src/middleware/rateLimiter.js
 Rate limiting middleware with Redis fallback
 
 ```javascript
@@ -450,7 +450,7 @@ module.exports = {
 };
 ```
 
-### middleware/csrf.js
+### packages/api/src/middleware/csrf.js
 CSRF protection middleware (double-submit pattern)
 
 ```javascript
@@ -483,7 +483,7 @@ module.exports = csrfProtection;
 
 ## Services
 
-### services/backgroundJobs.js
+### packages/api/src/services/backgroundJobs.js
 Background tasks for session cleanup and user presence management
 
 ```javascript
@@ -548,7 +548,7 @@ export default { startBackgroundJobs };
 
 ## Utilities
 
-### utils/logger.js
+### packages/api/src/utils/logger.js
 Simple console logger utility
 
 ```javascript
@@ -560,7 +560,7 @@ export default {
 };
 ```
 
-### utils/security.js
+### packages/api/src/utils/security.js
 Security utilities (CSRF token generation/validation, encryption wrappers)
 
 ```javascript
@@ -596,7 +596,7 @@ module.exports = {
 
 ## Frontend Components
 
-### pages/index.tsx
+### packages/web/src/pages/index.tsx
 Next.js homepage (App Router)
 
 ```tsx
@@ -611,7 +611,7 @@ export default function Home() {
 }
 ```
 
-### components/chat/Block.tsx
+### packages/web/src/components/chat/Block.tsx
 Main chat UI component (username creation, language/lounge selection, waiting room)
 
 *Note: This is a large component (662 lines). Below is the beginning section. The full file contains:*
@@ -833,42 +833,42 @@ JavaScript configuration for path aliases
 ## Architecture Overview
 
 ### Project Structure
+
+**📦 Monorepo Organization:** This project uses npm workspaces with separate packages for API, Socket.IO, frontend, and shared code.
+
 ```
 The-Chatroom/
-├── server/              # Backend servers
-│   ├── server.js       # Express API (port 3001)
-│   └── socket-server.js # Socket.IO (port 3002)
-├── routes/             # API route handlers
-│   └── auth.js         # Authentication endpoints
-├── lib/                # Core libraries
-│   ├── jwt.ts          # JWT utilities
-│   ├── crypto.js       # Encryption
-│   ├── prisma.ts       # Database client
-│   ├── twilio.ts       # SMS integration
-│   └── utils.ts        # Helper functions
-├── middleware/         # Express middleware
-│   ├── rateLimiter.js  # Rate limiting
-│   └── csrf.js         # CSRF protection
-├── services/           # Background services
-│   └── backgroundJobs.js # Session cleanup, presence
-├── utils/              # Utilities
-│   ├── logger.js       # Logging
-│   └── security.js     # Security helpers
-├── components/         # React components
-│   ├── chat/           # Chat UI components
-│   ├── auth/           # Auth components
-│   └── ui/             # Reusable UI components
-├── pages/              # Next.js pages
-│   ├── index.tsx       # Homepage
-│   └── api/            # API routes (Next.js)
-├── prisma/             # Database
-│   └── schema.prisma   # Schema definition
-├── public/             # Static assets
-│   └── client.js       # Socket.IO test client
-└── docs/               # Documentation
-    ├── Commit.md       # Commit history
-    ├── TODO.md         # Project tasks
-    └── COMPLETE_CODEBASE.md # This file
+├── packages/
+│   ├── api/             # Backend REST API
+│   │   └── src/
+│   │       ├── server.js        # Express API server (port 3001)
+│   │       ├── routes/          # API routes (auth, etc.)
+│   │       ├── lib/             # Core libraries (JWT, crypto, Prisma, Twilio)
+│   │       ├── middleware/      # Express middleware (CSRF, rate limiting)
+│   │       ├── services/        # Background jobs and services
+│   │       └── utils/           # Logger, security helpers
+│   ├── socket/          # WebSocket server
+│   │   └── src/
+│   │       └── socket-server.js # Socket.IO server (port 3002)
+│   ├── web/             # Next.js frontend
+│   │   └── src/
+│   │       ├── app/             # Next.js App Router
+│   │       ├── pages/           # Next.js Pages Router (legacy)
+│   │       ├── components/      # React UI components
+│   │       │   ├── chat/       # Chat-related components
+│   │       │   ├── auth/       # Authentication components
+│   │       │   └── ui/         # shadcn/ui components
+│   │       ├── lib/             # Frontend utilities
+│   │       └── styles/          # Global CSS and Tailwind styles
+│   └── shared/          # Shared types and utilities
+│       └── src/
+│           ├── types/           # TypeScript type definitions
+│           ├── schemas/         # JSON schemas
+│           └── utils/           # Shared utilities
+├── prisma/              # Database schema and migrations
+│   └── schema.prisma   # Prisma schema definition
+├── public/              # Static assets & client scripts
+└── docs/                # Documentation
 ```
 
 ### Technology Stack
@@ -880,6 +880,7 @@ The-Chatroom/
 - **Real-time:** Socket.IO for WebSocket communication
 - **SMS:** Twilio integration
 - **UI:** Tailwind CSS, shadcn/ui components, Lucide icons
+- **Monorepo:** npm workspaces with @chatroom/* scoped packages
 
 ### Key Features
 1. **Multi-tier Authentication**
@@ -965,13 +966,13 @@ NODE_ENV="development"
 4. **Run development servers:**
    ```bash
    # Terminal 1: API server
-   npm run dev
+   npm run dev:api
 
    # Terminal 2: Socket.IO server
-   npm run socket:dev
+   npm run dev:socket
 
    # Terminal 3: Next.js frontend
-   npm run next:dev
+   npm run dev:web
    ```
 
 5. **Access the application:**

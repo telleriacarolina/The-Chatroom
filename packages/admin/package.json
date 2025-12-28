@@ -1,0 +1,15 @@
+{
+  "name": "@chatroom/admin",
+  "version": "1.0.0",
+  "dependencies": {
+    "@chatroom/shared": "*",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  },
+  "scripts": {
+    "prepare": "husky"
+  }
+}

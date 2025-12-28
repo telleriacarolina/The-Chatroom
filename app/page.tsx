@@ -1,5 +1,9 @@
 import Block from "@/components/chat/Block";
 
-export default function Page() {
-  return <Block />;
+export default function Home() {
+  return (
+    <main>
+      <Block />
+    </main>
+  );
 }

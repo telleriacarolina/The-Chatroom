@@ -71,6 +71,12 @@ npm run dev:api
 
 Server runs on http://localhost:3001
 
+### Health & CORS
+
+- Health endpoint: `GET /health` returns `{ status: "ok", timestamp }`.
+- CORS origin: configured to `FRONTEND_URL` (default `http://localhost:3000`).
+- Cookies: auth tokens set as httpOnly cookies; ensure same-origin frontend in dev.
+
 ## API Endpoints
 
 ### Authentication
