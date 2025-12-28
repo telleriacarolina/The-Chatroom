@@ -70,11 +70,11 @@ setup_and_push \
 # Setup X-FACTOR repo
 setup_and_push \
     "/workspaces/The-Chatroom/LEAVING ROOM FOR THE X FACTOR" \
-    "LEAVINGROOM4-X-FACTOR" \
-    "https://github.com/$GITHUB_USER/LEAVINGROOM4-X-FACTOR.git"
+    "LEAVINGROOM4xFactor" \
+    "https://github.com/$GITHUB_USER/LEAVINGROOM4xFactor.git"
 
 echo -e "${GREEN}=== Setup Complete ===${NC}"
 echo ""
 echo "View your repositories:"
 echo "  https://github.com/$GITHUB_USER/The-Chatroom"
-echo "  https://github.com/$GITHUB_USER/LEAVINGROOM4-X-FACTOR"
+echo "  https://github.com/$GITHUB_USER/LEAVINGROOM4xFactor"

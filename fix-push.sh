@@ -31,7 +31,7 @@ fi
 echo ""
 
 # X-FACTOR repo - use gh auth for proper credentials
-echo -e "${YELLOW}2️⃣  LEAVINGROOM4-X-FACTOR - Using GH CLI for auth${NC}"
+echo -e "${YELLOW}2️⃣  LEAVINGROOM4xFactor - Using GH CLI for auth${NC}"
 cd "/workspaces/The-Chatroom/LEAVING ROOM FOR THE X FACTOR"
 
 # Configure git to use gh as credential helper
@@ -41,14 +41,14 @@ git config --local --add credential.helper '!gh auth git-credential'
 # Try SSH instead if HTTPS fails
 CURRENT_URL=$(git remote get-url origin)
 if [[ "$CURRENT_URL" == https* ]]; then
-    SSH_URL="git@github.com:telleriacarolina/LEAVINGROOM4-X-FACTOR.git"
+    SSH_URL="git@github.com:telleriacarolina/LEAVINGROOM4xFactor.git"
     echo "   Switching to SSH: $SSH_URL"
     git remote set-url origin "$SSH_URL"
 fi
 
 echo "   Pushing..."
 if git push origin main; then
-    echo -e "${GREEN}✅ LEAVINGROOM4-X-FACTOR pushed successfully${NC}"
+    echo -e "${GREEN}✅ LEAVINGROOM4xFactor pushed successfully${NC}"
 else
     echo -e "${RED}❌ Still failed${NC}"
     echo "   Try: gh auth refresh -s write:packages,repo"

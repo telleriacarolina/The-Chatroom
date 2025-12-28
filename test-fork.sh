@@ -40,10 +40,10 @@ fi
 
 echo ""
 
-# Check LEAVINGROOM4-X-FACTOR fork
-echo -e "2️⃣  ${YELLOW}LEAVINGROOM4-X-FACTOR fork:${NC}"
-if gh repo view "$GITHUB_USER/LEAVINGROOM4-X-FACTOR" &>/dev/null; then
-    XFACTOR_URL=$(gh repo view "$GITHUB_USER/LEAVINGROOM4-X-FACTOR" --json url -q .url)
+# Check LEAVINGROOM4xFactor fork
+echo -e "2️⃣  ${YELLOW}LEAVINGROOM4xFactor fork:${NC}"
+if gh repo view "$GITHUB_USER/LEAVINGROOM4xFactor" &>/dev/null; then
+    XFACTOR_URL=$(gh repo view "$GITHUB_USER/LEAVINGROOM4xFactor" --json url -q .url)
     echo -e "   ${GREEN}✅ Found: $XFACTOR_URL${NC}"
 else
     echo -e "   ${RED}❌ Not found${NC}"
@@ -60,5 +60,5 @@ echo "  git push -u origin main"
 echo ""
 echo -e "${YELLOW}X-FACTOR repo:${NC}"
 echo "  cd 'LEAVING ROOM FOR THE X FACTOR'"
-echo "  git remote set-url origin https://github.com/$GITHUB_USER/LEAVINGROOM4-X-FACTOR.git"
+echo "  git remote set-url origin https://github.com/$GITHUB_USER/LEAVINGROOM4xFactor.git"
 echo "  git push origin main"

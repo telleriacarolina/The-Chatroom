@@ -42,8 +42,8 @@ fi
 echo ""
 
 # Fork X-FACTOR repository
-echo -e "${YELLOW}2. Forking LEAVINGROOM4-X-FACTOR...${NC}"
-XFACTOR_REPO="telleriacarolina/LEAVINGROOM4-X-FACTOR"
+echo -e "${YELLOW}2. Forking LEAVINGROOM4xFactor...${NC}"
+XFACTOR_REPO="telleriacarolina/LEAVINGROOM4xFactor"
 echo "   Source: $XFACTOR_REPO"
 
 if gh repo fork "$XFACTOR_REPO" --clone=false 2>/dev/null; then
@@ -64,7 +64,7 @@ echo "  git push -u origin main"
 echo ""
 echo -e "${YELLOW}X-FACTOR repo:${NC}"
 echo "  cd '/workspaces/The-Chatroom/LEAVING ROOM FOR THE X FACTOR'"
-echo "  git remote set-url origin https://github.com/YOUR_USERNAME/LEAVINGROOM4-X-FACTOR.git"
+echo "  git remote set-url origin https://github.com/YOUR_USERNAME/LEAVINGROOM4xFactor.git"
 echo "  git push origin main"
 echo ""
 echo "View your forks:"
