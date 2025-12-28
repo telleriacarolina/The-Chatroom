@@ -1,0 +1,19 @@
+{
+  "name": "@chatroom/socket",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/socket-server.js",
+  "scripts": {
+    "start": "node src/socket-server.js",
+    "dev": "nodemon src/socket-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "@chatroom/shared": "*"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "dotenv": "^16.3.0"
+  }
+}

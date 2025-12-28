@@ -1,40 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Eye, UserCircle, Users, MessageSquare, Globe, ChevronRight, ChevronLeft, Clock, Loader2, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-
-// Types for language and lounge
-type Lounge = {
-  id: string;
-  name: string;
-  members: number;
-  isAll?: boolean;
-};
-type LanguageCategory = {
-  name: string;
-  flag: string;
-  lounges: Lounge[];
-};
-
-type LanguageMap = Record<string, LanguageCategory>;
+import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus } from "lucide-react";
 
 export default function Block() {
-  const [username, setUsername] = useState<string>("");
-  const [tempUsername, setTempUsername] = useState<string>("");
+  const [username, setUsername] = useState("");
+  const [tempUsername, setTempUsername] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
-  const [error, setError] = useState<string>("");
-  const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const [waitProgress, setWaitProgress] = useState<number>(0);
+  const [error, setError] = useState("");
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
   // Language categories with All Users Lounge + Country-specific lounges
-  const languageCategories: LanguageMap = {
+  const languageCategories = {
     english: {
       name: "English",
       flag: "🇬🇧",
@@ -130,29 +111,6 @@ export default function Block() {
     },
   };
 
-  // Guest waiting room with priority messaging
-  useEffect(() => {
-    if (isWaiting) {
-      const duration = Math.floor(Math.random() * 30000) + 30000; // 30-60 seconds
-      const interval = 100;
-      const steps = duration / interval;
-      let currentStep = 0;
-
-      const timer = setInterval(() => {
-        currentStep++;
-        setWaitProgress((currentStep / steps) * 100);
-
-        if (currentStep >= steps) {
-          clearInterval(timer);
-          setIsWaiting(false);
-          setWaitProgress(0);
-        }
-      }, interval);
-
-      return () => clearInterval(timer);
-    }
-  }, [isWaiting]);
-
   const handleSetUsername = () => {
     const trimmedUsername = username.trim();
 
@@ -177,179 +135,9 @@ export default function Block() {
     }
 
     setError("");
-    setIsWaiting(true);
-
-    setTimeout(() => {
-      setTempUsername(username);
-      setUsername("");
-    }, Math.floor(Math.random() * 30000) + 30000);
+    setTempUsername(username);
+    setUsername("");
   };
-
-  // Guest waiting room
-  if (isWaiting) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <Loader2 className="w-16 h-16 text-primary animate-spin" />
-            </div>
-            <CardTitle className="text-2xl">Enter The Chatroom! 🌍</CardTitle>
-            <CardDescription>
-              Please wait while we prepare your experience...
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Setting up your session...</span>
-                <span className="font-medium">{Math.round(waitProgress)}%</span>
-              </div>
-              <Progress value={waitProgress} className="h-2" />
-            </div>
-
-            <div className="p-4 bg-primary/10 rounded-lg border-2 border-primary">
-              <div className="flex items-start gap-3 mb-3">
-                <Crown className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-primary mb-1">Priority Username Access</p>
-                  <p className="text-sm text-muted-foreground">
-                    Users with Creator or Viewer accounts get first priority to usernames and instant access to all features!
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="text-center">
-                <h3 className="font-semibold mb-3">How The Chatroom Works</h3>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Globe className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm mb-1">Multi-Language Lounges</p>
-                      <p className="text-xs text-muted-foreground">
-                        Chat in 8 languages with country-specific rooms and global lounges
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Video className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm mb-1">Live Video Features</p>
-                      <p className="text-xs text-muted-foreground">
-                        Creators & Viewers get access to live video chats and streaming
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <DollarSign className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm mb-1">Monetize Content</p>
-                      <p className="text-xs text-muted-foreground">
-                        Creators can sell content, offer paid interactions, and receive gifts
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-muted rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Lock className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium text-sm mb-1">Private Groups</p>
-                      <p className="text-xs text-muted-foreground">
-                        Join exclusive creator groups and premium communities
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-secondary/10 rounded-lg border border-secondary">
-              <div className="flex items-start gap-3">
-                <ShoppingCart className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-secondary mb-2">Purchase Content Safely</p>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• Secure payment processing for all transactions</li>
-                    <li>• Instant access to purchased content</li>
-                    <li>• Safe shipping info exchange for physical items</li>
-                    <li>• Monthly, yearly, or one-time purchases available</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <Card className="border-2 border-primary">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Crown className="w-5 h-5 text-primary" />
-                    <CardTitle className="text-sm">Creator Account</CardTitle>
-                  </div>
-                  <Badge variant="default" className="w-fit text-xs">
-                    <Zap className="w-3 h-3 mr-1" />
-                    Instant Access + Priority
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>✓ Permanent username (yearly)</li>
-                    <li>✓ No wait times</li>
-                    <li>✓ Monetize & sell content</li>
-                    <li>✓ Live video features</li>
-                    <li>✓ Create private groups</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-secondary">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Eye className="w-5 h-5 text-secondary" />
-                    <CardTitle className="text-sm">Viewer Account</CardTitle>
-                  </div>
-                  <Badge variant="secondary" className="w-fit text-xs">
-                    <Zap className="w-3 h-3 mr-1" />
-                    Instant Access + Priority
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>✓ Permanent username (yearly)</li>
-                    <li>✓ No wait times</li>
-                    <li>✓ Live video access</li>
-                    <li>✓ Purchase content</li>
-                    <li>✓ Join private groups</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="text-center">
-              <Button variant="outline" size="sm" onClick={() => {
-                setIsWaiting(false);
-                setWaitProgress(0);
-              }}>
-                Cancel
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   // Start with username creation screen
   if (!tempUsername) {
@@ -362,12 +150,11 @@ export default function Block() {
             </div>
             <CardTitle className="text-2xl">Enter The Chatroom</CardTitle>
             <CardDescription>
-              Create your username to get started
+              You Know You Ready to Chit-Chat
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Choose Your Username</Label>
               <Input
                 id="username"
                 placeholder="Enter your username (4-10 characters)"
@@ -383,30 +170,19 @@ export default function Block() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <Button onClick={handleSetUsername} className="w-full" disabled={isWaiting}>
-              {isWaiting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Please wait...
-                </>
-              ) : (
-                "Start Chatting"
-              )}
+            <Button onClick={handleSetUsername} className="w-full">
+              Enter
             </Button>
 
-            <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary">
-              <div className="flex items-start gap-2">
-                <Crown className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <div className="text-xs">
-                  <p className="font-medium text-primary mb-1">Get Priority Username Access!</p>
-                  <p className="text-muted-foreground mb-2">
-                    Creator & Viewer accounts get instant access with no wait times, plus first priority to claim usernames.
-                  </p>
-                  <p className="text-muted-foreground">
-                    Upgrade to secure a permanent username with a yearly subscription!
-                  </p>
-                </div>
-              </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1">
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+              <Button variant="outline" className="flex-1">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Sign Up
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -494,7 +270,7 @@ export default function Block() {
                   <ul className="text-xs text-muted-foreground space-y-1.5">
                     <li className="flex items-start gap-2">
                       <Zap className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
-                      <span className="font-medium text-primary">Priority username access</span>
+                      <span className="font-medium text-primary">Instant access</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <UserCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
@@ -509,8 +285,8 @@ export default function Block() {
                       <span>Live video features</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Lock className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                      <span>Create private groups</span>
+                      <Calendar className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>Schedule appointments</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Package className="w-3 h-3 mt-0.5 flex-shrink-0" />
@@ -533,7 +309,7 @@ export default function Block() {
                   <ul className="text-xs text-muted-foreground space-y-1.5">
                     <li className="flex items-start gap-2">
                       <Zap className="w-3 h-3 mt-0.5 flex-shrink-0 text-secondary" />
-                      <span className="font-medium text-secondary">Priority username access</span>
+                      <span className="font-medium text-secondary">Instant access</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <UserCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-secondary" />
@@ -576,11 +352,10 @@ export default function Block() {
                     <li>• Free access to all lounges</li>
                     <li>• No login required</li>
                     <li>• Basic chat features</li>
-                    <li className="text-amber-600">• Wait times for username access</li>
                   </ul>
                   <div className="mt-3 p-2 bg-primary/10 rounded text-xs border border-primary">
-                    <p className="font-medium text-primary mb-1">💡 Skip the wait!</p>
-                    <p className="text-muted-foreground">Upgrade for instant access & permanent username</p>
+                    <p className="font-medium text-primary mb-1">💡 Upgrade for instant access!</p>
+                    <p className="text-muted-foreground">Get a permanent username and skip all wait times</p>
                   </div>
                 </CardContent>
               </Card>
@@ -616,7 +391,9 @@ export default function Block() {
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => setTempUsername("")}
+          onClick={() => {
+            setTempUsername("");
+          }}
         >
           Change Username
         </Button>
