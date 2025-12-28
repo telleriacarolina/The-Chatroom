@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  REGISTERED
+  GUEST
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum VerificationType {
+  AGE_ONLY
+  ID_FULL
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum AgeCategory {
+  PLUS_18
+  PLUS_18_RED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  LINK
+  SYSTEM
+}
+
+enum ModerationStatus {
+  APPROVED
+  PENDING
+  REMOVED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
+enum ItemCategory {
+  PHOTOS
+  VIDEOS
+  CUSTOM_CONTENT
+  SERVICES
+  OTHER
+}
+
+enum ContentType {
+  SFW
+  NSFW
+}
+
+enum AccessLevel {
+  MAIN_LOUNGE
+  RED_LOUNGE
+}
+
+enum TransactionPaymentMethod {
+  STRIPE
+  PAYPAL
+  CRYPTO
+}
+
+enum TransactionPaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum ModerationActionType {
+  WARNING
+  MUTE
+  KICK
+  BAN_TEMP
+  BAN_PERMANENT
+  MESSAGE_DELETE
+  ITEM_REMOVE
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  UNDERAGE
+  SCAM
+  OTHER
+}
+
+model User {
+  id                     String   @id @default(uuid())
+  phoneNumber            String?  @unique
+  email                  String?  @unique
+  passwordHash           String?
+  permanentUsername      String?  @unique
+  preferredName          String?
+  avatarUrl              String?
+  accountType            AccountType
+  ageVerified            Boolean  @default(false)
+  idVerified             Boolean  @default(false)
+  idVerificationDate     DateTime?
+  idVerificationProvider String?
+  dateOfBirth            DateTime?
+  accountStatus          AccountStatus @default(ACTIVE)
+  banReason              String?
+  banExpiresAt           DateTime?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  lastSeenAt             DateTime?
+  isOnline               Boolean  @default(false)
+  stayOnline             Boolean  @default(false)
+  stayOnlineUntil        DateTime?
+
+  sessions               Session[]
+  tempSessions           TempSession[]
+  verifications          IDVerification[]
+  chatMessages           ChatMessage[]
+  deletedMessages        ChatMessage[] @relation("deletedBy")
+  marketplaceItems       MarketplaceItem[] @relation("SellerItems")
+  transactionsAsBuyer    Transaction[] @relation("buyer")
+  transactionsAsSeller   Transaction[] @relation("seller")
+  moderationActions      ModerationAction[] @relation("moderator")
+  moderationTargets      ModerationAction[] @relation("targetUser")
+  reportsFiled           UserReport[] @relation("reporter")
+  reportsReceived        UserReport[] @relation("reportedUser")
+  reportsReviewed        UserReport[] @relation("reviewer")
+  auditLogs              AuditLog[]
+}
+
+model Session {
+  id               String   @id @default(uuid())
+  user             User     @relation(fields: [userId], references: [id])
+  userId           String
+  sessionToken     String   @unique
+  ipAddress        String?
+  userAgent        String?
+  isActive         Boolean  @default(true)
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  lastActivityAt   DateTime?
+  stayOnlineEnabled Boolean @default(false)
+}
+
+model TempSession {
+  id                String    @id @default(uuid())
+  user              User?     @relation(fields: [userId], references: [id])
+  userId            String?
+  temporaryUsername String    @unique
+  ageCategory       AgeCategory
+  sessionToken      String?   @unique
+  expiresAt         DateTime
+  createdAt         DateTime  @default(now())
+}
+
+model IDVerification {
+  id                         String             @id @default(uuid())
+  user                       User               @relation(fields: [userId], references: [id])
+  userId                     String
+  verificationType           VerificationType
+  verificationStatus         VerificationStatus
+  documentType               String
+  documentImageUrl           String
+  selfieImageUrl             String
+  verificationProvider       String?
+  verificationProviderResponse String?
+  verifiedAt                 DateTime?
+  expiresAt                  DateTime?
+  rejectionReason            String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+}
+
+model Lounge {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  description      String
+  accessLevel      AccessLevel
+  iconColor        String?
+  isActive         Boolean  @default(true)
+  maxCapacity      Int?
+  currentUserCount Int      @default(0)
+  createdAt        DateTime @default(now())
+  languageRooms    LanguageRoom[]
+  chatMessages     ChatMessage[]
+}
+
+model LanguageRoom {
+  id               String   @id @default(uuid())
+  lounge           Lounge   @relation(fields: [loungeId], references: [id])
+  loungeId         String
+  languageCode     String
+  languageName     String
+  flagEmoji        String
+  currentUserCount Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  chatMessages     ChatMessage[]
+}
+
+model ChatMessage {
+  id               String   @id @default(uuid())
+  lounge           Lounge   @relation(fields: [loungeId], references: [id])
+  loungeId         String
+  languageRoom     LanguageRoom @relation(fields: [languageRoomId], references: [id])
+  languageRoomId   String
+  user             User     @relation(fields: [userId], references: [id])
+  userId           String
+  displayUsername  String
+  messageText      String
+  messageType      MessageType
+  attachmentUrl    String?
+  isEdited         Boolean  @default(false)
+  editedAt         DateTime?
+  isDeleted        Boolean  @default(false)
+  deletedAt        DateTime?
+  deletedBy        User?    @relation("deletedBy", fields: [deletedById], references: [id])
+  deletedById      String?
+  flagCount        Int      @default(0)
+  isFlagged        Boolean  @default(false)
+  moderationStatus ModerationStatus @default(APPROVED)
+  createdAt        DateTime @default(now())
+  moderationActions ModerationAction[]
+  reports          UserReport[]
+}
+
+model MarketplaceItem {
+  id           String   @id @default(uuid())
+  seller       User     @relation("SellerItems", fields: [sellerId], references: [id])
+  sellerId     String
+  title        String   @db.VarChar(100)
+  description  String
+  price        Decimal  @db.Decimal(12,2)
+  currency     Currency
+  category     ItemCategory
+  contentType  ContentType
+  thumbnailUrl String
+  previewUrls  Json?
+  accessLevel  AccessLevel
+  status       String   @default("ACTIVE")
+  viewCount    Int      @default(0)
+  purchaseCount Int     @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  transactions Transaction[]
+  moderationActions ModerationAction[]
+  reports      UserReport[]
+}
+
+model Transaction {
+  id             String   @id @default(uuid())
+  item           MarketplaceItem @relation(fields: [itemId], references: [id])
+  itemId         String
+  buyer          User     @relation("buyer", fields: [buyerId], references: [id])
+  buyerId        String
+  seller         User     @relation("seller", fields: [sellerId], references: [id])
+  sellerId       String
+  amount         Decimal  @db.Decimal(12,2)
+  currency       Currency
+  paymentMethod  TransactionPaymentMethod
+  paymentStatus  TransactionPaymentStatus
+  transactionFee Decimal? @db.Decimal(12,2)
+  sellerPayout   Decimal? @db.Decimal(12,2)
+  paymentIntentId String?
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+}
+
+model ModerationAction {
+  id             String   @id @default(uuid())
+  moderator      User     @relation("moderator", fields: [moderatorId], references: [id])
+  moderatorId    String
+  targetUser     User?    @relation("targetUser", fields: [targetUserId], references: [id])
+  targetUserId   String?
+  targetMessage  ChatMessage? @relation(fields: [targetMessageId], references: [id])
+  targetMessageId String?
+  targetItem     MarketplaceItem? @relation(fields: [targetItemId], references: [id])
+  targetItemId   String?
+  actionType     ModerationActionType
+  reason         String
+  duration       Int?
+  expiresAt      DateTime?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model UserReport {
+  id               String   @id @default(uuid())
+  reporter         User     @relation("reporter", fields: [reporterId], references: [id])
+  reporterId       String
+  reportedUser     User?    @relation("reportedUser", fields: [reportedUserId], references: [id])
+  reportedUserId   String?
+  reportedMessage  ChatMessage? @relation(fields: [reportedMessageId], references: [id])
+  reportedMessageId String?
+  reportedItem     MarketplaceItem? @relation(fields: [reportedItemId], references: [id])
+  reportedItemId   String?
+  reportReason     ReportReason
+  reportDetails    String?
+  status           String   @default("PENDING")
+  reviewedBy       User?    @relation("reviewer", fields: [reviewedById], references: [id])
+  reviewedById     String?
+  reviewedAt       DateTime?
+  createdAt        DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  eventType   String
+  eventDetails Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
