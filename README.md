@@ -121,6 +121,17 @@ The-Chatroom/
 ### Prerequisites
 
 - Node.js 18+
+
+Note on Node versions:
+- This project targets Node 18.x. Newer major versions (e.g., Node 24) can crash due to dependency incompatibilities.
+- A `.nvmrc` is provided. If you use `nvm`, run:
+
+```bash
+nvm install
+nvm use
+```
+
+Alternatively, install Node 18 via your preferred manager (asdf/Volta) before running dev scripts.
 - PostgreSQL database
 - npm or yarn
 
