@@ -11,19 +11,19 @@ This file contains GitHub-ready tasks that can be imported into GitHub Projects 
 
 ## 🎯 IMMEDIATE ACTIONS (High Priority)
 
-### #1 Fix TypeScript Errors in Block.tsx ✅
+### #1 Fix TypeScript Errors in Block.tsx
 **Package:** `@chatroom/web`  
 **Labels:** `bug`, `typescript`, `high-priority`  
 **Time:** 5 minutes  
-**Status:** ✅ COMPLETED
+**Status:** Pending
 
 **Description:**
 Fix type error on line 14 of `components/chat/Block.tsx`
 
 **Tasks:**
-- [x] Change `useState(null)` to `useState<string | null>(null)`
-- [x] Verify no TypeScript errors with `npm run build`
-- [x] Test component renders correctly
+- [ ] Change `useState(null)` to `useState<string | null>(null)`
+- [ ] Verify no TypeScript errors with `npm run build`
+- [ ] Test component renders correctly
 
 **Files:**
 - `packages/web/src/components/chat/Block.tsx`

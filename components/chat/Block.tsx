@@ -1,3 +1,4 @@
+/*
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,22 +61,14 @@ export default function Block() {
   
   // Waiting room state
   const [isWaitingRoom, setIsWaitingRoom] = useState<boolean>(false);
->>>>>>> origin/main
-  const [waitProgress, setWaitProgress] = useState<number>(0);
-  const [queuePosition, setQueuePosition] = useState<number>(15);
-  
-  // Modal state
-  const [showSignInModal, setShowSignInModal] = useState<boolean>(false);
-  const [showSignUpModal, setShowSignUpModal] = useState<boolean>(false);
-  
-  // Form state
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [birthYear, setBirthYear] = useState<string>("");
-  
-  // View state
+  return (
+    <section style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600 }}>The Chatroom</h1>
+      <p style={{ marginTop: 8 }}>
+        Placeholder UI while components and data wiring are finalized.
+      </p>
+    </section>
+  );
   const [showMarketplace, setShowMarketplace] = useState<boolean>(false);
   const [inChatRoom, setInChatRoom] = useState<boolean>(false);
 
@@ -877,5 +870,18 @@ export default function Block() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+*/
+
+export default function Block() {
+  return (
+    <section style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600 }}>The Chatroom</h1>
+      <p style={{ marginTop: 8 }}>
+        Placeholder UI while components and data wiring are finalized.
+      </p>
+    </section>
   );
 }
