@@ -1,0 +1,28 @@
+{
+  "name": "@chatroom/web",
+  "version": "0.1.0",
+  "description": "The Chatroom frontend (Next.js 14)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@chatroom/shared": "file:../shared",
+    "lucide-react": "^0.264.0",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "socket.io-client": "^4.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "gh-pages": "^6.3.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.3.0"
+  }
+}

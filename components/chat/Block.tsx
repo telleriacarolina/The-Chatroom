@@ -1,89 +1,16 @@
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { 
-  Crown, Eye, UserCircle, Users, MessageSquare, Globe, ChevronRight, 
-  ChevronLeft, Clock, Loader2, DollarSign, Lock, ShoppingCart, Zap, 
-  Package, Video, Calendar, ExternalLink, Send, ArrowLeft, Settings, Store, Timer 
-} from "lucide-react";
-
-type Message = {
-  id: string;
-  user: string;
-  text: string;
-  timestamp: Date;
-};
-
-type Lounge = {
-  id: string;
-  name: string;
-  members: number;
-  isAll?: boolean;
-};
-
-type LanguageCategory = {
-  name: string;
-  flag: string;
-  lounges: Lounge[];
-};
-
 export default function Block() {
-  // Username state
-  const [username, setUsername] = useState<string>("");
-  const [tempUsername, setTempUsername] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  
-  // Age verification state
-  const [accountType, setAccountType] = useState<string>("guest");
-  const [showUnder18Message, setShowUnder18Message] = useState<boolean>(false);
-  
-  // Language and lounge state
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
-  const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
-<<<<<<< HEAD
-  const [error, setError] = useState<string | null>(null);
-  const [isWaiting, setIsWaiting] = useState<boolean>(false);
-=======
-  
-  // Chat room state
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [currentMessage, setCurrentMessage] = useState<string>("");
-  const [onlineUsers, setOnlineUsers] = useState<number>(127);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  // Waiting room state
-  const [isWaitingRoom, setIsWaitingRoom] = useState<boolean>(false);
->>>>>>> origin/main
-  const [waitProgress, setWaitProgress] = useState<number>(0);
-  const [queuePosition, setQueuePosition] = useState<number>(15);
-  
-  // Modal state
-  const [showSignInModal, setShowSignInModal] = useState<boolean>(false);
-  const [showSignUpModal, setShowSignUpModal] = useState<boolean>(false);
-  
-  // Form state
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [birthYear, setBirthYear] = useState<string>("");
-  
-  // View state
-  const [showMarketplace, setShowMarketplace] = useState<boolean>(false);
-  const [inChatRoom, setInChatRoom] = useState<boolean>(false);
-
+  return (
+    <section style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600 }}>The Chatroom</h1>
+      <p style={{ marginTop: 8 }}>
+        Placeholder UI while components and data wiring are finalized.
+      </p>
+    </section>
+  );
+}
+/*
   // Language categories with country-specific lounges
   const languageCategories: LanguageCategory[] = [
-    {
-      name: "English",
-      flag: "🇬🇧",
       lounges: [
         { id: "en-all", name: "All English Speakers", members: 1234, isAll: true },
         { id: "en-us", name: "United States", members: 456 },
@@ -879,3 +806,4 @@ export default function Block() {
     </div>
   );
 }
+*/

@@ -2,6 +2,7 @@
   "name": "the-chatroom",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://telleriacarolina.github.io/the-chatroom",
   "workspaces": [
     "packages/*"
   ],
@@ -18,7 +19,10 @@
     "comment_3": "=== Database & Prisma ===",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "comment_4": "=== Utilities ===",
+    "comment_4": "=== Testing ===",
+    "test:startup": "node scripts/test-startup.js",
+    "test:startup:bash": "bash scripts/test-startup.sh",
+    "comment_5": "=== Utilities ===",
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"
