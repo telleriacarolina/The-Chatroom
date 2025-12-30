@@ -3,17 +3,20 @@
 ## Issues Resolved
 
 ### 1. ✅ TypeScript Configuration
+
 - **Fixed:** `tsconfig.json` - Added proper path aliases, excluded react-native type checking
 - **Added:** `baseUrl` and `paths` for imports
 - **Excluded:** `packages/` from compilation (separate workspaces)
 
 ### 2. ✅ Shared Module
+
 - **Created:** `shared/types/index.ts` - User, Session, ChatMessage, Lounge types
 - **Created:** `shared/utils/index.ts` - Utility functions (cn, generateId, validate functions)
 - **Created:** `shared/schemas/index.ts` - API request/response schemas
 - **Updated:** `shared/index.ts` - Exports all modules
 
 ### 3. ✅ API Server
+
 - **Created:** `api/utils/logger.js` - Logging utility
 - **Created:** `api/services/socketio.js` - Socket.IO initialization
 - **Created:** `api/services/backgroundJobs.js` - Background task runner
@@ -22,6 +25,7 @@
 - **Created:** `api/middleware/rateLimiter.js` - Rate limiting middleware
 
 ### 4. ✅ Web/Frontend
+
 - **Created:** `web/app/page.tsx` - Home page with Block component
 - **Created:** `web/app/layout.tsx` - Root layout
 - **Created:** `web/styles/globals.css` - Global styles
@@ -32,11 +36,15 @@
 - **Created:** `web/package.json` - Web package configuration
 
 ### 5. ✅ Socket Server
+
 - Verified existing `socket/socket-server.js` is present and functional
+
+```,
 
 ## Current Structure
 
 ```
+
 The-Chatroom/
 ├── api/
 │   ├── server.js (Express app)
@@ -64,7 +72,8 @@ The-Chatroom/
 ├── COMMIT_READY.md (commit instructions)
 ├── tsconfig.json (TypeScript config - FIXED)
 └── package.json (root workspace)
-```
+
+```.
 
 ## Next Steps
 

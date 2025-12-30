@@ -8,7 +8,8 @@ A real-time chat application with multi-tier authentication, language-specific l
 
 ## 📦 Packages
 
-```
+```,
+
 The-Chatroom/
 ├── packages/
 │   ├── api/          # Backend REST API (Express + Prisma + PostgreSQL)
@@ -195,27 +196,27 @@ npm run dev:api          # API server only
 npm run dev:socket       # Socket.IO server only
 npm run dev:web          # Next.js frontend only
 
-# Database
+## Database
 
 DATABASE_URL="postgresql://user:password@localhost:5432/chatroom"
 
-# JWT Secrets
+## JWT Secrets
 
 ACCESS_TOKEN_SECRET="your-access-secret"
 REFRESH_TOKEN_SECRET="your-refresh-secret"
 
-# Encryption
+## Encryption
 
 PHONE_ENC_KEY="32-byte-encryption-key"
 ENCRYPTION_KEY="fallback-key"
 
-# Twilio (optional)
+## Twilio (optional)
 
 TWILIO_ACCOUNT_SID="optional"
 TWILIO_AUTH_TOKEN="optional"
 TWILIO_FROM_NUMBER="+1234567890"
 
-# Server Configuration
+## Server Configuration
 
 PORT=3001
 SOCKET_PORT=3002
@@ -228,7 +229,7 @@ NODE_ENV="development"
   s.emit('chat message', 'hello from UI');
 })();
 
-# API health (expects a JSON response with status: ok)
+## API health (expects a JSON response with status: ok)
 
 curl -s <http://localhost:3001/health>
 node app-standalone.js
@@ -236,19 +237,19 @@ npm run dev:api      # API server (<http://localhost:3001>)
 npm run dev:socket   # Socket.IO (<http://localhost:3002>)
 npm run dev:web      # Next.js (<http://localhost:3000>)
 
-# First time setup
+## First time setup
 
 ./start-all.sh --setup
 
-# Start all services
+## Start all services
 
 ./start-all.sh
 
-# View logs
+## View logs
 
 ./start-all.sh --logs
 
-# Get help
+## Get help
 
 ./start-all.sh --help
 npm run prisma:generate
@@ -281,7 +282,7 @@ nvm use
 ./start-all.sh --help
 ```
 
-**Option B: Individual Services**
+### Option B: Individual Services
 
 ```bash
 npm run dev:api      # API server (http://localhost:3001)
@@ -289,13 +290,13 @@ npm run dev:socket   # Socket.IO (http://localhost:3002)
 npm run dev:web      # Next.js (http://localhost:3000)
 ```
 
-**Option C: Standalone Single-File App**
+### Option C: Standalone Single-File App
 
 ```bash
 node app-standalone.js
 ```
 
-### 5. Access Application
+## 5. Access Application
 
 - **🌐 Frontend:** <http://localhost:3000>
 - **📡 API:** <http://localhost:3001>
@@ -374,7 +375,7 @@ npm run start:socket     # Start Socket.IO only
 npm run start:web        # Start Next.js only
 ```
 
-### Database
+### Database Setup
 
 ```bash
 npm run prisma:generate  # Generate Prisma client
@@ -396,7 +397,7 @@ npm run clean            # Clean all build artifacts and node_modules
 
 ---
 
-_Last updated: December 28, 2025_
+### Last updated: December 28, 2025
 
 ⸻
 
