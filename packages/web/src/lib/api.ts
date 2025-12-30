@@ -41,11 +41,48 @@ async function apiFetch<T>(
       },
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    let data: any = null;
+
+    if (contentType.includes('application/json')) {
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', parseError);
+
+        if (!response.ok) {
+          return {
+            error: `Request failed with status ${response.status}`,
+          };
+        }
+
+        return {
+          error: 'Invalid JSON response from server',
+        };
+      }
+    } else {
+      // Fallback for non-JSON responses (e.g., HTML error pages, plain text)
+      let textBody = '';
+      try {
+        textBody = await response.text();
+      } catch (e) {
+        console.error('Failed to read non-JSON response body:', e);
+      }
+
+      if (!response.ok) {
+        const baseMessage = `Request failed with status ${response.status}`;
+        return {
+          error: textBody ? `${baseMessage}: ${textBody}` : baseMessage,
+        };
+      }
+
+      // Successful non-JSON response; return raw text as data
+      return { data: textBody as any as T };
+    }
 
     if (!response.ok) {
       return {
-        error: data.error || `Request failed with status ${response.status}`,
+        error: (data && data.error) || `Request failed with status ${response.status}`,
       };
     }
 
