@@ -111,13 +111,13 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormPro
           </div>
           <CardTitle className="text-2xl text-green-600">Account Created!</CardTitle>
           <CardDescription>
-            Your default password has been sent to your phone via SMS
+            Your default password has been generated. If SMS is configured, it will be sent to your phone.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
             <p className="text-sm text-center">
-              📱 <strong>Check your text messages</strong> for your temporary password.
+              📱 <strong>If SMS is enabled, check your text messages</strong> for your temporary password.
               You can change it after signing in.
             </p>
           </div>
