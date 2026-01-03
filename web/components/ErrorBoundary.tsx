@@ -1,3 +1,8 @@
+/**
+ * Error Boundary must be a Client Component because it uses React lifecycle methods
+ * (getDerivedStateFromError, componentDidCatch) and state, which are only available
+ * in the client-side environment.
+ */
 'use client'
 
 import React, { Component, ReactNode } from 'react'
