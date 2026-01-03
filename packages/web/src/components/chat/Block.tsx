@@ -201,9 +201,11 @@ export default function Block() {
       setTempUsername(trimmedUsername);
       setUsername("");
       
-      // Store in localStorage for persistence
-      localStorage.setItem('guestToken', response.tempSessionToken);
-      localStorage.setItem('guestUsername', trimmedUsername);
+      // Store in localStorage for persistence (client-side only)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('guestToken', response.tempSessionToken);
+        localStorage.setItem('guestUsername', trimmedUsername);
+      }
 
       // Show success toast
       toast.success('Welcome!', `Guest session created for ${trimmedUsername}`);
@@ -513,7 +515,7 @@ export default function Block() {
                   setSelectedLounge(lounge.id);
                   if (isConnected && tempUsername) {
                     joinLounge(lounge.id, tempUsername);
-                    toast.success('Joined Lounge', `Welcome to ${lounge.name}!`);
+                    // Success toast will be shown when server confirms join
                   } else if (!isConnected) {
                     toast.error('Not Connected', 'Please wait for the connection to be established.');
                   }

@@ -36,9 +36,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     onError,
   } = options;
 
-  const [status, setStatus] = useState<ConnectionStatus>(
-    isConnected() ? 'connected' : 'disconnected'
-  );
+  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [error, setError] = useState<Error | null>(null);
   const socketRef = useRef<TypedSocket | null>(null);
   const callbacksRef = useRef({ onConnect, onDisconnect, onError });
@@ -51,6 +49,10 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   // Initialize socket
   useEffect(() => {
     const socket = getSocket();
+    
+    // Skip if SSR or socket not available
+    if (!socket) return;
+    
     socketRef.current = socket;
 
     // Set up event listeners

@@ -32,12 +32,12 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <Toaster richColors position="top-center" />
         <ErrorBoundary>
           <div className="fixed top-4 right-4 z-50">
             <ThemeToggle />
           </div>
           {children}
-          <Toaster richColors position="top-center" />
         </ErrorBoundary>
       </body>
     </html>

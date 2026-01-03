@@ -47,8 +47,14 @@ let socket: TypedSocket | null = null;
 
 /**
  * Get or create Socket.IO client instance
+ * Uses singleton pattern with SSR safety
  */
 export function getSocket(): TypedSocket {
+  // Don't create socket during SSR
+  if (typeof window === 'undefined') {
+    return null as any;
+  }
+
   if (!socket) {
     socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
@@ -69,7 +75,7 @@ export function getSocket(): TypedSocket {
 export function connect(): TypedSocket {
   const socket = getSocket();
   
-  if (!socket.connected) {
+  if (socket && !socket.connected) {
     socket.connect();
   }
 
@@ -82,7 +88,7 @@ export function connect(): TypedSocket {
 export function disconnect(): void {
   const socket = getSocket();
   
-  if (socket.connected) {
+  if (socket && socket.connected) {
     socket.disconnect();
   }
 }
@@ -91,6 +97,9 @@ export function disconnect(): void {
  * Check if socket is connected
  */
 export function isConnected(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
   return socket?.connected ?? false;
 }
 
@@ -114,7 +123,9 @@ export function cleanupSocket(): void {
  */
 export function joinLounge(loungeId: string, username: string): void {
   const socket = getSocket();
-  socket.emit('join lounge', { loungeId, username });
+  if (socket) {
+    socket.emit('join lounge', { loungeId, username });
+  }
 }
 
 /**
@@ -122,7 +133,9 @@ export function joinLounge(loungeId: string, username: string): void {
  */
 export function leaveLounge(loungeId: string): void {
   const socket = getSocket();
-  socket.emit('leave lounge', { loungeId });
+  if (socket) {
+    socket.emit('leave lounge', { loungeId });
+  }
 }
 
 /**
@@ -130,7 +143,9 @@ export function leaveLounge(loungeId: string): void {
  */
 export function sendMessage(message: string): void {
   const socket = getSocket();
-  socket.emit('chat message', message);
+  if (socket) {
+    socket.emit('chat message', message);
+  }
 }
 
 /**
@@ -138,7 +153,9 @@ export function sendMessage(message: string): void {
  */
 export function sendTyping(loungeId: string, isTyping: boolean): void {
   const socket = getSocket();
-  socket.emit('typing', { loungeId, isTyping });
+  if (socket) {
+    socket.emit('typing', { loungeId, isTyping });
+  }
 }
 
 /**
@@ -146,7 +163,9 @@ export function sendTyping(loungeId: string, isTyping: boolean): void {
  */
 export function requestLoungeCounts(): void {
   const socket = getSocket();
-  socket.emit('request counts');
+  if (socket) {
+    socket.emit('request counts');
+  }
 }
 
 // ============================================================================
