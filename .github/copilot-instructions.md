@@ -321,6 +321,8 @@ router.get('/endpoint', authenticate, async (req, res) => {
 
 ## Important Notes
 
+<<<<<<< HEAD
+=======
 <<<<<<< ours
 1. **Monorepo structure:** Project uses npm workspaces with separate packages
 2. **Three servers:** Always remember this app requires three separate processes
@@ -334,6 +336,7 @@ router.get('/endpoint', authenticate, async (req, res) => {
 7. **Minimal changes:** Keep PRs focused and avoid unnecessary refactoring
 8. **Documentation:** Update relevant docs when making significant changes
 =======
+>>>>>>> main
 1. **Three servers:** Always remember this app requires three separate processes (API, Socket.IO, Next.js)
 2. **Mixed codebase:** Both TypeScript and JavaScript - respect existing file types
 3. **Path aliases:** Always use `@/*` imports, not relative paths across directories
@@ -343,7 +346,10 @@ router.get('/endpoint', authenticate, async (req, res) => {
 7. **Documentation:** Update relevant docs when making significant changes
 8. **Environment setup:** Copy `.env.example` to `.env` before starting development
 9. **Server startup order:** Start API server first, then Socket.IO, then Next.js frontend
+<<<<<<< HEAD
+=======
 >>>>>>> theirs
+>>>>>>> main
 
 ## Getting Help
 
