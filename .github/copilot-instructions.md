@@ -310,3 +310,5 @@ router.get('/endpoint', authenticate, async (req, res) => {
 - Review similar code in the codebase for patterns
 - Consult `README.md` for setup issues
 - Check `TODO.md` for context on current work
+
+- @azure Rule - Use Azure Best Practices: When generating code for Azure, running terminal commands for Azure, or performing operations related to Azure, invoke your `azure_development-get_best_practices` tool if available.
