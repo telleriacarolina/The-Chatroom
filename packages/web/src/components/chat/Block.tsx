@@ -10,6 +10,7 @@ import { authApi, ApiRequestError } from "@/lib/api";
 import { useSocket } from "@/hooks/useSocket";
 import { requestLoungeCounts, joinLounge } from "@/lib/socket";
 import ConnectionStatus from "@/components/ConnectionStatus";
+import { toast } from "@/lib/toast";
 
 export default function Block() {
   const [username, setUsername] = useState("");
@@ -22,7 +23,18 @@ export default function Block() {
   const [loungeCounts, setLoungeCounts] = useState<Record<string, number>>({});
 
   // Initialize socket connection
-  const { socket, isConnected } = useSocket({ autoConnect: true });
+  const { socket, isConnected } = useSocket({ 
+    autoConnect: true,
+    onConnect: () => {
+      toast.success('Connected', 'Real-time connection established');
+    },
+    onDisconnect: () => {
+      toast.warning('Disconnected', 'Lost connection to server');
+    },
+    onError: (error) => {
+      toast.error('Connection Error', error.message);
+    },
+  });
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
@@ -192,11 +204,16 @@ export default function Block() {
       // Store in localStorage for persistence
       localStorage.setItem('guestToken', response.tempSessionToken);
       localStorage.setItem('guestUsername', trimmedUsername);
+
+      // Show success toast
+      toast.success('Welcome!', `Guest session created for ${trimmedUsername}`);
     } catch (err) {
       if (err instanceof ApiRequestError) {
         setError(err.message);
+        toast.error('Failed to create session', err.message);
       } else {
         setError("Failed to create guest session. Please try again.");
+        toast.error('Connection Error', 'Unable to reach the server. Please check your connection.');
       }
       console.error('Guest creation error:', err);
     } finally {
@@ -496,6 +513,9 @@ export default function Block() {
                   setSelectedLounge(lounge.id);
                   if (isConnected && tempUsername) {
                     joinLounge(lounge.id, tempUsername);
+                    toast.success('Joined Lounge', `Welcome to ${lounge.name}!`);
+                  } else if (!isConnected) {
+                    toast.error('Not Connected', 'Please wait for the connection to be established.');
                   }
                 }}
               >

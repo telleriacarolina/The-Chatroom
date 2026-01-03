@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
 import '../styles/globals.css'
-<<<<<<< ours
 import { ThemeToggle } from '@/components/ThemeToggle'
-=======
 import ErrorBoundary from '@/components/ErrorBoundary'
->>>>>>> theirs
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'The Chatroom',
@@ -17,7 +15,6 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-<<<<<<< ours
     <html lang="en" suppressHydrationWarning>
       <head>
         <script
@@ -35,17 +32,13 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
-        {children}
-=======
-    <html lang="en">
-      <body>
         <ErrorBoundary>
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggle />
+          </div>
           {children}
+          <Toaster richColors position="top-center" />
         </ErrorBoundary>
->>>>>>> theirs
       </body>
     </html>
   )
