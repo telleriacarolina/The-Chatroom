@@ -1,63 +1,31 @@
 {
-  "compilerOptions": {
-<<<<<<< HEAD
-    "target": "ES2020",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-=======
-    "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
->>>>>>> origin/main
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "incremental": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "esModuleInterop": true,
-<<<<<<< HEAD
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"],
-      "@/api/*": ["./api/*"],
-      "@/socket/*": ["./socket/*"],
-      "@/web/*": ["./web/*"],
-      "@/shared/*": ["./shared/*"],
-      "@/components/*": ["./components/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/utils/*": ["./utils/*"]
-=======
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./*"],
-      "@/components/*": ["components/*"],
-      "@/lib/*": ["lib/*"],
-      "@/utils/*": ["utils/*"]
->>>>>>> origin/main
-    },
-    "plugins": [
-      { "name": "next" }
-    ],
-<<<<<<< HEAD
-    "strictNullChecks": true,
-    "types": ["node", "jest"]
-=======
-    "types": ["node"],
-    "forceConsistentCasingInFileNames": true
->>>>>>> origin/main
+"compilerOptions": {
+  "target": "esnext",
+  "lib": ["dom", "dom.iterable", "esnext"],
+  "allowJs": true,
+  "skipLibCheck": true,
+  "strict": false,
+  "noEmit": true,
+  "incremental": true,
+  "module": "esnext",
+  "moduleResolution": "bundler",
+  "esModuleInterop": true,
+  "resolveJsonModule": true,
+  "isolatedModules": true,
+  "jsx": "preserve",
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["./*"],
+    "@/components/*": ["components/*"],
+    "@/lib/*": ["lib/*"],
+    "@/utils/*": ["utils/*"]
   },
+  "plugins": [
+    { "name": "next" }
+  ],
+  "types": ["node"],
+  "forceConsistentCasingInFileNames": true
+},
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
@@ -73,14 +41,10 @@
     "lib/**/*.ts",
     "utils/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "packages/**",
-<<<<<<< HEAD
-    "web/.next"
-=======
-    ".next",
-    "out"
->>>>>>> origin/main
-  ]
+"exclude": [
+  "node_modules",
+  "packages/**",
+  ".next",
+  "out"
+]
 }
