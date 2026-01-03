@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus } from "lucide-react";
+import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { authApi, ApiRequestError } from "@/lib/api";
+import { useSocket } from "@/hooks/useSocket";
+import { requestLoungeCounts, joinLounge } from "@/lib/socket";
+import ConnectionStatus from "@/components/ConnectionStatus";
+import { toast } from "@/lib/toast";
 
 export default function Block() {
   const [username, setUsername] = useState("");
@@ -13,10 +18,58 @@ export default function Block() {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [guestToken, setGuestToken] = useState<string | null>(null);
+  const [loungeCounts, setLoungeCounts] = useState<Record<string, number>>({});
+
+  // Initialize socket connection
+  const { socket, isConnected } = useSocket({ 
+    autoConnect: true,
+    onConnect: () => {
+      toast.success('Connected', 'Real-time connection established');
+    },
+    onDisconnect: () => {
+      toast.warning('Disconnected', 'Lost connection to server');
+    },
+    onError: (error) => {
+      toast.error('Connection Error', error.message);
+    },
+  });
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
+  // Listen for real-time lounge counts
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleLoungeCounts = (counts: Record<string, number>) => {
+      setLoungeCounts(counts);
+    };
+
+    const handleUserCount = ({ loungeId, count }: { loungeId: string; count: number }) => {
+      setLoungeCounts(prev => ({ ...prev, [loungeId]: count }));
+    };
+
+    socket.on('lounge counts', handleLoungeCounts);
+    socket.on('user count', handleUserCount);
+
+    // Request initial counts when connected
+    if (isConnected) {
+      requestLoungeCounts();
+    }
+
+    return () => {
+      socket.off('lounge counts', handleLoungeCounts);
+      socket.off('user count', handleUserCount);
+    };
+  }, [socket, isConnected]);
+
   // Language categories with All Users Lounge + Country-specific lounges
+  // Member counts will be updated from Socket.IO real-time data
+  const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
+    return loungeCounts[loungeId] ?? defaultCount;
+  };
+
   const languageCategories = {
     english: {
       name: "English",
@@ -113,7 +166,7 @@ export default function Block() {
     },
   };
 
-  const handleSetUsername = () => {
+  const handleSetUsername = async () => {
     const trimmedUsername = username.trim();
 
     if (!trimmedUsername) {
@@ -136,9 +189,38 @@ export default function Block() {
       return;
     }
 
+    // Call the backend API to create a guest session
+    setIsLoading(true);
     setError(null);
-    setTempUsername(username);
-    setUsername("");
+
+    try {
+      const response = await authApi.createGuest({ ageCategory: '_18PLUS' });
+      
+      // Store the guest token and username
+      setGuestToken(response.tempSessionToken);
+      setTempUsername(trimmedUsername);
+      setUsername("");
+      
+      // Store in localStorage for persistence (client-side only)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('guestToken', response.tempSessionToken);
+        localStorage.setItem('guestUsername', trimmedUsername);
+      }
+
+      // Show success toast
+      toast.success('Welcome!', `Guest session created for ${trimmedUsername}`);
+    } catch (err) {
+      if (err instanceof ApiRequestError) {
+        setError(err.message);
+        toast.error('Failed to create session', err.message);
+      } else {
+        setError("Failed to create guest session. Please try again.");
+        toast.error('Connection Error', 'Unable to reach the server. Please check your connection.');
+      }
+      console.error('Guest creation error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Start with username creation screen
@@ -172,8 +254,15 @@ export default function Block() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <Button onClick={handleSetUsername} className="w-full">
-              Enter
+            <Button onClick={handleSetUsername} className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating Session...
+                </>
+              ) : (
+                'Enter'
+              )}
             </Button>
 
             <div className="flex gap-2">
@@ -185,6 +274,10 @@ export default function Block() {
                 <UserPlus className="w-4 h-4 mr-2" />
                 Sign Up
               </Button>
+            </div>
+
+            <div className="mt-4 flex justify-center">
+              <ConnectionStatus />
             </div>
           </CardContent>
         </Card>
@@ -205,6 +298,7 @@ export default function Block() {
               <UserCircle className="w-4 h-4" />
               {tempUsername}
             </Badge>
+            <ConnectionStatus />
           </div>
           <Button 
             variant="outline" 
@@ -235,7 +329,7 @@ export default function Block() {
                     <CardTitle className="text-lg">{lang.name}</CardTitle>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Users className="w-4 h-4" />
-                      <span>{lang.lounges[0].members} online</span>
+                      <span>{getLoungeMemberCount(lang.lounges[0].id, lang.lounges[0].members)} online</span>
                     </div>
                     <div className="text-xs text-muted-foreground mt-2">
                       {lang.lounges.length} lounges available
@@ -389,6 +483,7 @@ export default function Block() {
             <UserCircle className="w-4 h-4" />
             {tempUsername}
           </Badge>
+          <ConnectionStatus />
         </div>
         <Button 
           variant="outline" 
@@ -416,7 +511,15 @@ export default function Block() {
                 className={`hover:border-primary transition-colors cursor-pointer ${
                   lounge.isAll ? "border-2 border-primary" : ""
                 }`}
-                onClick={() => setSelectedLounge(lounge.id)}
+                onClick={() => {
+                  setSelectedLounge(lounge.id);
+                  if (isConnected && tempUsername) {
+                    joinLounge(lounge.id, tempUsername);
+                    // Success toast will be shown when server confirms join
+                  } else if (!isConnected) {
+                    toast.error('Not Connected', 'Please wait for the connection to be established.');
+                  }
+                }}
               >
                 <CardHeader className="py-4">
                   <div className="flex items-center justify-between">
@@ -434,7 +537,7 @@ export default function Block() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Users className="w-4 h-4" />
-                        <span>{lounge.members} online</span>
+                        <span>{getLoungeMemberCount(lounge.id, lounge.members)} online</span>
                       </div>
                       <ChevronRight className="w-5 h-5 text-muted-foreground" />
                     </div>
