@@ -86,6 +86,17 @@ export function useApiRequest<T = any>(
   // Use ref to track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
 
+  // Stabilize options callbacks with refs to avoid recreating execute
+  const onSuccessRef = useRef(options.onSuccess);
+  const onErrorRef = useRef(options.onError);
+  const onCompleteRef = useRef(options.onComplete);
+
+  useEffect(() => {
+    onSuccessRef.current = options.onSuccess;
+    onErrorRef.current = options.onError;
+    onCompleteRef.current = options.onComplete;
+  }, [options.onSuccess, options.onError, options.onComplete]);
+
   // Cleanup: Set mounted ref to false when component unmounts
   useEffect(() => {
     return () => {
@@ -111,7 +122,7 @@ export function useApiRequest<T = any>(
         // Only update state if component is still mounted
         if (isMountedRef.current) {
           setData(result);
-          await options.onSuccess?.(result);
+          await onSuccessRef.current?.(result);
         }
         
         return result;
@@ -121,7 +132,7 @@ export function useApiRequest<T = any>(
         // Only update state if component is still mounted
         if (isMountedRef.current) {
           setError(errorMessage);
-          await options.onError?.(err as Error);
+          await onErrorRef.current?.(err as Error);
         }
         
         // Re-throw to allow caller to handle if needed
@@ -130,11 +141,11 @@ export function useApiRequest<T = any>(
         // Only update state if component is still mounted
         if (isMountedRef.current) {
           setIsLoading(false);
-          await options.onComplete?.();
+          await onCompleteRef.current?.();
         }
       }
     },
-    [apiFunction, isLoading, options]
+    [apiFunction, isLoading]
   );
 
   const reset = useCallback(() => {

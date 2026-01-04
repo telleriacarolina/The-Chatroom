@@ -76,6 +76,15 @@ export function useAsync<T = any>(
   
   const isMountedRef = useRef(true);
 
+  // Stabilize options callbacks with refs to avoid recreating execute
+  const onSuccessRef = useRef(options.onSuccess);
+  const onErrorRef = useRef(options.onError);
+
+  useEffect(() => {
+    onSuccessRef.current = options.onSuccess;
+    onErrorRef.current = options.onError;
+  }, [options.onSuccess, options.onError]);
+
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
@@ -95,7 +104,7 @@ export function useAsync<T = any>(
       
       if (isMountedRef.current) {
         setValue(result);
-        await options.onSuccess?.(result);
+        await onSuccessRef.current?.(result);
       }
       
       return result;
@@ -104,7 +113,7 @@ export function useAsync<T = any>(
       
       if (isMountedRef.current) {
         setError(error);
-        await options.onError?.(error);
+        await onErrorRef.current?.(error);
       }
       
       throw error;
@@ -113,7 +122,7 @@ export function useAsync<T = any>(
         setIsLoading(false);
       }
     }
-  }, [asyncFunction, isLoading, options]);
+  }, [asyncFunction, isLoading]);
 
   // Execute immediately if requested
   // We intentionally omit execute from deps to avoid infinite loops
