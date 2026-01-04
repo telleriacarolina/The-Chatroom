@@ -1,0 +1,42 @@
+# Root-level Application Code
+
+All main application source code is now copied to root-level folders:
+
+- **api/** — Express REST API server (port 3001)
+  - server.js — Main entry point
+  - lib/ — JWT, crypto, Prisma, Twilio utilities
+  - middleware/ — CSRF, rate limiting, auth
+  - routes/ — API endpoints
+  - services/ — Background jobs, Socket.IO integration
+  - utils/ — Logger, security helpers
+
+- **socket/** — Socket.IO WebSocket server (port 3002)
+  - socket-server.js — Main entry point
+  - lib/ — Socket utilities and helpers
+
+- **web/** — Next.js 14 frontend (port 3000)
+  - app/ — Next.js App Router
+  - components/ — React UI components
+  - lib/ — Frontend utilities
+  - styles/ — Global CSS and Tailwind
+
+- **shared/** — Shared types, utilities, and schemas
+  - index.ts — Barrel exports
+  - types/ — TypeScript type definitions
+  - utils/ — Shared utility functions
+  - schemas/ — JSON schemas for validation
+
+## Entry Points
+
+```bash
+# API server (root-level)
+node api/server.js
+
+# Socket.IO server (root-level)
+node socket/socket-server.js
+
+# Next.js frontend (root-level)
+npm run dev:web
+```
+
+This flattened structure makes it easier to review and maintain all application code directly from the project root.
