@@ -15,6 +15,14 @@ The Chatroom is a real-time chat application with multi-tier authentication, lan
 
 ## Technology Stack
 
+- **Backend:** Node.js 18+, Express, Socket.IO
+- **Frontend:** Next.js 14, React 18, TypeScript
+- **Database:** PostgreSQL with Prisma ORM
+- **Authentication:** JWT (access & refresh tokens), bcrypt, CSRF protection
+- **Real-time:** Socket.IO for WebSocket connections
+- **Optional:** Twilio (SMS), AWS S3 (file uploads)
+- **UI:** Tailwind CSS, shadcn/ui, Lucide icons
+
 
 ## Architecture & Project Structure
 
@@ -58,6 +66,14 @@ The-Chatroom/
 ### Environment Variables
 
 Required environment variables (see `.env.example`):
+- `DATABASE_URL` - PostgreSQL connection string
+- `ACCESS_TOKEN_SECRET` - JWT access token secret (min 32 chars)
+- `REFRESH_TOKEN_SECRET` - JWT refresh token secret (min 32 chars)
+- `PHONE_ENC_KEY` - 32-byte encryption key for phone numbers
+- `PORT` - API server port (default: 3001)
+- `SOCKET_PORT` - Socket.IO server port (default: 3002)
+- `FRONTEND_URL` - Frontend URL (default: http://localhost:3000)
+- `NODE_ENV` - Environment (development/production)
 
 ### Running the Application
 
@@ -119,26 +135,53 @@ npm run prisma:generate   # Generate Prisma client
 
 ### React Component Patterns
 
+- Use functional components with hooks
+- Prefer TypeScript for new components (`.tsx`)
+- Co-locate related components in feature folders
+- Use `'use client'` directive for client-side interactivity
+- Export components as default or named exports consistently
 
 ### Next.js Routing
 
+- Uses Next.js 14 App Router (`web/app/` directory)
+- File-based routing with `page.tsx` for routes
+- Use `layout.tsx` for shared layouts
+- Server components by default, use `'use client'` when needed
 
 ### Database & Prisma
 
+- Schema located at `packages/api/prisma/schema.prisma`
+- After schema changes: run `npm run prisma:migrate` then `npm run prisma:generate`
+- Use Prisma Client for all database operations
+- Handle unique constraint violations and not-found errors explicitly
 
-Key models:
+Key models: User, Session, TempSession, IDVerification, Lounge, LanguageRoom, ChatMessage, MarketplaceItem, Transaction, ModerationAction, UserReport, AuditLog
 
 ## Security Practices
 
 ### Authentication & Authorization
 
+- JWT-based authentication with access tokens (15min expiry) and refresh tokens (30 days)
+- Guest sessions supported via `TempSession` model
+- Password hashing with bcrypt (strong salt rounds)
+- Phone number encryption using AES-256-GCM
+- CSRF protection with double-submit cookie pattern
+- Rate limiting on auth endpoints and API routes
 
 ### Security Headers
 
+- Helmet middleware enabled on API server
+- CORS configured with specific origins
+- Secure cookie settings (httpOnly, sameSite, secure in production)
+- Content Security Policy headers as needed
 
 ### Input Validation
 
-
+- Validate all user inputs before processing
+- Sanitize inputs to prevent XSS attacks
+- Use Prisma's type safety for database queries
+- Validate phone numbers, passwords, and other sensitive data
+- Return appropriate error messages without leaking system details
 ### Secrets Management
 
 - **Never commit secrets** to version control
@@ -183,10 +226,19 @@ module.exports = router;
 
 ### Socket.IO Events
 
+- Server runs on port 3002 (separate from API server)
+- Handle connection/disconnection events
+- Emit and listen for custom events (chat messages, user presence, etc.)
+- Room-based messaging for language lounges
+- Error handling for socket connections
 
 ### React Components
 
-
+- Use client-side state management (useState, useContext)
+- Implement error boundaries for graceful error handling
+- Handle loading and error states in components
+- Use useEffect for side effects and cleanup
+- Fetch data from API using fetch or axios
 ### Error Handling
 
 **Backend error handling:**
@@ -236,9 +288,20 @@ try {
 
 ## Testing Approach
 
-  1. API server (npm run dev)
-  2. Socket.IO server (npm run socket:dev)
-  3. Next.js frontend (npm run next:dev)
+**Manual testing workflow:**
+1. Start API server: `npm run dev:api` (port 3001)
+2. Start Socket.IO server: `npm run dev:socket` (port 3002)
+3. Start Next.js frontend: `npm run dev:web` (port 3000)
+4. Or run all at once: `npm run dev`
+
+**Testing checklist:**
+- Verify all three servers start without errors
+- Test API endpoints with curl or Postman
+- Check Socket.IO connections in browser console
+- Test user flows in the frontend
+- Verify database operations with Prisma Studio
+
+**No automated test suite currently:** Focus on manual testing and code review
 
 ## Common Tasks
 
@@ -279,7 +342,28 @@ try {
 
 ### Common Issues
 
+**Port conflicts:**
+- Check if ports 3000, 3001, 3002 are in use
+- Kill conflicting processes or change PORT/SOCKET_PORT in .env
 
+**Database connection errors:**
+- Verify PostgreSQL is running
+- Check DATABASE_URL in .env is correct
+- Run `npm run prisma:generate` and `npm run prisma:migrate`
+
+**Missing environment variables:**
+- Copy `.env.example` to `.env`
+- Set all required secrets (JWT secrets, encryption keys)
+
+**Prisma errors:**
+- Run `npm run prisma:generate` after pulling schema changes
+- Run `npm run prisma:migrate` to apply new migrations
+- Delete and recreate database if migrations are broken
+
+**Build errors:**
+- Clear `.next` directory: `rm -rf web/.next`
+- Clear node_modules: `npm run clean` then `npm install`
+- Check Node.js version (requires 18.x, use `nvm use`)
 ### Debugging
 
 **Enable debug logging:**
@@ -350,35 +434,20 @@ localStorage.debug = 'socket.io-client:*';
 
 ## Important Notes
 
-<<<<<<< HEAD
-=======
-<<<<<<< ours
-1. **Monorepo structure:** Project uses npm workspaces with separate packages
-2. **Three servers:** Always remember this app requires three separate processes
-3. **Mixed codebase:** Both TypeScript and JavaScript - respect existing file types
+1. **Three servers:** Always remember this app requires three separate processes (API on port 3001, Socket.IO on port 3002, Next.js on port 3000)
+2. **Mixed codebase:** Both TypeScript and JavaScript - respect existing file types
+3. **Path aliases:** Use `@/*` imports for web package, relative imports for API/socket packages
 4. **Package imports:**
-   - API: Use relative imports (`./lib/`, `./routes/`)
-   - Web: Use path aliases (`@/components/`, `@/lib/`)
+   - API: Use relative imports (`./lib/`, `./routes/`, `./utils/`)
+   - Socket: Use relative imports
+   - Web: Use path aliases (`@/components/`, `@/lib/`, `@/utils/`)
    - Shared: Import as `@chatroom/shared` from other packages
 5. **Prisma workflow:** Schema change → migrate → generate → update code
 6. **Security first:** Never commit secrets, always validate inputs
 7. **Minimal changes:** Keep PRs focused and avoid unnecessary refactoring
 8. **Documentation:** Update relevant docs when making significant changes
-=======
->>>>>>> main
-1. **Three servers:** Always remember this app requires three separate processes (API, Socket.IO, Next.js)
-2. **Mixed codebase:** Both TypeScript and JavaScript - respect existing file types
-3. **Path aliases:** Always use `@/*` imports, not relative paths across directories
-4. **Prisma workflow:** Schema change → migrate → generate → update code
-5. **Security first:** Never commit secrets, always validate inputs
-6. **Minimal changes:** Keep PRs focused and avoid unnecessary refactoring
-7. **Documentation:** Update relevant docs when making significant changes
-8. **Environment setup:** Copy `.env.example` to `.env` before starting development
-9. **Server startup order:** Start API server first, then Socket.IO, then Next.js frontend
-<<<<<<< HEAD
-=======
->>>>>>> theirs
->>>>>>> main
+9. **Environment setup:** Copy `.env.example` to `.env` before starting development
+10. **Server startup order:** Start API server first, then Socket.IO, then Next.js frontend
 
 ## Getting Help
 
