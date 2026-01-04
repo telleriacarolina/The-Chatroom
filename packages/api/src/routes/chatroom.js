@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/prisma');
 const { authenticateRequest } = require('../middleware/auth');
 const { apiLimiter } = require('../middleware/rateLimiter');
 const logger = require('../utils/logger');
-
-const prisma = new PrismaClient();
 
 // Get all lounges (public endpoint)
 router.get('/lounges', async (req, res) => {
