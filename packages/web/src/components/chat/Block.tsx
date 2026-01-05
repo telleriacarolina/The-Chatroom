@@ -1,40 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
-import { authApi, ApiRequestError, setGuestToken as storeGuestToken } from "@/lib/api";
-import { useSocket } from "@/hooks/useSocket";
-import { requestLoungeCounts, joinLounge } from "@/lib/socket";
-import ConnectionStatus from "@/components/ConnectionStatus";
-import { toast } from "@/lib/toast";
 
 export default function Block() {
   const [username, setUsername] = useState("");
   const [tempUsername, setTempUsername] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [guestToken, setGuestToken] = useState<string | null>(null);
-  const [loungeCounts, setLoungeCounts] = useState<Record<string, number>>({});
-
-  // Initialize socket connection
-  const { socket, isConnected } = useSocket({ 
-    autoConnect: true,
-    onConnect: () => {
-      toast.success('Connected', 'Real-time connection established');
-    },
-    onDisconnect: () => {
-      toast.warning('Disconnected', 'Lost connection to server');
-    },
-    onError: (error) => {
-      toast.error('Connection Error', error.message);
-    },
-  });
+  const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
+  const [isLoadingLounges, setIsLoadingLounges] = useState(false);
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
@@ -203,35 +185,25 @@ export default function Block() {
       return;
     }
 
-    // Call the backend API to create a guest session
+    setError("");
     setIsLoading(true);
-    setError(null);
 
     try {
-      const response = await authApi.createGuest({ ageCategory: '18+' });
+      // TODO: Replace with actual API call to /api/auth/guest
+      // const response = await fetch('/api/auth/guest', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ username: trimmedUsername })
+      // });
+      // if (!response.ok) throw new Error('Failed to create guest session');
       
-      // Store the guest token and username
-      setGuestToken(response.tempSessionToken);
-      setTempUsername(trimmedUsername);
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setTempUsername(username);
       setUsername("");
-      
-      // Store in localStorage for persistence (client-side only)
-      storeGuestToken(response.tempSessionToken);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('guestUsername', trimmedUsername);
-      }
-
-      // Show success toast
-      toast.success('Welcome!', `Guest session created for ${trimmedUsername}`);
     } catch (err) {
-      if (err instanceof ApiRequestError) {
-        setError(err.message);
-        toast.error('Failed to create session', err.message);
-      } else {
-        setError("Failed to create guest session. Please try again.");
-        toast.error('Connection Error', 'Unable to reach the server. Please check your connection.');
-      }
-      console.error('Guest creation error:', err);
+      setError("Failed to create guest session. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -275,16 +247,16 @@ export default function Block() {
                   Creating Session...
                 </>
               ) : (
-                'Enter'
+                "Enter"
               )}
             </Button>
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1">
+              <Button variant="outline" className="flex-1" disabled={isLoading}>
                 <LogIn className="w-4 h-4 mr-2" />
                 Sign In
               </Button>
-              <Button variant="outline" className="flex-1">
+              <Button variant="outline" className="flex-1" disabled={isLoading}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Sign Up
               </Button>
@@ -331,27 +303,42 @@ export default function Block() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(languageCategories).map(([key, lang]) => (
-                <Card
-                  key={key}
-                  className="hover:border-primary transition-colors cursor-pointer"
-                  onClick={() => setSelectedLanguage(key)}
-                >
-                  <CardHeader>
-                    <div className="text-4xl mb-2">{lang.flag}</div>
-                    <CardTitle className="text-lg">{lang.name}</CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Users className="w-4 h-4" />
-                      <span>{getLoungeMemberCount(lang.lounges[0].id, lang.lounges[0].members)} online</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-2">
-                      {lang.lounges.length} lounges available
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
+            {isLoadingLanguages ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="w-12 h-12 mb-2" />
+                      <Skeleton className="h-6 w-24 mb-2" />
+                      <Skeleton className="h-4 w-32 mb-1" />
+                      <Skeleton className="h-3 w-28" />
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Object.entries(languageCategories).map(([key, lang]) => (
+                  <Card
+                    key={key}
+                    className="hover:border-primary transition-colors cursor-pointer"
+                    onClick={() => setSelectedLanguage(key)}
+                  >
+                    <CardHeader>
+                      <div className="text-4xl mb-2">{lang.flag}</div>
+                      <CardTitle className="text-lg">{lang.name}</CardTitle>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                        <span>{lang.lounges[0].members} online</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        {lang.lounges.length} lounges available
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -518,62 +505,64 @@ export default function Block() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {currentLanguage.lounges.map((lounge) => (
-              <Card
-                key={lounge.id}
-                className={`hover:border-primary transition-colors cursor-pointer ${
-                  lounge.isAll ? "border-2 border-primary" : ""
-                }`}
-                onClick={() => {
-                  setSelectedLounge(lounge.id);
-                  if (isConnected && tempUsername) {
-                    // Listen for server confirmation of lounge join and show success toast
-                    if (socket) {
-                      socket.once('user joined', (data: { userId: string; username: string; loungeId: string }) => {
-                        try {
-                          // If the server payload includes a lounge identifier, ensure it matches
-                          if (data && data.loungeId === lounge.id) {
-                            toast.success('Joined Lounge', `Welcome to ${lounge.name}!`);
-                          }
-                        } catch {
-                          // Swallow errors from toast or unexpected payloads to avoid breaking UX
-                        }
-                      });
-                    }
-                    joinLounge(lounge.id, tempUsername);
-                  } else if (!isConnected) {
-                    toast.error('Not Connected', 'Please wait for the connection to be established.');
-                  } else if (!tempUsername) {
-                    toast.error('Username Required', 'Please choose a username before joining a lounge.');
-                  }
-                }}
-              >
-                <CardHeader className="py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="w-5 h-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-base">{lounge.name}</CardTitle>
-                        {lounge.isAll && (
-                          <Badge variant="default" className="mt-1">
-                            All Users Welcome
-                          </Badge>
-                        )}
+          {isLoadingLounges ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-5 h-5 rounded" />
+                        <div>
+                          <Skeleton className="h-5 w-48 mb-2" />
+                          {i === 0 && <Skeleton className="h-5 w-32" />}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="w-5 h-5" />
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>{getLoungeMemberCount(lounge.id, lounge.members)} online</span>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentLanguage.lounges.map((lounge) => (
+                <Card
+                  key={lounge.id}
+                  className={`hover:border-primary transition-colors cursor-pointer ${
+                    lounge.isAll ? "border-2 border-primary" : ""
+                  }`}
+                  onClick={() => setSelectedLounge(lounge.id)}
+                >
+                  <CardHeader className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <MessageSquare className="w-5 h-5 text-primary" />
+                        <div>
+                          <CardTitle className="text-base">{lounge.name}</CardTitle>
+                          {lounge.isAll && (
+                            <Badge variant="default" className="mt-1">
+                              All Users Welcome
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Users className="w-4 h-4" />
+                          <span>{lounge.members} online</span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="mt-6 p-4 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground">

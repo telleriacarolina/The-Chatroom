@@ -4,30 +4,33 @@ import clsx from "clsx";
 export function Button({
   children,
   className = "",
-  variant = "default",
-  size = "md",
+  variant = "default", // default variant
+  size = "md",          // size: sm, md, lg
+  disabled = false,
   ...props
 }) {
-  const base = "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  const base = "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variantClasses = {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary",
-    outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground focus:ring-ring",
-    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-secondary",
-    ghost: "hover:bg-accent hover:text-accent-foreground focus:ring-accent",
-    destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive",
+    default: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+    outline: "border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-400",
+    success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",
+    error: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+    ghost: "hover:bg-gray-100 text-gray-700",
+    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
   };
 
   const sizeClasses = {
-    sm: "h-9 px-3 text-sm",
-    md: "h-10 px-4 py-2",
-    lg: "h-11 px-8 text-lg",
-    icon: "h-10 w-10",
+    sm: "px-2 py-1 text-sm",
+    md: "px-4 py-2 text-base",
+    lg: "px-6 py-3 text-lg",
+    icon: "p-2",
   };
 
   return (
     <button
       className={clsx(base, variantClasses[variant], sizeClasses[size], className)}
+      disabled={disabled}
       {...props}
     >
       {children}
