@@ -1,6 +1,14 @@
 const crypto = require('crypto');
 
 const ALGORITHM = 'aes-256-gcm';
+
+// Validate encryption key is provided in production
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.PHONE_ENC_KEY && !process.env.ENCRYPTION_KEY) {
+    throw new Error('Encryption key must be provided in production environment');
+  }
+}
+
 const KEY = process.env.PHONE_ENC_KEY || process.env.ENCRYPTION_KEY || 'dev_key_32_byte_length_needed_!';
 
 function getKey() {
