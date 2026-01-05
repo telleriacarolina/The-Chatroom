@@ -59,7 +59,7 @@ export const toast = {
   /**
    * Show promise toast with loading/success/error states
    */
-  promise: <T,>(
+  promise: <T>(
     promise: Promise<T>,
     options: {
       loading: string;

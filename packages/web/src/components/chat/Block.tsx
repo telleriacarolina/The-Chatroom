@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, Lock, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 import { authApi, ApiRequestError } from "@/lib/api";
 import { useSocket } from "@/hooks/useSocket";
 import { requestLoungeCounts, joinLounge } from "@/lib/socket";
@@ -53,15 +53,16 @@ export default function Block() {
     socket.on('lounge counts', handleLoungeCounts);
     socket.on('user count', handleUserCount);
 
-    // Request initial counts when connected
-    if (isConnected) {
-      requestLoungeCounts();
-    }
-
     return () => {
       socket.off('lounge counts', handleLoungeCounts);
       socket.off('user count', handleUserCount);
     };
+  }, [socket]);
+
+  // Request initial lounge counts when connected
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+    requestLoungeCounts();
   }, [socket, isConnected]);
 
   // Language categories with All Users Lounge + Country-specific lounges
@@ -194,7 +195,7 @@ export default function Block() {
     setError(null);
 
     try {
-      const response = await authApi.createGuest({ ageCategory: '_18PLUS' });
+      const response = await authApi.createGuest({ ageCategory: '18+' });
       
       // Store the guest token and username
       setGuestToken(response.tempSessionToken);
@@ -514,10 +515,24 @@ export default function Block() {
                 onClick={() => {
                   setSelectedLounge(lounge.id);
                   if (isConnected && tempUsername) {
+                    // Listen for server confirmation of lounge join and show success toast
+                    if (socket) {
+                      socket.once('user joined', (data: { userId: string; username: string; loungeId: string }) => {
+                        try {
+                          // If the server payload includes a lounge identifier, ensure it matches
+                          if (data && data.loungeId === lounge.id) {
+                            toast.success('Joined Lounge', `Welcome to ${lounge.name}!`);
+                          }
+                        } catch {
+                          // Swallow errors from toast or unexpected payloads to avoid breaking UX
+                        }
+                      });
+                    }
                     joinLounge(lounge.id, tempUsername);
-                    // Success toast will be shown when server confirms join
                   } else if (!isConnected) {
                     toast.error('Not Connected', 'Please wait for the connection to be established.');
+                  } else if (!tempUsername) {
+                    toast.error('Username Required', 'Please choose a username before joining a lounge.');
                   }
                 }}
               >

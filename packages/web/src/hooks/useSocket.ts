@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { getSocket, connect, disconnect, isConnected, TypedSocket } from '@/lib/socket';
+import { getSocket, connect, disconnect, TypedSocket } from '@/lib/socket';
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -40,6 +40,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   const [error, setError] = useState<Error | null>(null);
   const socketRef = useRef<TypedSocket | null>(null);
   const callbacksRef = useRef({ onConnect, onDisconnect, onError });
+  const autoConnectAttemptedRef = useRef(false);
 
   // Update callbacks ref when they change
   useEffect(() => {
@@ -77,8 +78,9 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     socket.on('disconnect', handleDisconnect);
     socket.on('connect_error', handleConnectError);
 
-    // Auto-connect if enabled
-    if (autoConnect && !socket.connected) {
+    // Auto-connect if enabled and not already attempted
+    if (autoConnect && !autoConnectAttemptedRef.current && !socket.connected) {
+      autoConnectAttemptedRef.current = true;
       setStatus('connecting');
       connect();
     }
@@ -89,7 +91,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
       socket.off('disconnect', handleDisconnect);
       socket.off('connect_error', handleConnectError);
     };
-  }, [autoConnect]);
+  }, []);
 
   const handleConnect = useCallback(() => {
     if (socketRef.current && !socketRef.current.connected) {

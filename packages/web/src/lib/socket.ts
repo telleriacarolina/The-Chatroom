@@ -49,10 +49,10 @@ let socket: TypedSocket | null = null;
  * Get or create Socket.IO client instance
  * Uses singleton pattern with SSR safety
  */
-export function getSocket(): TypedSocket {
+export function getSocket(): TypedSocket | null {
   // Don't create socket during SSR
   if (typeof window === 'undefined') {
-    return null as any;
+    return null;
   }
 
   if (!socket) {
@@ -72,7 +72,7 @@ export function getSocket(): TypedSocket {
 /**
  * Connect to Socket.IO server
  */
-export function connect(): TypedSocket {
+export function connect(): TypedSocket | null {
   const socket = getSocket();
   
   if (socket && !socket.connected) {

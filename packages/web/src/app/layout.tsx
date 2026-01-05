@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ReactNode } from 'react'
 import '../styles/globals.css'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html lang="en" suppressHydrationWarning>

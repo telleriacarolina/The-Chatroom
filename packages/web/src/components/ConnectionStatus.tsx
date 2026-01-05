@@ -21,6 +21,10 @@ export default function ConnectionStatus({
   showReconnectButton = true,
   className = '' 
 }: ConnectionStatusProps) {
+  // useSocket internally manages a singleton socket instance.
+  // Passing autoConnect: true here will only initialize that shared connection,
+  // and will NOT create multiple WebSocket connections when multiple
+  // ConnectionStatus components are rendered.
   const { status, isConnected, connect } = useSocket({ autoConnect: true });
 
   const statusConfig = {
