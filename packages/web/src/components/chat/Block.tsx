@@ -8,7 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 
-export default function Block() {
+interface BlockProps {
+  onShowLogin?: () => void;
+  onShowSignup?: () => void;
+}
+
+export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   const [username, setUsername] = useState("");
   const [tempUsername, setTempUsername] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
@@ -252,11 +257,11 @@ export default function Block() {
             </Button>
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" disabled={isLoading}>
+              <Button variant="outline" className="flex-1" onClick={onShowLogin}>
                 <LogIn className="w-4 h-4 mr-2" />
                 Sign In
               </Button>
-              <Button variant="outline" className="flex-1" disabled={isLoading}>
+              <Button variant="outline" className="flex-1" onClick={onShowSignup}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Sign Up
               </Button>
