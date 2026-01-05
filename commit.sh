@@ -90,10 +90,10 @@ fi
 echo -e "\n${BLUE}The following changes will be staged:${NC}"
 git status --short
 
-# Stage changes (only tracked files and changes)
-echo -e "\n${BLUE}Staging changes...${NC}"
-git add -u  # Stage only modified and deleted files
-git add .   # Stage new files in current directory
+# Stage all changes from the repository root
+echo -e "\n${BLUE}Staging changes from repository root...${NC}"
+repo_root="$(git rev-parse --show-toplevel)"
+git -C "$repo_root" add -A
 
 # Show final staged changes
 echo -e "\n${BLUE}Staged changes:${NC}"
