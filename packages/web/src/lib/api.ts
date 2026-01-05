@@ -3,6 +3,18 @@
  * 
  * Provides a fetch wrapper with error handling, TypeScript types,
  * and helper functions for making HTTP requests to the backend API.
+ * 
+ * 🔒 CANONICAL PATTERN: This file implements the STATELESS API SERVICE layer.
+ * 
+ * Rules:
+ * - ❌ NEVER manage UI state (loading, error, success indicators)
+ * - ❌ NEVER show toasts, modals, or other UI elements
+ * - ✅ Only handle HTTP requests and responses
+ * - ✅ Throw errors for callers to handle
+ * - ✅ Return typed data
+ * 
+ * State management belongs in container/page components, not here.
+ * See: docs/frontend/LOADING_STATE_PATTERN.md
  */
 
 // ============================================================================
