@@ -1,0 +1,16 @@
+{
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.pythonProjects": [],
+    "chat.mcp.serverSampling": {
+        "The-Chatroom/.vscode/mcp.json: io.github.github/github-mcp-server": {
+            "allowedModels": [
+                "copilot/auto",
+                "copilot/gpt-4.1",
+                "copilot/gpt-4o"
+            ]
+        }
+    },
+    "github.copilot.chat.anthropic.tools.websearch.maxUses": 2,
+    "js/ts.hover.maximumLength": 500,
+    "github.copilot.chat.tools.memory.enabled": true
+}

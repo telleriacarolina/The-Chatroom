@@ -10,6 +10,7 @@
         "./*"
       ]
     },
+    "types": [],
     "allowImportingTsExtensions": false,
     "strict": false,
     "esModuleInterop": true,
@@ -40,6 +41,8 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "../mobile",
+    "../shared/node_modules/@types/react-native"
   ]
 }

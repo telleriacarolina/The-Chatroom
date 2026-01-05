@@ -20,7 +20,52 @@ export default function Block() {
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUsername = localStorage.getItem('guestUsername');
+      const storedToken = localStorage.getItem('guestToken');
+      
+      if (storedUsername && storedToken) {
+        setTempUsername(storedUsername);
+        setGuestToken(storedToken);
+      }
+    }
+  }, []);
+
+  // Listen for real-time lounge counts
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleLoungeCounts = (counts: Record<string, number>) => {
+      setLoungeCounts(counts);
+    };
+
+    const handleUserCount = ({ loungeId, count }: { loungeId: string; count: number }) => {
+      setLoungeCounts(prev => ({ ...prev, [loungeId]: count }));
+    };
+
+    socket.on('lounge counts', handleLoungeCounts);
+    socket.on('user count', handleUserCount);
+
+    return () => {
+      socket.off('lounge counts', handleLoungeCounts);
+      socket.off('user count', handleUserCount);
+    };
+  }, [socket]);
+
+  // Request initial lounge counts when connected
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+    requestLoungeCounts();
+  }, [socket, isConnected]);
+
   // Language categories with All Users Lounge + Country-specific lounges
+  // Member counts will be updated from Socket.IO real-time data
+  const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
+    return loungeCounts[loungeId] ?? defaultCount;
+  };
+
   const languageCategories = {
     english: {
       name: "English",
@@ -216,6 +261,10 @@ export default function Block() {
                 Sign Up
               </Button>
             </div>
+
+            <div className="mt-4 flex justify-center">
+              <ConnectionStatus />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -235,6 +284,7 @@ export default function Block() {
               <UserCircle className="w-4 h-4" />
               {tempUsername}
             </Badge>
+            <ConnectionStatus />
           </div>
           <Button 
             variant="outline" 
@@ -434,6 +484,7 @@ export default function Block() {
             <UserCircle className="w-4 h-4" />
             {tempUsername}
           </Badge>
+          <ConnectionStatus />
         </div>
         <Button 
           variant="outline" 

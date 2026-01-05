@@ -1,5 +1,5 @@
 import React from "react";
-import clsx from "clsx"; // optional, for cleaner conditional class merging
+import clsx from "clsx";
 
 export function Button({
   children,

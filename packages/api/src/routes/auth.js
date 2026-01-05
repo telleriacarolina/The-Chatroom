@@ -32,7 +32,7 @@ router.post('/signup', authLimiter, async (req, res) => {
     if (existing) return res.status(409).json({ error: 'User already exists' });
 
     const defaultPassword = `${(firstName||'User').slice(0,3)}${birthYear||'2000'}${(lastName||'').slice(0,3)}!`;
-    const passwordHash = bcrypt.hashSync(defaultPassword, 12);
+    const passwordHash = await bcrypt.hash(defaultPassword, 12);
 
     const user = await prisma.user.create({ data: {
       phoneNumber: encryptedPhone,
@@ -57,7 +57,7 @@ router.post('/signin', authLimiter, async (req, res) => {
     const user = await prisma.user.findUnique({ where: { phoneNumber: encryptedPhone } });
     if (!user || !user.passwordHash) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const ok = bcrypt.compareSync(password, user.passwordHash);
+    const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
     const accessToken = signAccess({ userId: user.id });
@@ -104,9 +104,9 @@ router.post('/change-password', authLimiter, async (req, res) => {
     const encryptedPhone = encryptPhone(phoneNumber);
     const user = await prisma.user.findUnique({ where: { phoneNumber: encryptedPhone } });
     if (!user || !user.passwordHash) return res.status(404).json({ error: 'User not found' });
-    const ok = bcrypt.compareSync(currentPassword, user.passwordHash);
+    const ok = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Current password is incorrect' });
-    const newHash = bcrypt.hashSync(newPassword, 12);
+    const newHash = await bcrypt.hash(newPassword, 12);
     await prisma.user.update({ where: { id: user.id }, data: { passwordHash: newHash } });
     await prisma.session.updateMany({ where: { userId: user.id }, data: { isActive: false } }).catch(() => {});
     res.json({ ok: true, message: 'Password changed' });
