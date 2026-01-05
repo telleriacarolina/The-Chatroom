@@ -40,7 +40,7 @@ export default function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProp
     }
 
     // Validate password
-    if (!password || password.length < 1) {
+    if (!password.trim()) {
       setError("Password is required");
       return;
     }
