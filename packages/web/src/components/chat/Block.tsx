@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
-import { authApi, ApiRequestError } from "@/lib/api";
+import { authApi, ApiRequestError, setGuestToken as storeGuestToken } from "@/lib/api";
 import { useSocket } from "@/hooks/useSocket";
 import { requestLoungeCounts, joinLounge } from "@/lib/socket";
 import ConnectionStatus from "@/components/ConnectionStatus";
@@ -37,6 +37,19 @@ export default function Block() {
   });
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUsername = localStorage.getItem('guestUsername');
+      const storedToken = localStorage.getItem('guestToken');
+      
+      if (storedUsername && storedToken) {
+        setTempUsername(storedUsername);
+        setGuestToken(storedToken);
+      }
+    }
+  }, []);
 
   // Listen for real-time lounge counts
   useEffect(() => {
@@ -203,8 +216,8 @@ export default function Block() {
       setUsername("");
       
       // Store in localStorage for persistence (client-side only)
+      storeGuestToken(response.tempSessionToken);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('guestToken', response.tempSessionToken);
         localStorage.setItem('guestUsername', trimmedUsername);
       }
 
@@ -527,34 +540,10 @@ export default function Block() {
                           // Swallow errors from toast or unexpected payloads to avoid breaking UX
                         }
                       });
-                    // Listen for server confirmation of lounge join and show success toast
-                    if (typeof socket !== "undefined" && socket) {
-                      socket.once("user joined", (data: any) => {
-                        try {
-                          // If the server payload includes a lounge identifier, ensure it matches
-                          if (!data || (data.loungeId && data.loungeId !== lounge.id)) {
-                            return;
-                          }
-                          toast.success(
-                            "Joined lounge",
-                            `You have joined the ${lounge.name} lounge.`
-                          );
-                        } catch {
-                          // Swallow errors from toast or unexpected payloads to avoid breaking UX
-                        }
-                      });
                     }
                     joinLounge(lounge.id, tempUsername);
                   } else if (!isConnected) {
-                    toast.error(
-                      "Not Connected",
-                      "Please wait for the connection to be established."
-                    );
-                  } else if (!tempUsername) {
-                    toast.error(
-                      "Username required",
-                      "Please choose a temporary username before joining a lounge."
-                    );
+                    toast.error('Not Connected', 'Please wait for the connection to be established.');
                   } else if (!tempUsername) {
                     toast.error('Username Required', 'Please choose a username before joining a lounge.');
                   }

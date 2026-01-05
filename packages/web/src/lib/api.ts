@@ -12,6 +12,39 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // ============================================================================
+// Token Management
+// ============================================================================
+
+/**
+ * Get guest token from localStorage
+ */
+export function getGuestToken(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return localStorage.getItem('guestToken');
+}
+
+/**
+ * Set guest token in localStorage
+ */
+export function setGuestToken(token: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('guestToken', token);
+  }
+}
+
+/**
+ * Remove guest token from localStorage
+ */
+export function removeGuestToken(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('guestToken');
+    localStorage.removeItem('guestUsername');
+  }
+}
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -117,8 +150,12 @@ export async function apiRequest<T = any>(
   
   const url = `${baseURL}${endpoint}`;
   
+  // Get guest token and include in headers if available
+  const guestToken = getGuestToken();
+  
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
+    ...(guestToken && { 'Authorization': `Bearer ${guestToken}` }),
     ...headers,
   };
 
@@ -322,4 +359,7 @@ export default {
   apiRequest,
   authApi,
   healthCheck,
+  getGuestToken,
+  setGuestToken,
+  removeGuestToken,
 };
