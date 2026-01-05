@@ -5,17 +5,19 @@
 Your monorepo now includes **9 packages** total:
 
 ### Core Packages (Existing)
+
 1. **@chatroom/api** - Backend REST API (Express + Prisma)
 2. **@chatroom/socket** - WebSocket server (Socket.IO)
 3. **@chatroom/web** - Frontend (Next.js)
 4. **@chatroom/shared** - Shared types and utilities
 
 ### New Packages
-5. **@chatroom/mobile** - Mobile app (React Native + Expo)
-6. **@chatroom/admin** - Admin panel (Next.js)
-7. **@chatroom/email** - Email service (Nodemailer + templates)
-8. **@chatroom/analytics** - Analytics tracking (Mixpanel + PostHog)
-9. **@chatroom/cli** - Command-line tools (Commander)
+
+1. **@chatroom/mobile** - Mobile app (React Native + Expo)
+2. **@chatroom/admin** - Admin panel (Next.js)
+3. **@chatroom/email** - Email service (Nodemailer + templates)
+4. **@chatroom/analytics** - Analytics tracking (Mixpanel + PostHog)
+5. **@chatroom/cli** - Command-line tools (Commander)
 
 ---
 
@@ -23,14 +25,16 @@ Your monorepo now includes **9 packages** total:
 
 **Location:** `packages/mobile/`
 
-### Features
+### Mobile Features
+
 - Cross-platform iOS & Android
 - Real-time chat with Socket.IO
 - Shared types from @chatroom/shared
 - React Navigation
 - Expo framework
 
-### Commands
+### Mobile Commands
+
 ```bash
 npm run dev:mobile     # Start Expo dev server
 npm run android        # Run on Android
@@ -38,6 +42,7 @@ npm run ios            # Run on iOS
 ```
 
 ### Use Cases
+
 - Native mobile experience
 - Push notifications
 - Camera/photo access
@@ -50,7 +55,8 @@ npm run ios            # Run on iOS
 **Location:** `packages/admin/`  
 **Port:** 3003
 
-### Features
+### Admin Panel Features
+
 - User management dashboard
 - Content moderation queue
 - Analytics visualizations (Recharts)
@@ -59,7 +65,8 @@ npm run ios            # Run on iOS
 - Audit logs viewer
 - Data tables (TanStack Table)
 
-### Commands
+### Admin Panel Commands
+
 ```bash
 npm run dev:admin      # Start admin panel
 npm run build:admin    # Build for production
@@ -67,6 +74,7 @@ npm run start:admin    # Start production server
 ```
 
 ### Pages
+
 - `/` - Dashboard overview
 - `/users` - User management
 - `/moderation` - Content review
@@ -80,7 +88,8 @@ npm run start:admin    # Start production server
 
 **Location:** `packages/email/`
 
-### Features
+### Email Service Features
+
 - Multi-provider support (SendGrid, SMTP, AWS SES)
 - Handlebars templating
 - MJML responsive emails
@@ -88,7 +97,8 @@ npm run start:admin    # Start production server
 - Plain text generation
 - TypeScript types
 
-### Usage in API
+### Usage Example in API
+
 ```typescript
 import { EmailService } from '@chatroom/email';
 
@@ -104,11 +114,13 @@ await emailService.sendWelcome({
 ```
 
 ### Templates Included
+
 - `welcome.hbs` - New user welcome
 - `password-reset.hbs` - Password reset
 - `verification-approved.hbs` - ID verification approved
 
-### Commands
+### Email Service Commands
+
 ```bash
 npm run build:email    # Build TypeScript
 ```
@@ -119,7 +131,8 @@ npm run build:email    # Build TypeScript
 
 **Location:** `packages/analytics/`
 
-### Features
+### Analytics Features
+
 - Multi-provider (Mixpanel, PostHog, GA)
 - Event tracking
 - User properties
@@ -128,6 +141,7 @@ npm run build:email    # Build TypeScript
 - Type-safe events
 
 ### Usage in API
+
 ```typescript
 import { AnalyticsService, Events } from '@chatroom/analytics';
 
@@ -144,12 +158,14 @@ analytics.track(Events.USER_SIGNED_UP, {
 ```
 
 ### Pre-defined Events
+
 - `USER_SIGNED_UP`, `USER_SIGNED_IN`
 - `MESSAGE_SENT`, `ROOM_JOINED`
 - `ITEM_PURCHASED`, `ITEM_LISTED`
 - `VERIFICATION_STARTED`
 
-### Commands
+### Analytics Commands
+
 ```bash
 npm run build:analytics    # Build TypeScript
 ```
@@ -161,6 +177,7 @@ npm run build:analytics    # Build TypeScript
 **Location:** `packages/cli/`
 
 ### Features
+
 - User management commands
 - Database operations
 - Development utilities
@@ -171,6 +188,7 @@ npm run build:analytics    # Build TypeScript
 ### Commands
 
 #### Database
+
 ```bash
 npm run cli -- db migrate    # Run migrations
 npm run cli -- db seed       # Seed data
@@ -178,6 +196,7 @@ npm run cli -- db reset      # Reset database
 ```
 
 #### User Management
+
 ```bash
 npm run cli -- user list
 npm run cli -- user ban <id>
@@ -185,6 +204,7 @@ npm run cli -- user grant-admin <id>
 ```
 
 #### Development
+
 ```bash
 npm run cli -- dev setup     # Initial setup
 npm run cli -- dev start     # Start all servers
@@ -192,6 +212,7 @@ npm run cli -- dev test-email
 ```
 
 #### Deployment
+
 ```bash
 npm run cli -- deploy prod
 npm run cli -- deploy staging
@@ -199,12 +220,14 @@ npm run cli -- deploy verify
 ```
 
 #### Analytics
+
 ```bash
 npm run cli -- analytics export --format csv
 npm run cli -- analytics summary
 ```
 
 ### Build
+
 ```bash
 npm run build:cli       # Build TypeScript
 ```
@@ -214,16 +237,19 @@ npm run build:cli       # Build TypeScript
 ## 🚀 Quick Start
 
 ### Install All Dependencies
+
 ```bash
 npm install
 ```
 
 ### Build All Packages
+
 ```bash
 npm run build
 ```
 
 ### Start Development
+
 ```bash
 # All services
 npm run dev
@@ -237,6 +263,7 @@ npm run dev:mobile      # Mobile app (Expo)
 ```
 
 ### Use CLI Tools
+
 ```bash
 npm run cli -- --help
 npm run cli -- dev setup
@@ -248,7 +275,9 @@ npm run cli -- user list
 ## 🔗 Package Dependencies
 
 ### Dependency Graph
-```
+
+```,
+
 @chatroom/shared
     ↓
 @chatroom/api ← @chatroom/analytics
@@ -264,6 +293,7 @@ npm run cli -- user list
 ### Usage Examples
 
 #### API using Email & Analytics
+
 ```typescript
 // packages/api/src/routes/auth.js
 import { EmailService } from '@chatroom/email';
@@ -292,6 +322,7 @@ router.post('/signup', async (req, res) => {
 ```
 
 #### Web using Shared Types
+
 ```typescript
 // packages/web/src/components/UserProfile.tsx
 import type { User } from '@chatroom/shared';
@@ -302,6 +333,7 @@ export function UserProfile({ user }: { user: User }) {
 ```
 
 #### CLI using API Client
+
 ```typescript
 // packages/cli/src/commands/user.ts
 import axios from 'axios';
@@ -318,6 +350,7 @@ const users = await api.get('/api/users');
 ## 📋 Environment Variables
 
 ### API Package
+
 ```bash
 DATABASE_URL=postgresql://...
 ACCESS_TOKEN_SECRET=...
@@ -327,18 +360,21 @@ MIXPANEL_TOKEN=...            # For analytics
 ```
 
 ### Admin Package
+
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ADMIN_API_KEY=...
 ```
 
 ### Mobile Package
+
 ```bash
 API_URL=http://localhost:3001
 SOCKET_URL=http://localhost:3002
 ```
 
 ### CLI Package
+
 ```bash
 CHATROOM_API_URL=http://localhost:3001
 CHATROOM_ADMIN_KEY=...
@@ -367,12 +403,13 @@ npm test -w @chatroom/analytics
 3. **Set up environment files** for each package
 4. **Start services:** `npm run dev`
 5. **Access applications:**
-   - Frontend: http://localhost:3000
-   - API: http://localhost:3001
-   - Socket.IO: http://localhost:3002
-   - Admin: http://localhost:3003
+   - Frontend: <http://localhost:3000>
+   - API: <http://localhost:3001>
+   - Socket.IO: <http://localhost:3002>
+   - Admin: <http://localhost:3003>
 
 6. **Try CLI tools:**
+
    ```bash
    npm run cli -- dev setup
    npm run cli -- user list
@@ -394,9 +431,10 @@ npm test -w @chatroom/analytics
 
 ---
 
-## 🎉 Success!
+## 🎉 Success
 
 Your monorepo now has a complete ecosystem:
+
 - ✅ Backend API & WebSocket
 - ✅ Web frontend
 - ✅ Mobile app
@@ -406,3 +444,87 @@ Your monorepo now has a complete ecosystem:
 - ✅ CLI tools
 
 All packages share code through `@chatroom/shared` and work together seamlessly! 🚀
+
+## Tests for NEW_PACKAGES.md
+
+## Section Presence
+
+- [ ] The document includes a section for each of the following packages:
+  - @chatroom/api
+  - @chatroom/socket
+  - @chatroom/web
+  - @chatroom/shared
+  - @chatroom/mobile
+  - @chatroom/admin
+  - @chatroom/email
+  - @chatroom/analytics
+  - @chatroom/cli
+
+## Commands and Usage
+
+- [ ] Each package section lists relevant npm scripts/commands in fenced code blocks with language specified (e.g., `bash`).
+- [ ] The "Quick Start" section includes commands for installing, building, and starting all services.
+- [ ] The CLI section documents at least one command for each feature area (db, user, dev, deploy, analytics).
+
+## Example Usages
+
+- [ ] The API section includes a TypeScript usage example for EmailService and AnalyticsService.
+- [ ] The Web section includes a TypeScript usage example for importing shared types.
+- [ ] The CLI section includes a TypeScript usage example for making API requests.
+
+## Environment Variables
+
+- [ ] There is a section listing required environment variables for each package.
+- [ ] Each environment variable block is fenced with `bash`.
+
+## Package Dependency Graph
+
+- [ ] The dependency graph is present and visually shows the relationships between packages.
+
+## Testing Section
+
+- [ ] There is a section describing how to run tests for all and individual packages.
+- [ ] All code blocks in this section are fenced with `bash`.
+
+## Next Steps
+
+- [ ] The "Next Steps" section lists a step-by-step process for getting started.
+- [ ] Each step is clear and actionable.
+
+## Documentation Links
+
+- [ ] The "Documentation" section lists a README for each package.
+- [ ] Each listed README path matches the package name.
+
+## Fenced Code Block Language (MD040)
+
+- [ ] All code blocks use a language specifier (e.g., `bash`, `typescript`, `json`, `markdown`).
+
+## Success Criteria
+
+- [ ] The "Success" section summarizes the ecosystem and confirms all packages are integrated.
+
+---
+
+## Manual Verification Steps
+
+1. Open `NEW_PACKAGES.md`.
+2. For each checklist item above, verify the content is present and correct.
+3. For code blocks, ensure the language is specified after the opening triple backticks.
+4. For usage examples, check that imports and code match the described package APIs.
+5. For environment variables, confirm all required variables are listed for each package.
+6. For commands, try running them in your terminal to ensure they work as described (where possible).
+
+---
+
+## Example: Fenced Code Block Language Test
+
+```bash
+# This is a correctly fenced bash code block
+npm run dev:api
+```
+
+```typescript
+// This is a correctly fenced TypeScript code block
+import { EmailService } from '@chatroom/email';
+```

@@ -15,16 +15,17 @@ High-level overview of active tasks and progress.
 - ✅ Added tsconfig.json with JSX support and path aliases
 - ✅ Created badge.tsx and progress.tsx UI components
 - ✅ Added lib/utils.ts for shared utilities
-- ✅ Fixed all TypeScript compilation errors in Block.tsx
+- ⚠️ Pending: Fix TypeScript errors in Block.tsx
 - ✅ Made Card, CardHeader, Button, Badge components flexible with proper props
 - ✅ Simplified Progress component to work without @radix-ui dependency
 - ✅ Updated tsconfig.json moduleResolution to "bundler"
 
 ## Next Steps
-1. Run `npm install` to fetch missing dependencies (clsx, tailwind-merge, @radix-ui/react-progress)
-2. Run `npm run next:dev` to start development server on http://localhost:3000
-3. Test chat UI rendering and lounge selection flow
-4. Set up Socket.IO integration between client and server
+1. Install dependencies: `npm install`
+2. Set up environment files for api/socket/web as per README
+3. Start dev servers (`npm run dev:api`, `npm run dev:socket`, `npm run dev:web`)
+4. Test chat UI rendering and lounge selection flow
+5. Connect frontend guest flow to `/api/auth/guest`
 
 ---
 

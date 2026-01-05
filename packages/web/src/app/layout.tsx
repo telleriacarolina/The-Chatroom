@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   description: 'Real-time chat application with multi-language support',
 }
 
+/**
+ * Root Layout Component
+ * 
+ * Note: This is a simplified layout. Theme support and other features
+ * can be added later without affecting the loading-state pattern.
+ */
 export default function RootLayout({
   children,
 }: {

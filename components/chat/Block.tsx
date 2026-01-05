@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+export default function Block() {
+=======
+/*
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +51,10 @@ export default function Block() {
   // Language and lounge state
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
+<<<<<<< HEAD
+  const [error, setError] = useState<string | null>(null);
+  const [isWaiting, setIsWaiting] = useState<boolean>(false);
+=======
   
   // Chat room state
   const [messages, setMessages] = useState<Message[]>([]);
@@ -56,29 +64,25 @@ export default function Block() {
   
   // Waiting room state
   const [isWaitingRoom, setIsWaitingRoom] = useState<boolean>(false);
-  const [waitProgress, setWaitProgress] = useState<number>(0);
-  const [queuePosition, setQueuePosition] = useState<number>(15);
-  
-  // Modal state
-  const [showSignInModal, setShowSignInModal] = useState<boolean>(false);
-  const [showSignUpModal, setShowSignUpModal] = useState<boolean>(false);
-  
-  // Form state
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [birthYear, setBirthYear] = useState<string>("");
-  
-  // View state
+>>>>>>> origin/main
+  return (
+    <section style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600 }}>The Chatroom</h1>
+      <p style={{ marginTop: 8 }}>
+        Placeholder UI while components and data wiring are finalized.
+      </p>
+    </section>
+  );
+<<<<<<< HEAD
+}
+/*
+=======
   const [showMarketplace, setShowMarketplace] = useState<boolean>(false);
   const [inChatRoom, setInChatRoom] = useState<boolean>(false);
 
+>>>>>>> origin/main
   // Language categories with country-specific lounges
   const languageCategories: LanguageCategory[] = [
-    {
-      name: "English",
-      flag: "🇬🇧",
       lounges: [
         { id: "en-all", name: "All English Speakers", members: 1234, isAll: true },
         { id: "en-us", name: "United States", members: 456 },
@@ -190,6 +194,32 @@ export default function Block() {
     } else {
       setShowUnder18Message(false);
     }
+<<<<<<< HEAD
+
+    if (trimmedUsername.length < 4) {
+      setError("Username must be at least 4 characters");
+      return;
+    }
+
+    if (trimmedUsername.length > 10) {
+      setError("Username must be no more than 10 characters");
+      return;
+    }
+
+    if (existingUsernames.includes(trimmedUsername)) {
+      setError("This username is already taken. Please choose another.");
+      return;
+    }
+
+    setError(null);
+    setIsWaiting(true);
+
+    setTimeout(() => {
+      setTempUsername(username);
+      setUsername("");
+    }, Math.floor(Math.random() * 30000) + 30000);
+=======
+>>>>>>> origin/main
   };
 
   const handleUsernameSubmit = () => {
@@ -848,3 +878,20 @@ export default function Block() {
     </div>
   );
 }
+<<<<<<< HEAD
+*/
+=======
+
+*/
+
+export default function Block() {
+  return (
+    <section style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600 }}>The Chatroom</h1>
+      <p style={{ marginTop: 8 }}>
+        Placeholder UI while components and data wiring are finalized.
+      </p>
+    </section>
+  );
+}
+>>>>>>> origin/main

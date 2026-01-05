@@ -1,0 +1,441 @@
+
+> the-chatroom@0.1.0 next:dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3001
+
+ ✓ Starting...
+It looks like you're trying to use TypeScript but do not have the required package(s) installed.
+Installing dependencies
+
+If you are not trying to use TypeScript, please remove the tsconfig.json file from your package root (and any TypeScript files in your pages directory).
+
+
+Installing devDependencies (npm):
+- typescript
+- @types/react
+
+npm warn deprecated sudo-prompt@9.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated scmp@2.1.0: Just use Node.js's crypto.timingSafeEqual()
+npm warn deprecated osenv@0.1.5: This package is no longer supported.
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated crypto@1.0.1: This package is no longer supported. It's now a built-in Node module. If you've depended on crypto, you should switch to the one that's built-in.
+npm warn deprecated @types/commander@2.12.5: This is a stub types definition. commander provides its own type definitions, so you do not need this installed.
+npm warn deprecated @types/react-native@0.73.0: This is a stub types definition. react-native provides its own type definitions, so you do not need this installed.
+npm warn deprecated rimraf@2.6.3: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated multer@1.4.5-lts.2: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
+npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+npm warn deprecated @babel/plugin-proposal-optional-catch-binding@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-catch-binding instead.
+npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+npm warn deprecated @babel/plugin-proposal-optional-chaining@7.21.0: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
+npm warn deprecated @babel/plugin-proposal-async-generator-functions@7.20.7: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-async-generator-functions instead.
+npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
+npm warn deprecated @babel/plugin-proposal-object-rest-spread@7.20.7: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-object-rest-spread instead.
+npm warn deprecated @xmldom/xmldom@0.7.13: this version is no longer supported, please update to at least 0.8.*
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid/src'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid/src/main/res'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/expo/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory, lstat '/workspaces/The-Chatroom/node_modules/@types/react-native/node_modules/react-native/ReactAndroid'
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/lucide-react-native',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/lucide-react-native'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/lucide-react-native'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/@jest',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/@jest/expect-utils/build'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/@jest/expect-utils/build'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/node_modules/css-tree',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/node_modules/css-tree/node_modules/source-map/lib'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/node_modules/css-tree/node_modules/source-map/lib'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native/node_modules/promise/src'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native/node_modules/promise/src'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-navigation',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-navigation/core/lib/commonjs'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-navigation/core/lib/commonjs'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-native',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-native/dev-middleware/dist/types'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-native/dev-middleware/dist/types'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/node_modules/https-proxy-agent/node_modules',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/node_modules/https-proxy-agent/node_modules/agent-base/dist/src'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/node_modules/https-proxy-agent/node_modules/agent-base/dist/src'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/pretty-format',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/pretty-format'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/pretty-format'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-safe-area-context',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-safe-area-context'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-safe-area-context'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-screens',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-screens'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-screens'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-native-async-storage',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-native-async-storage/async-storage'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/@react-native-async-storage/async-storage'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-gesture-handler',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-gesture-handler'] {
+npm warn cleanup       errno: -39,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: '/workspaces/The-Chatroom/packages/mobile/node_modules/react-native-gesture-handler'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
+npm error code 1
+npm error path /workspaces/The-Chatroom/node_modules/prisma
+npm error command failed
+npm error command sh -c node scripts/preinstall-entry.js
+npm error node:internal/modules/cjs/loader:1424
+npm error   throw err;
+npm error   ^
+npm error
+npm error Error: Cannot find module '/workspaces/The-Chatroom/node_modules/prisma/scripts/preinstall-entry.js'
+npm error     at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+npm error     at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+npm error     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+npm error     at Module._load (node:internal/modules/cjs/loader:1227:37)
+npm error     at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+npm error     at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+npm error     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+npm error     at node:internal/main/run_main_module:33:47 {
+npm error   code: 'MODULE_NOT_FOUND',
+npm error   requireStack: []
+npm error }
+npm error
+npm error Node.js v24.11.1
+npm error A complete log of this run can be found in: /home/codespace/.npm/_logs/2025-12-28T21_00_51_686Z-debug-0.log
+Failed to install required TypeScript dependencies, please install them manually to continue:
+npm install --save-exact --save-dev typescript @types/react
+
+{
+  command: 'npm install --save-exact --save-dev typescript @types/react'
+}
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+[?25h
