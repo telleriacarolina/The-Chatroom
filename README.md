@@ -8,7 +8,7 @@ A real-time chat application with multi-tier authentication, language-specific l
 
 ## 📦 Packages
 
-```Bash
+```bash
 ##Packages 
 
 The-Chatroom/
