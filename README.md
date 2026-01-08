@@ -9,6 +9,7 @@ A real-time chat application with multi-tier authentication, language-specific l
 ## 📦 Packages
 
 ```bash
+
 ##Packages 
 
 The-Chatroom/
@@ -19,9 +20,6 @@ The-Chatroom/
 │   └── shared/       # Shared types, schemas, and utilities
 ├── docs/             # Documentation
 └── package.json      # Workspace configuration
-```
-
-```Bash
 
 ### Package Details
 
