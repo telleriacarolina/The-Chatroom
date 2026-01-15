@@ -19,7 +19,7 @@ export default function AuthDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-burgundy flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
       {showLogin ? (
         <LoginForm
           onSuccess={handleLoginSuccess}

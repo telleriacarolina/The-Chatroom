@@ -86,7 +86,7 @@ router.post('/guest', async (req, res) => {
   try {
     const temp = await prisma.tempSession.create({ data: {
       temporaryUsername,
-      ageCategory: ageCategory === '18+RED' ? '_18PLUS_RED' : '_18PLUS',
+      ageCategory: ageCategory === '18+RED' ? 'PLUS_18_RED' : 'PLUS_18',
       sessionToken: token,
       expiresAt: new Date(Date.now() + 24*60*60*1000)
     }});
