@@ -45,20 +45,23 @@ The following tables have been created in the database:
 12. **AuditLog** - System audit trail
 
 ### Schema Changes Made
-During initialization, the following fixes were applied to `prisma/schema.prisma`:
+During initialization, the following fixes were applied to `packages/api/prisma/schema.prisma`:
 
-1. **Fixed AgeCategory enum:** Renamed `_18PLUS` to `EIGHTEEN_PLUS` and `_18PLUS_RED` to `EIGHTEEN_PLUS_RED` (Prisma doesn't support enum values starting with underscore+number)
+1. **Fixed AgeCategory enum:** Uses `PLUS_18` and `PLUS_18_RED` (Prisma doesn't support enum values starting with underscore+number)
 
 2. **Added missing relations:**
    - Added `deletedMessages` relation to User model for tracking message deletions
    - Added `reportsReceived` relation to User model for reports filed against users
-   - Added `moderationActions` and `userReports` arrays to ChatMessage model
-   - Added `moderationActions` and `userReports` arrays to MarketplaceItem model
+   - Added `moderationActions` and `reports` arrays to ChatMessage model
+   - Added `moderationActions` and `reports` arrays to MarketplaceItem model
 
 ## Running Migrations
 
 ### Initial Setup (Already Completed)
 ```bash
+# Navigate to the API package
+cd packages/api
+
 # Generate Prisma client
 npm run prisma:generate
 
@@ -70,12 +73,15 @@ npm run prisma:migrate
 When making schema changes:
 
 ```bash
-# 1. Edit prisma/schema.prisma
-# 2. Generate new migration
+# 1. Edit packages/api/prisma/schema.prisma
+# 2. Navigate to the API package
+cd packages/api
+
+# 3. Generate new migration
 npm run prisma:migrate
 
 # Or with custom name
-npx prisma migrate dev --name your_migration_name --schema=./prisma/schema.prisma
+npx prisma migrate dev --name your_migration_name
 ```
 
 ## Verifying the Setup
@@ -125,13 +131,16 @@ sudo -u postgres psql -c "ALTER USER chatroom_user CREATEDB;"
 
 ### Reset Database (Development Only)
 ```bash
+# Navigate to the API package
+cd packages/api
+
 # WARNING: This will delete all data!
-npx prisma migrate reset --schema=./prisma/schema.prisma
+npx prisma migrate reset
 ```
 
 ## Migration Files
 
-Migrations are stored in `prisma/migrations/`:
+Migrations are stored in `packages/api/prisma/migrations/`:
 - `20251228071826_init/migration.sql` - Initial database schema
 
 ## Next Steps
@@ -168,12 +177,13 @@ const { PrismaClient } = require('@prisma/client');
 // Or import from the lib/prisma.ts file
 const prisma = require('./lib/prisma');
 
-// Example: Create a user
-const user = await prisma.user.create({
+// Example: Create a temp session (guest user)
+const tempSession = await prisma.tempSession.create({
   data: {
-    accountType: 'REGISTERED',
-    phoneNumber: '+1234567890',
-    permanentUsername: 'john_doe'
+    temporaryUsername: 'guest_abc123',
+    ageCategory: 'PLUS_18', // or 'PLUS_18_RED'
+    sessionToken: 'unique-token',
+    expiresAt: new Date(Date.now() + 24*60*60*1000)
   }
 });
 

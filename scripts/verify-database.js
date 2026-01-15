@@ -53,7 +53,7 @@ async function verifyDatabase() {
       const testSession = await prisma.tempSession.create({
         data: {
           temporaryUsername: 'verify_test_' + Date.now(),
-          ageCategory: 'EIGHTEEN_PLUS',
+          ageCategory: 'PLUS_18',
           sessionToken: 'verify-token-' + Date.now(),
           expiresAt: new Date(Date.now() + 24*60*60*1000)
         }
