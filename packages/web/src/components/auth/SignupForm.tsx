@@ -104,20 +104,22 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormPro
   // Success state
   if (success) {
     return (
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-3d-lg">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <CheckCircle2 className="w-16 h-16 text-green-600" />
+            <div className="p-4 bg-green-900/80 rounded-2xl shadow-lg">
+              <CheckCircle2 className="w-12 h-12 sm:w-16 sm:h-16 text-green-400 drop-shadow-glow-pink" />
+            </div>
           </div>
-          <CardTitle className="text-2xl text-green-600">Account Created!</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl sm:text-3xl text-gradient-pink drop-shadow-text">Account Created!</CardTitle>
+          <CardDescription className="text-base">
             Your default password has been generated. If SMS is configured, it will be sent to your phone.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-            <p className="text-sm text-center">
-              📱 <strong>If SMS is enabled, check your text messages</strong> for your temporary password.
+          <div className="p-4 bg-kawaii/20 rounded-xl border-2 border-kawaii shadow-inner">
+            <p className="text-sm sm:text-base text-foreground/90 text-center">
+              📱 <strong className="text-kawaii">If SMS is enabled, check your text messages</strong> for your temporary password.
               You can change it after signing in.
             </p>
           </div>
@@ -126,6 +128,7 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormPro
             <Button
               onClick={onSwitchToLogin}
               className="w-full"
+              variant="kawaii"
             >
               Go to Sign In
             </Button>
@@ -137,13 +140,15 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormPro
 
   // Signup form
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md shadow-3d-lg">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <UserPlus className="w-12 h-12 text-primary" />
+          <div className="p-4 bg-gradient-pink rounded-2xl shadow-glow-pink">
+            <UserPlus className="w-10 h-10 sm:w-12 sm:h-12 text-chocolate drop-shadow-lg" />
+          </div>
         </div>
-        <CardTitle className="text-2xl">Sign Up</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl text-gradient-pink drop-shadow-text">Sign Up</CardTitle>
+        <CardDescription className="text-base">
           Create your account and receive a password via SMS
         </CardDescription>
       </CardHeader>

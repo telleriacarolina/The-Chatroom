@@ -61,7 +61,7 @@ export default function LoginPage() {
 
   // ✅ Pass state down to presentational component
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+    <div className="min-h-screen flex items-center justify-center bg-burgundy p-4 sm:p-6">
       <LoginForm
         onSubmit={onSubmit}
         isLoading={isLoading}

@@ -71,13 +71,15 @@ export default function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProp
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md shadow-3d-lg">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <LogIn className="w-12 h-12 text-primary" />
+          <div className="p-4 bg-gradient-pink rounded-2xl shadow-glow-pink">
+            <LogIn className="w-10 h-10 sm:w-12 sm:h-12 text-chocolate drop-shadow-lg" />
+          </div>
         </div>
-        <CardTitle className="text-2xl">Sign In</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl sm:text-3xl text-gradient-pink drop-shadow-text">Sign In</CardTitle>
+        <CardDescription className="text-base">
           Enter your phone number and password to access your account
         </CardDescription>
       </CardHeader>
