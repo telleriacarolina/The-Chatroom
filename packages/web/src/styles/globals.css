@@ -4,48 +4,50 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    /* New burgundy-based color palette */
+    --background: 0 97% 23%;  /* #700303 burgundy */
+    --foreground: 0 0% 100%;  /* white text */
+    --card: 348 91% 6%;  /* #1d0207 chocolate */
+    --card-foreground: 0 0% 100%;  /* white */
+    --popover: 348 91% 6%;  /* #1d0207 chocolate */
+    --popover-foreground: 0 0% 100%;  /* white */
+    --primary: 350 100% 89%;  /* #ffc0cb kawaii pink */
+    --primary-foreground: 348 91% 6%;  /* chocolate text */
+    --secondary: 348 100% 56%;  /* #ff1744 passion red */
+    --secondary-foreground: 0 0% 100%;  /* white */
+    --muted: 348 91% 6%;  /* #1d0207 */
+    --muted-foreground: 0 0% 70%;  /* light gray */
+    --accent: 350 100% 89%;  /* #ffc0cb kawaii pink */
+    --accent-foreground: 348 91% 6%;  /* chocolate */
+    --destructive: 348 100% 56%;  /* #ff1744 passion red */
+    --destructive-foreground: 0 0% 100%;  /* white */
+    --border: 348 91% 6%;  /* #1d0207 chocolate */
+    --input: 348 91% 6%;  /* #1d0207 chocolate */
+    --ring: 350 100% 89%;  /* #ffc0cb kawaii pink */
+    --radius: 0.75rem;  /* rounded-xl default */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    /* Dark mode uses same burgundy palette */
+    --background: 0 97% 23%;  /* #700303 burgundy */
+    --foreground: 0 0% 100%;  /* white text */
+    --card: 348 91% 6%;  /* #1d0207 chocolate */
+    --card-foreground: 0 0% 100%;  /* white */
+    --popover: 348 91% 6%;  /* #1d0207 chocolate */
+    --popover-foreground: 0 0% 100%;  /* white */
+    --primary: 350 100% 89%;  /* #ffc0cb kawaii pink */
+    --primary-foreground: 348 91% 6%;  /* chocolate text */
+    --secondary: 348 100% 56%;  /* #ff1744 passion red */
+    --secondary-foreground: 0 0% 100%;  /* white */
+    --muted: 348 91% 6%;  /* #1d0207 */
+    --muted-foreground: 0 0% 70%;  /* light gray */
+    --accent: 350 100% 89%;  /* #ffc0cb kawaii pink */
+    --accent-foreground: 348 91% 6%;  /* chocolate */
+    --destructive: 348 100% 56%;  /* #ff1744 passion red */
+    --destructive-foreground: 0 0% 100%;  /* white */
+    --border: 348 91% 6%;  /* #1d0207 chocolate */
+    --input: 348 91% 6%;  /* #1d0207 chocolate */
+    --ring: 350 100% 89%;  /* #ffc0cb kawaii pink */
   }
 }
 
@@ -62,6 +64,49 @@
 
 /* Minimal globals for the demo */
 html,body,#__next { height: 100%; }
+
+/* Custom utility classes for 3D effects and gradients */
+@layer utilities {
+  .text-gradient-pink {
+    background: linear-gradient(135deg, #ffc0cb 0%, #ff9eb0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-red {
+    background: linear-gradient(135deg, #ff1744 0%, #cc0033 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .bg-gradient-burgundy {
+    background: linear-gradient(135deg, #700303 0%, #5a0202 100%);
+  }
+  
+  .bg-gradient-pink {
+    background: linear-gradient(135deg, #ffc0cb 0%, #ff9eb0 100%);
+  }
+  
+  .bg-gradient-red {
+    background: linear-gradient(135deg, #ff1744 0%, #cc0033 100%);
+  }
+  
+  .border-3d {
+    border: 2px solid #1d0207;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.2), 
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .border-3d-heavy {
+    border: 4px solid #1d0207;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.3), 
+                inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+  }
+}
 
 /* Simple reset for cards/buttons */
 .rounded-xl { border-radius: 0.75rem; }

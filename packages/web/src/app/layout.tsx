@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 /**
  * Root Layout Component
  * 
- * Note: This is a simplified layout. Theme support and other features
- * can be added later without affecting the loading-state pattern.
+ * Styled with new burgundy color palette (#700303 background)
+ * Features responsive design, theme support, and accessibility
  */
 export default function RootLayout({
   children,
@@ -38,7 +38,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className="bg-burgundy text-foreground antialiased">
         <Toaster richColors position="top-center" />
         <ErrorBoundary>
           <div className="fixed top-4 right-4 z-50">

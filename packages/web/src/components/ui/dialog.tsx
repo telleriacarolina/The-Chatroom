@@ -54,12 +54,12 @@ export function DialogContent({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={() => onOpenChange?.(false)}
     >
       <div
         className={cn(
-          "relative bg-background rounded-lg shadow-lg p-6 w-full max-w-lg mx-4",
+          "relative bg-card text-card-foreground rounded-2xl shadow-3d-lg border-2 border-chocolate p-4 sm:p-6 w-full max-w-lg mx-4",
           "animate-in fade-in-0 zoom-in-95",
           className
         )}
@@ -68,7 +68,7 @@ export function DialogContent({
       >
         <button
           onClick={() => onOpenChange?.(false)}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute right-4 top-4 rounded-lg p-2 opacity-70 bg-chocolate/50 hover:bg-chocolate transition-all hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-kawaii focus:ring-offset-2 focus:ring-offset-burgundy"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
@@ -101,7 +101,7 @@ export function DialogTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
-      className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+      className={cn("text-lg sm:text-xl font-bold leading-none tracking-tight text-foreground drop-shadow-text", className)}
       {...props}
     >
       {children}
@@ -116,7 +116,7 @@ export function DialogDescription({
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn("text-sm sm:text-base text-muted-foreground/80", className)}
       {...props}
     >
       {children}

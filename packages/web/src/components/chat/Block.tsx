@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import ConnectionStatus from "@/components/ConnectionStatus";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 
 interface BlockProps {
@@ -29,48 +30,14 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUsername = localStorage.getItem('guestUsername');
-      const storedToken = localStorage.getItem('guestToken');
       
-      if (storedUsername && storedToken) {
+      if (storedUsername) {
         setTempUsername(storedUsername);
-        setGuestToken(storedToken);
       }
     }
   }, []);
 
-  // Listen for real-time lounge counts
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleLoungeCounts = (counts: Record<string, number>) => {
-      setLoungeCounts(counts);
-    };
-
-    const handleUserCount = ({ loungeId, count }: { loungeId: string; count: number }) => {
-      setLoungeCounts(prev => ({ ...prev, [loungeId]: count }));
-    };
-
-    socket.on('lounge counts', handleLoungeCounts);
-    socket.on('user count', handleUserCount);
-
-    return () => {
-      socket.off('lounge counts', handleLoungeCounts);
-      socket.off('user count', handleUserCount);
-    };
-  }, [socket]);
-
-  // Request initial lounge counts when connected
-  useEffect(() => {
-    if (!socket || !isConnected) return;
-    requestLoungeCounts();
-  }, [socket, isConnected]);
-
   // Language categories with All Users Lounge + Country-specific lounges
-  // Member counts will be updated from Socket.IO real-time data
-  const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
-    return loungeCounts[loungeId] ?? defaultCount;
-  };
-
   const languageCategories = {
     english: {
       name: "English",
@@ -217,14 +184,16 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   // Start with username creation screen
   if (!tempUsername) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-burgundy flex items-center justify-center p-4 sm:p-6">
+        <Card className="w-full max-w-md shadow-3d-lg">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <MessageSquare className="w-16 h-16 text-primary" />
+              <div className="p-4 bg-gradient-pink rounded-2xl shadow-glow-pink">
+                <MessageSquare className="w-12 h-12 sm:w-16 sm:h-16 text-chocolate drop-shadow-lg" />
+              </div>
             </div>
-            <CardTitle className="text-2xl">Enter The Chatroom</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl sm:text-3xl text-gradient-pink drop-shadow-text">Enter The Chatroom</CardTitle>
+            <CardDescription className="text-base sm:text-lg">
               You Know You Ready to Chit-Chat
             </CardDescription>
           </CardHeader>
@@ -278,33 +247,37 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
   if (!selectedLanguage) {
     return (
-      <div className="container py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold">The Chatroom</h1>
+      <div className="min-h-screen bg-burgundy">
+        <div className="container py-4 sm:py-8">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-pink rounded-xl shadow-glow-pink">
+                  <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-chocolate" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gradient-pink drop-shadow-text">The Chatroom</h1>
+              </div>
+              <Badge variant="default" className="gap-2">
+                <UserCircle className="w-4 h-4" />
+                <span className="text-xs sm:text-sm">{tempUsername}</span>
+              </Badge>
+              <ConnectionStatus />
             </div>
-            <Badge variant="secondary" className="gap-2">
-              <UserCircle className="w-4 h-4" />
-              {tempUsername}
-            </Badge>
-            <ConnectionStatus />
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setTempUsername("")}
+              className="w-full sm:w-auto"
+            >
+              Change Username
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setTempUsername("")}
-          >
-            Change Username
-          </Button>
-        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Choose a Language Category</CardTitle>
-            <CardDescription>
-              Select a language to see all available lounges
+          <Card className="shadow-3d-lg">
+            <CardHeader>
+              <CardTitle className="text-xl sm:text-2xl">Choose a Language Category</CardTitle>
+              <CardDescription>
+                Select a language to see all available lounges
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -322,21 +295,21 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
                 ))}
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {Object.entries(languageCategories).map(([key, lang]) => (
                   <Card
                     key={key}
-                    className="hover:border-primary transition-colors cursor-pointer"
+                    className="hover:border-kawaii hover:shadow-glow-pink transition-all cursor-pointer active:scale-95"
                     onClick={() => setSelectedLanguage(key)}
                   >
-                    <CardHeader>
-                      <div className="text-4xl mb-2">{lang.flag}</div>
-                      <CardTitle className="text-lg">{lang.name}</CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Users className="w-4 h-4" />
+                    <CardHeader className="p-3 sm:p-4">
+                      <div className="text-3xl sm:text-4xl mb-2 drop-shadow-lg">{lang.flag}</div>
+                      <CardTitle className="text-base sm:text-lg">{lang.name}</CardTitle>
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground/80">
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>{lang.lounges[0].members} online</span>
                       </div>
-                      <div className="text-xs text-muted-foreground mt-2">
+                      <div className="text-xs text-muted-foreground/70 mt-2">
                         {lang.lounges.length} lounges available
                       </div>
                     </CardHeader>
@@ -347,123 +320,132 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
           </CardContent>
         </Card>
 
-        <Card className="mt-6">
+        <Card className="mt-6 shadow-3d-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Crown className="w-5 h-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+              <div className="p-2 bg-gradient-pink rounded-lg">
+                <Crown className="w-5 h-5 text-chocolate" />
+              </div>
               Want More Features?
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-base">
               Upgrade to unlock premium benefits and secure a permanent username
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-4">
-              <Card className="border-2 border-primary">
-                <CardHeader>
-                  <Crown className="w-8 h-8 text-primary mb-2" />
-                  <CardTitle className="text-base">Creator Account</CardTitle>
-                  <Badge variant="default" className="w-fit">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="border-4 border-kawaii shadow-glow-pink hover:scale-105 transition-all">
+                <CardHeader className="p-4">
+                  <div className="p-3 bg-gradient-pink rounded-xl w-fit shadow-lg">
+                    <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-chocolate" />
+                  </div>
+                  <CardTitle className="text-base sm:text-lg mt-2">Creator Account</CardTitle>
+                  <Badge variant="default" className="w-fit mt-2">
                     <Calendar className="w-3 h-3 mr-1" />
-                    Yearly Subscription
+                    <span className="text-xs">Yearly Subscription</span>
                   </Badge>
                 </CardHeader>
-                <CardContent>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
+                <CardContent className="p-4 pt-0">
+                  <ul className="text-xs sm:text-sm text-muted-foreground/90 space-y-2">
                     <li className="flex items-start gap-2">
-                      <Zap className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
-                      <span className="font-medium text-primary">Instant access</span>
+                      <Zap className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0 text-kawaii" />
+                      <span className="font-bold text-kawaii">Instant access</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <UserCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
-                      <span className="font-medium text-primary">Permanent username</span>
+                      <UserCircle className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0 text-kawaii" />
+                      <span className="font-bold text-kawaii">Permanent username</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <DollarSign className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Monetize content & interactions</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Video className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Video className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Live video features</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Calendar className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Schedule appointments</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Package className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Package className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Exchange shipping info safely</span>
                     </li>
                   </ul>
                 </CardContent>
               </Card>
 
-              <Card className="border-2 border-secondary">
-                <CardHeader>
-                  <Eye className="w-8 h-8 text-secondary mb-2" />
-                  <CardTitle className="text-base">Viewer Account</CardTitle>
-                  <Badge variant="secondary" className="w-fit">
+              <Card variant="passion" className="border-4 border-passion shadow-glow-red hover:scale-105 transition-all">
+                <CardHeader className="p-4">
+                  <div className="p-3 bg-gradient-red rounded-xl w-fit shadow-lg">
+                    <Eye className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <CardTitle className="text-base sm:text-lg mt-2">Viewer Account (18+)</CardTitle>
+                  <Badge variant="secondary" className="w-fit mt-2">
                     <Calendar className="w-3 h-3 mr-1" />
-                    Yearly Subscription
+                    <span className="text-xs">Yearly Subscription</span>
                   </Badge>
                 </CardHeader>
-                <CardContent>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
+                <CardContent className="p-4 pt-0">
+                  <ul className="text-xs sm:text-sm text-muted-foreground/90 space-y-2">
                     <li className="flex items-start gap-2">
-                      <Zap className="w-3 h-3 mt-0.5 flex-shrink-0 text-secondary" />
-                      <span className="font-medium text-secondary">Instant access</span>
+                      <Zap className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0 text-passion" />
+                      <span className="font-bold text-passion">Instant access</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <UserCircle className="w-3 h-3 mt-0.5 flex-shrink-0 text-secondary" />
-                      <span className="font-medium text-secondary">Permanent username</span>
+                      <UserCircle className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0 text-passion" />
+                      <span className="font-bold text-passion">Permanent username</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Video className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Video className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Live video access</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Zap className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Zap className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Priority room entry</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <ShoppingCart className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Purchase creator content</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Users className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Join private groups</span>
                     </li>
                   </ul>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <UserCircle className="w-8 h-8 text-muted-foreground mb-2" />
-                  <CardTitle className="text-base">Guest Access</CardTitle>
-                  <Badge variant="outline" className="w-fit">
-                    Free
+              <Card className="hover:scale-105 transition-all">
+                <CardHeader className="p-4">
+                  <div className="p-3 bg-chocolate/50 rounded-xl w-fit">
+                    <UserCircle className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
+                  </div>
+                  <CardTitle className="text-base sm:text-lg mt-2">Guest Access</CardTitle>
+                  <Badge variant="outline" className="w-fit mt-2">
+                    <span className="text-xs">Free</span>
                   </Badge>
                 </CardHeader>
-                <CardContent>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
+                <CardContent className="p-4 pt-0">
+                  <ul className="text-xs sm:text-sm text-muted-foreground/90 space-y-2">
                     <li className="flex items-start gap-2">
-                      <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0" />
                       <span>Temporary username for your visit</span>
                     </li>
                     <li>• Free access to all lounges</li>
                     <li>• No login required</li>
                     <li>• Basic chat features</li>
                   </ul>
-                  <div className="mt-3 p-2 bg-primary/10 rounded text-xs border border-primary">
-                    <p className="font-medium text-primary mb-1">💡 Upgrade for instant access!</p>
-                    <p className="text-muted-foreground">Get a permanent username and skip all wait times</p>
+                  <div className="mt-3 p-3 bg-kawaii/20 rounded-xl text-xs border-2 border-kawaii shadow-inner">
+                    <p className="font-bold text-kawaii mb-1">💡 Upgrade for instant access!</p>
+                    <p className="text-foreground/80">Get a permanent username and skip all wait times</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     );
   }
@@ -471,41 +453,44 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   const currentLanguage = languageCategories[selectedLanguage];
 
   return (
-    <div className="container py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSelectedLanguage(null)}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <span className="text-3xl">{currentLanguage.flag}</span>
-            <h1 className="text-3xl font-bold">{currentLanguage.name} Lounges</h1>
+    <div className="min-h-screen bg-burgundy">
+      <div className="container py-4 sm:py-8">
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedLanguage(null)}
+              className="flex-shrink-0"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl sm:text-3xl drop-shadow-lg">{currentLanguage.flag}</span>
+              <h1 className="text-xl sm:text-3xl font-bold text-gradient-pink drop-shadow-text">{currentLanguage.name} Lounges</h1>
+            </div>
+            <Badge variant="default" className="gap-2">
+              <UserCircle className="w-4 h-4" />
+              <span className="text-xs sm:text-sm">{tempUsername}</span>
+            </Badge>
+            <ConnectionStatus />
           </div>
-          <Badge variant="secondary" className="gap-2">
-            <UserCircle className="w-4 h-4" />
-            {tempUsername}
-          </Badge>
-          <ConnectionStatus />
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => {
-            setTempUsername("");
-          }}
-        >
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setTempUsername("");
+            }}
+            className="w-full sm:w-auto"
+          >
           Change Username
         </Button>
       </div>
 
-      <Card>
+      <Card className="shadow-3d-lg">
         <CardHeader>
-          <CardTitle>Select a Lounge</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl sm:text-2xl">Select a Lounge</CardTitle>
+          <CardDescription className="text-base">
             Join the All Users Lounge or a country-specific chat
           </CardDescription>
         </CardHeader>
@@ -514,17 +499,17 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <Card key={i}>
-                  <CardHeader className="py-4">
+                  <CardHeader className="py-3 sm:py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Skeleton className="w-5 h-5 rounded" />
                         <div>
-                          <Skeleton className="h-5 w-48 mb-2" />
-                          {i === 0 && <Skeleton className="h-5 w-32" />}
+                          <Skeleton className="h-5 w-32 sm:w-48 mb-2" />
+                          {i === 0 && <Skeleton className="h-5 w-24 sm:w-32" />}
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16 sm:w-20" />
                         <Skeleton className="w-5 h-5" />
                       </div>
                     </div>
@@ -537,30 +522,33 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
               {currentLanguage.lounges.map((lounge) => (
                 <Card
                   key={lounge.id}
-                  className={`hover:border-primary transition-colors cursor-pointer ${
-                    lounge.isAll ? "border-2 border-primary" : ""
+                  className={`hover:border-kawaii hover:shadow-glow-pink transition-all cursor-pointer active:scale-98 ${
+                    lounge.isAll ? "border-4 border-kawaii shadow-glow-pink" : ""
                   }`}
                   onClick={() => setSelectedLounge(lounge.id)}
                 >
-                  <CardHeader className="py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <MessageSquare className="w-5 h-5 text-primary" />
-                        <div>
-                          <CardTitle className="text-base">{lounge.name}</CardTitle>
+                  <CardHeader className="py-3 sm:py-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="p-2 bg-gradient-pink rounded-lg shadow-lg flex-shrink-0">
+                          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-chocolate" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-sm sm:text-base truncate">{lounge.name}</CardTitle>
                           {lounge.isAll && (
                             <Badge variant="default" className="mt-1">
-                              All Users Welcome
+                              <span className="text-xs">All Users Welcome</span>
                             </Badge>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Users className="w-4 h-4" />
-                          <span>{lounge.members} online</span>
+                      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground/80">
+                          <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden sm:inline">{lounge.members} online</span>
+                          <span className="sm:hidden">{lounge.members}</span>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       </div>
                     </div>
                   </CardHeader>
@@ -569,14 +557,15 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
             </div>
           )}
 
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              💡 <strong>Tip:</strong> The All Users Lounge connects everyone speaking {currentLanguage.name}, 
+          <div className="mt-6 p-4 bg-chocolate/50 rounded-xl border-2 border-chocolate shadow-inner">
+            <p className="text-sm sm:text-base text-foreground/90">
+              💡 <strong className="text-kawaii">Tip:</strong> The All Users Lounge connects everyone speaking {currentLanguage.name}, 
               while country-specific lounges let you chat with people from particular regions.
             </p>
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
