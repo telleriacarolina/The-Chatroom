@@ -31,7 +31,7 @@ export function ThemeToggle() {
   // Prevent flash of incorrect theme on initial load
   if (!mounted) {
     return (
-      <Button variant="outline" size="icon" disabled>
+      <Button variant="outline" size="sm" disabled className="w-11 h-11 p-2">
         <Sun className="h-5 w-5" />
       </Button>
     );
@@ -40,9 +40,10 @@ export function ThemeToggle() {
   return (
     <Button
       variant="outline"
-      size="icon"
+      size="sm"
       onClick={toggleTheme}
       title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      className="w-11 h-11 p-2"
     >
       {theme === "light" ? (
         <Moon className="h-5 w-5" />
