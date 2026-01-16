@@ -33,8 +33,8 @@ else
     echo -e "${YELLOW}No remote 'origin' found.${NC}"
     echo ""
     echo "Enter repository URL (examples):"
-    echo "  • HTTPS: https://github.com/username/The-Chatroom.git"
-    echo "  • SSH:   git@github.com:username/The-Chatroom.git"
+    echo "  • https://github.com/Catarey-Territory/The-Chatroom.git"
+    echo "  • SSH:   git@github.com:Catarey-Territory/The-Chatroom.git"
     echo ""
     read -p "Repository URL: " REPO_URL
     
