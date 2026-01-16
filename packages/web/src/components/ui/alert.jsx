@@ -3,13 +3,12 @@ import clsx from "clsx"; // optional, for cleaner class merging
 
 export function Alert({ children, className = "", style = {}, variant = "default" }) {
   // You can define variants for different alert types
-  const baseClasses = "p-4 rounded-xl border-2 shadow-lg";
+  const baseClasses = "p-4 rounded-xl border";
   const variantClasses = {
-    default: "bg-card border-kawaii text-foreground",
-    success: "bg-green-900/80 border-green-500 text-white",
-    error: "bg-passion/90 border-chocolate text-white shadow-glow-red",
-    warning: "bg-yellow-900/80 border-yellow-500 text-white",
-    info: "bg-card border-kawaii text-foreground",
+    default: "bg-blue-50 border-blue-300 text-blue-800",
+    success: "bg-green-50 border-green-300 text-green-800",
+    error: "bg-red-50 border-red-300 text-red-800",
+    warning: "bg-yellow-50 border-yellow-300 text-yellow-800",
   };
 
   return (
@@ -20,7 +19,7 @@ export function Alert({ children, className = "", style = {}, variant = "default
 }
 
 export function AlertDescription({ children, className = "" }) {
-  return <div className={`text-sm ${className}`}>{children}</div>;
+  return <div className={`text-sm text-gray-700 ${className}`}>{children}</div>;
 }
 
 export default Alert;

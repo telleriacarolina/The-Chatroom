@@ -1,6 +1,14 @@
-import crypto from 'crypto';
+const crypto = require('crypto');
 
 const ALGORITHM = 'aes-256-gcm';
+
+// Validate encryption key is provided in production
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.PHONE_ENC_KEY && !process.env.ENCRYPTION_KEY) {
+    throw new Error('Encryption key must be provided in production environment');
+  }
+}
+
 const KEY = process.env.PHONE_ENC_KEY || process.env.ENCRYPTION_KEY || 'dev_key_32_byte_length_needed_!';
 
 function getKey() {
@@ -8,7 +16,7 @@ function getKey() {
   return crypto.createHash('sha256').update(String(KEY)).digest();
 }
 
-export function encryptPhone(plaintext) {
+function encryptPhone(plaintext) {
   if (!plaintext) return null;
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv(ALGORITHM, getKey(), iv);
@@ -17,7 +25,7 @@ export function encryptPhone(plaintext) {
   return `${iv.toString('base64')}:${tag.toString('base64')}:${encrypted.toString('base64')}`;
 }
 
-export function decryptPhone(payload) {
+function decryptPhone(payload) {
   if (!payload) return null;
   const [ivB, tagB, dataB] = String(payload).split(':');
   if (!ivB || !tagB || !dataB) return null;
@@ -29,3 +37,5 @@ export function decryptPhone(payload) {
   const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
   return decrypted.toString('utf8');
 }
+
+module.exports = { encryptPhone, decryptPhone };

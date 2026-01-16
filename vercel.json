@@ -1,0 +1,7 @@
+{
+  "buildCommand": "npm run build:web",
+  "devCommand": "npm run dev:web",
+  "installCommand": "npm install",
+  "framework": null,
+  "outputDirectory": "packages/web/.next"
+}
