@@ -85,7 +85,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await fetch(`${API_URL}/api/auth/guest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ageCategory: '_18PLUS' }),
+        body: JSON.stringify({ ageCategory: 'PLUS_18' }),
       });
 
       if (!response.ok) throw new Error('Guest session creation failed');

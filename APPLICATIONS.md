@@ -5,11 +5,13 @@ Complete monorepo setup with all applications configured and ready to run.
 ## 📦 Packages Overview
 
 ### 1. **@chatroom/web** - Frontend Application
+
 **Location:** `packages/web/`
 **Tech:** Next.js 14, React 18, TypeScript, Tailwind CSS
 
-#### Structure:
-```
+#### Directory Structure
+
+```text
 packages/web/src/
 ├── app/
 │   ├── layout.tsx       # Root layout with metadata
@@ -35,13 +37,15 @@ packages/web/src/
     └── globals.css      # Global styles
 ```
 
-#### Features:
+#### Key Features
+
 - **Username Entry Screen**: 4-10 character validation
 - **Language Selection**: 8 categories (English, Spanish, French, German, Japanese, Chinese, Portuguese, Arabic)
 - **Lounge Selection**: All Users Lounge + country-specific rooms
 - **Upgrade Prompts**: Creator/Viewer/Guest comparison cards
 
-#### Run:
+#### Run @chatroom/web
+
 ```bash
 npm run dev:web
 ```
@@ -49,11 +53,13 @@ npm run dev:web
 ---
 
 ### 2. **@chatroom/api** - Backend API
+
 **Location:** `packages/api/`
 **Tech:** Express.js, Prisma, PostgreSQL
 
-#### Structure:
-```
+#### Directory Structure
+
+```text
 packages/api/src/
 ├── server.js            # Express API server
 ├── routes/
@@ -73,7 +79,8 @@ packages/api/src/
     └── security.js      # Security helpers
 ```
 
-#### API Endpoints:
+#### API Endpoints
+
 - `POST /api/auth/csrf` - Get CSRF token
 - `POST /api/auth/signup` - Register new user
 - `POST /api/auth/signin` - Login
@@ -83,7 +90,8 @@ packages/api/src/
 - `POST /api/auth/change-password` - Change password
 - `GET /health` - Health check
 
-#### Run:
+#### How to Run
+
 ```bash
 npm run dev:api
 ```
@@ -91,24 +99,28 @@ npm run dev:api
 ---
 
 ### 3. **@chatroom/socket** - WebSocket Server
+
 **Location:** `packages/socket/`
 **Tech:** Socket.IO, Express.js
 
-#### Structure:
-```
+#### Structure
+
+```text
 packages/socket/src/
 ├── socket-server.js     # Socket.IO server
 ├── lib/                 # Socket utilities
 └── public/              # Static files
 ```
 
-#### Features:
+#### Features
+
 - Real-time messaging
 - Room management
 - Presence tracking
 - Connection handling
 
-#### Run:
+#### Run
+
 ```bash
 npm run dev:socket
 ```
@@ -116,6 +128,7 @@ npm run dev:socket
 ---
 
 ### 4. **@chatroom/shared** - Shared Code
+
 **Location:** `packages/shared/`
 **Tech:** TypeScript
 
@@ -123,17 +136,20 @@ Shared types, schemas, and utilities used across all packages.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### Set Up Environment
+
 Create `.env` files in each package:
 
 **packages/api/.env:**
+
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/chatroom"
 ACCESS_TOKEN_SECRET="your-access-secret"
@@ -143,24 +159,28 @@ PORT=3001
 ```
 
 **packages/socket/.env:**
+
 ```env
 SOCKET_PORT=3002
 FRONTEND_URL="http://localhost:3000"
 ```
 
 **packages/web/.env.local:**
+
 ```env
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ```
 
 ### Initialize Database
+
 ```bash
 npm run prisma:generate
 npm run prisma:migrate
 ```
 
 ### Run All Applications
+
 ```bash
 # Run all services simultaneously
 npm run dev
@@ -201,6 +221,7 @@ npm run dev:web      # Next.js (http://localhost:3000)
 ## 🎯 Current Implementation Status
 
 ### ✅ Completed
+
 - [x] Monorepo structure with npm workspaces
 - [x] Next.js App Router setup
 - [x] Guest-only chat flow (username → language → lounge)
@@ -216,6 +237,7 @@ npm run dev:web      # Next.js (http://localhost:3000)
 - [x] Background job services
 
 ### 🚧 In Progress
+
 - [ ] Connect frontend to API/Socket servers
 - [ ] Implement actual authentication flows
 - [ ] Add real-time messaging
@@ -223,6 +245,7 @@ npm run dev:web      # Next.js (http://localhost:3000)
 - [ ] Moderation system
 
 ### 📋 Planned
+
 - [ ] Creator account features
 - [ ] Viewer account features  
 - [ ] Payment integration
@@ -261,17 +284,21 @@ npm run clean            # Clean all build artifacts
 ## 🔧 Troubleshooting
 
 ### Port Already in Use
+
 If ports are in use, change them in the `.env` files:
+
 - API: `PORT=3001`
 - Socket: `SOCKET_PORT=3002`
 - Web: Automatically uses `3000`, or next available
 
 ### Database Connection Issues
+
 1. Verify PostgreSQL is running
 2. Check `DATABASE_URL` in `packages/api/.env`
 3. Run `npm run prisma:generate`
 
 ### Module Not Found
+
 Run `npm install` from the root directory to install all workspace dependencies.
 
 ---

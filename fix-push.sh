@@ -41,7 +41,7 @@ git config --local --add credential.helper '!gh auth git-credential'
 # Try SSH instead if HTTPS fails
 CURRENT_URL=$(git remote get-url origin)
 if [[ "$CURRENT_URL" == https* ]]; then
-    SSH_URL="git@github.com:telleriacarolina/LEAVINGROOM4xFactor.git"
+    SSH_URL="git@github.com:Catarey-Territory/LEAVINGROOM4XFACTOR.git"
     echo "   Switching to SSH: $SSH_URL"
     git remote set-url origin "$SSH_URL"
 fi

@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+export default function Block() {
+=======
 /*
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +64,7 @@ export default function Block() {
   
   // Waiting room state
   const [isWaitingRoom, setIsWaitingRoom] = useState<boolean>(false);
+>>>>>>> origin/main
   return (
     <section style={{ padding: 24 }}>
       <h1 style={{ fontSize: 24, fontWeight: 600 }}>The Chatroom</h1>
@@ -69,14 +73,16 @@ export default function Block() {
       </p>
     </section>
   );
+<<<<<<< HEAD
+}
+/*
+=======
   const [showMarketplace, setShowMarketplace] = useState<boolean>(false);
   const [inChatRoom, setInChatRoom] = useState<boolean>(false);
 
+>>>>>>> origin/main
   // Language categories with country-specific lounges
   const languageCategories: LanguageCategory[] = [
-    {
-      name: "English",
-      flag: "🇬🇧",
       lounges: [
         { id: "en-all", name: "All English Speakers", members: 1234, isAll: true },
         { id: "en-us", name: "United States", members: 456 },
@@ -872,6 +878,9 @@ export default function Block() {
     </div>
   );
 }
+<<<<<<< HEAD
+*/
+=======
 
 */
 
@@ -885,3 +894,4 @@ export default function Block() {
     </section>
   );
 }
+>>>>>>> origin/main

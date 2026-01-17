@@ -1,7 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
 import Block from "@/components/chat/Block"
+<<<<<<< HEAD
+
+export default function Home() {
+  return (
+    <main>
+      <Block />
+    </main>
+  );
+}
+
+=======
 import { PwaPrompt } from "@/components/PwaPrompt"
 import { registerServiceWorker } from "@/lib/pwa"
 import ErrorBoundary from "@/components/ui/error-boundary"
@@ -20,3 +30,4 @@ export default function Page() {
     </>
   )
 }
+>>>>>>> origin/main

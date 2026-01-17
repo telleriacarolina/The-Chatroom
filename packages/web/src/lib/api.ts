@@ -1,19 +1,9 @@
 /**
- * API Client Utilities
- * 
- * Provides a fetch wrapper with error handling, TypeScript types,
- * and helper functions for making HTTP requests to the backend API.
+ * API Client for The Chatroom
+ * Handles communication with the backend API server
  */
 
-// ============================================================================
-// Configuration
-// ============================================================================
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-// ============================================================================
-// Types
-// ============================================================================
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -21,305 +11,163 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
-export interface ApiError {
-  error: string;
-  statusCode: number;
-  details?: any;
+export interface SignupData {
+  phoneNumber: string;
+  firstName?: string;
+  lastName?: string;
+  birthYear?: string;
 }
 
-export interface FetchOptions extends RequestInit {
-  baseURL?: string;
-  timeout?: number;
-}
-
-// Auth-related response types
-export interface SignupResponse {
-  message: string;
-  userId: string;
-}
-
-export interface SigninResponse {
-  ok: boolean;
-  user: {
-    id: string;
-    phoneNumber: string;
-  };
-}
-
-export interface GuestResponse {
-  tempSessionToken: string;
-  guestId: string;
-  expiresAt: string;
-}
-
-export interface CSRFResponse {
-  csrfToken: string;
-}
-
-// ============================================================================
-// Error Classes
-// ============================================================================
-
-export class ApiRequestError extends Error {
-  statusCode: number;
-  details?: any;
-
-  constructor(message: string, statusCode: number, details?: any) {
-    super(message);
-    this.name = 'ApiRequestError';
-    this.statusCode = statusCode;
-    this.details = details;
-    Object.setPrototypeOf(this, ApiRequestError.prototype);
-  }
-}
-
-// ============================================================================
-// Core Fetch Wrapper
-// ============================================================================
-
-/**
- * Enhanced fetch wrapper with error handling and timeout support
- */
-async function fetchWithTimeout(
-  url: string,
-  options: FetchOptions = {}
-): Promise<Response> {
-  const { timeout = 30000, ...fetchOptions } = options;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url, {
-      ...fetchOptions,
-      signal: controller.signal,
-      credentials: 'include', // Include cookies for auth
-    });
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error: any) {
-    clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
-      throw new ApiRequestError('Request timeout', 408);
-    }
-    throw error;
-  }
+export interface SigninData {
+  phoneNumber: string;
+  password: string;
+  staySignedIn?: boolean;
 }
 
 /**
- * Main API request function with error handling
+ * Generic fetch wrapper with error handling
  */
-export async function apiRequest<T = any>(
+async function apiFetch<T>(
   endpoint: string,
-  options: FetchOptions = {}
-): Promise<T> {
-  const { baseURL = API_BASE_URL, headers = {}, ...fetchOptions } = options;
-  
-  const url = `${baseURL}${endpoint}`;
-  
-  const defaultHeaders: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...headers,
-  };
-
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
   try {
-    const response = await fetchWithTimeout(url, {
-      ...fetchOptions,
-      headers: defaultHeaders,
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: 'include', // Important for httpOnly cookies
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
     });
 
-    // Handle non-OK responses
-    if (!response.ok) {
-      let errorMessage = 'Request failed';
-      let errorDetails;
+    const contentType = response.headers.get('content-type') || '';
+    let data: any = null;
 
+    if (contentType.includes('application/json')) {
       try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorData.message || errorMessage;
-        errorDetails = errorData;
-      } catch {
-        // If response is not JSON, use status text
-        errorMessage = response.statusText || errorMessage;
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', parseError);
+
+        if (!response.ok) {
+          return {
+            error: `Request failed with status ${response.status}`,
+          };
+        }
+
+        return {
+          error: 'Invalid JSON response from server',
+        };
+      }
+    } else {
+      // Fallback for non-JSON responses (e.g., HTML error pages, plain text)
+      let textBody = '';
+      try {
+        textBody = await response.text();
+      } catch (e) {
+        console.error('Failed to read non-JSON response body:', e);
       }
 
-      throw new ApiRequestError(errorMessage, response.status, errorDetails);
+      if (!response.ok) {
+        const baseMessage = `Request failed with status ${response.status}`;
+        return {
+          error: textBody ? `${baseMessage}: ${textBody}` : baseMessage,
+        };
+      }
+
+      // Successful non-JSON response; return raw text as data
+      return { data: textBody as any as T };
     }
 
-    // Parse JSON response
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
+    if (!response.ok) {
+      return {
+        error: (data && data.error) || `Request failed with status ${response.status}`,
+      };
     }
 
-    // Return empty object for non-JSON responses (e.g., 204 No Content)
-    return {} as T;
+    return { data };
   } catch (error) {
-    if (error instanceof ApiRequestError) {
-      throw error;
-    }
-
-    // Network errors or other unexpected errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new ApiRequestError('Network error - unable to reach server', 0);
-    }
-
-    throw new ApiRequestError(
-      error instanceof Error ? error.message : 'Unknown error occurred',
-      500
-    );
+    console.error('API Error:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Network error occurred',
+    };
   }
 }
 
-// ============================================================================
-// HTTP Method Helpers
-// ============================================================================
-
 /**
- * GET request helper
+ * Get CSRF token for protected requests
  */
-export async function get<T = any>(
-  endpoint: string,
-  options?: Omit<FetchOptions, 'method' | 'body'>
-): Promise<T> {
-  return apiRequest<T>(endpoint, {
-    ...options,
-    method: 'GET',
-  });
+export async function getCSRFToken(): Promise<string | null> {
+  try {
+    const response = await apiFetch<{ csrfToken: string }>('/api/auth/csrf', {
+      method: 'POST',
+    });
+    return response.data?.csrfToken || null;
+  } catch (error) {
+    console.error('Failed to get CSRF token:', error);
+    return null;
+  }
 }
 
 /**
- * POST request helper
+ * Sign up a new user
  */
-export async function post<T = any>(
-  endpoint: string,
-  data?: any,
-  options?: Omit<FetchOptions, 'method' | 'body'>
-): Promise<T> {
-  return apiRequest<T>(endpoint, {
-    ...options,
+export async function signup(data: SignupData): Promise<ApiResponse> {
+  return apiFetch('/api/auth/signup', {
     method: 'POST',
-    body: data ? JSON.stringify(data) : undefined,
+    body: JSON.stringify(data),
   });
 }
 
 /**
- * PUT request helper
+ * Sign in an existing user
  */
-export async function put<T = any>(
-  endpoint: string,
-  data?: any,
-  options?: Omit<FetchOptions, 'method' | 'body'>
-): Promise<T> {
-  return apiRequest<T>(endpoint, {
-    ...options,
-    method: 'PUT',
-    body: data ? JSON.stringify(data) : undefined,
+export async function signin(data: SigninData): Promise<ApiResponse> {
+  return apiFetch('/api/auth/signin', {
+    method: 'POST',
+    body: JSON.stringify(data),
   });
 }
 
 /**
- * PATCH request helper
+ * Refresh access token using refresh token
  */
-export async function patch<T = any>(
-  endpoint: string,
-  data?: any,
-  options?: Omit<FetchOptions, 'method' | 'body'>
-): Promise<T> {
-  return apiRequest<T>(endpoint, {
-    ...options,
-    method: 'PATCH',
-    body: data ? JSON.stringify(data) : undefined,
+export async function refreshToken(): Promise<ApiResponse> {
+  return apiFetch('/api/auth/refresh', {
+    method: 'POST',
   });
 }
 
 /**
- * DELETE request helper
+ * Log out the current user
  */
-export async function del<T = any>(
-  endpoint: string,
-  options?: Omit<FetchOptions, 'method' | 'body'>
-): Promise<T> {
-  return apiRequest<T>(endpoint, {
-    ...options,
-    method: 'DELETE',
+export async function logout(): Promise<ApiResponse> {
+  return apiFetch('/api/auth/logout', {
+    method: 'POST',
   });
 }
 
-// ============================================================================
-// API Endpoint Helpers
-// ============================================================================
+/**
+ * Create a guest session
+ */
+export async function createGuestSession(ageCategory?: string): Promise<ApiResponse> {
+  return apiFetch('/api/auth/guest', {
+    method: 'POST',
+    body: JSON.stringify({ ageCategory }),
+  });
+}
 
 /**
- * Authentication API helpers
+ * Change user password
  */
-export const authApi = {
-  /**
-   * Get CSRF token for protected requests
-   */
-  getCSRFToken: () => post<CSRFResponse>('/api/auth/csrf'),
-
-  /**
-   * Sign up a new user
-   */
-  signup: (data: {
-    phoneNumber: string;
-    firstName?: string;
-    lastName?: string;
-    birthYear?: string;
-  }) => post<SignupResponse>('/api/auth/signup', data),
-
-  /**
-   * Sign in an existing user
-   */
-  signin: (data: {
-    phoneNumber: string;
-    password: string;
-    staySignedIn?: boolean;
-  }) => post<SigninResponse>('/api/auth/signin', data),
-
-  /**
-   * Create guest session
-   */
-  createGuest: (data: { ageCategory?: string }) =>
-    post<GuestResponse>('/api/auth/guest', data),
-
-  /**
-   * Change password
-   */
-  changePassword: (data: {
-    phoneNumber: string;
-    oldPassword: string;
-    newPassword: string;
-  }) => post('/api/auth/change-password', data),
-
-  /**
-   * Refresh access token
-   */
-  refreshToken: () => post('/api/auth/refresh'),
-
-  /**
-   * Sign out current user
-   */
-  signout: () => post('/api/auth/signout'),
-};
-
-/**
- * Health check
- */
-export const healthCheck = () =>
-  get<{ status: string; timestamp: string }>('/health');
-
-// ============================================================================
-// Exports
-// ============================================================================
-
-export default {
-  get,
-  post,
-  put,
-  patch,
-  delete: del,
-  apiRequest,
-  authApi,
-  healthCheck,
-};
+export async function changePassword(
+  phoneNumber: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<ApiResponse> {
+  return apiFetch('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ phoneNumber, currentPassword, newPassword }),
+  });
+}

@@ -5,14 +5,12 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const helmet = require('helmet');
+
 const { startBackgroundJobs } = require('./services/backgroundJobs');
 const { initializeSocketIO } = require('./services/socketio');
 const authRoutes = require('./routes/auth');
-<<<<<<< HEAD:server.js
 const chatroomRoutes = require('./routes/chatroom');
-=======
 const loungeRoutes = require('./routes/lounges');
->>>>>>> origin/main:packages/api/src/server.js
 const logger = require('./utils/logger');
 
 const app = express();
@@ -37,11 +35,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
-<<<<<<< HEAD:server.js
 app.use('/api/chatroom', chatroomRoutes);
-=======
 app.use('/api/lounges', loungeRoutes);
->>>>>>> origin/main:packages/api/src/server.js
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
@@ -50,18 +45,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-<<<<<<< HEAD
 server.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  startBackgroundJobs();
-});
-
-module.exports = { app, server, io };
-=======
-app.listen(PORT, () => {
   logger.info(`API server running on port ${PORT}`);
   startBackgroundJobs();
 });
 
-module.exports = app;
->>>>>>> main
+module.exports = { app, server, io };

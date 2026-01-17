@@ -1,8 +1,11 @@
-import { prisma } from '../lib/prisma';
-import logger from '../utils/logger';
+const { prisma } = require('../lib/prisma');
+const logger = require('../utils/logger');
+
+// Store interval references for cleanup
+const intervals = [];
 
 /** Transition users from Online -> Away after 5 minutes inactivity */
-export async function transitionInactiveUsers() {
+async function transitionInactiveUsers() {
   try {
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
     const result = await prisma.user.updateMany({
@@ -16,7 +19,7 @@ export async function transitionInactiveUsers() {
 }
 
 /** Clean up expired sessions and temp sessions */
-export async function cleanupExpiredSessions() {
+async function cleanupExpiredSessions() {
   try {
     const refresh = await prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
     const temp = await prisma.tempSession.deleteMany({ where: { expiresAt: { lt: new Date() } } });
@@ -27,7 +30,7 @@ export async function cleanupExpiredSessions() {
 }
 
 /** Transition users to OFFLINE if no heartbeat in 10 minutes */
-export async function transitionOfflineUsers() {
+async function transitionOfflineUsers() {
   try {
     const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000);
     const result = await prisma.user.updateMany({
@@ -40,16 +43,30 @@ export async function transitionOfflineUsers() {
   }
 }
 
-export function startBackgroundJobs() {
+function startBackgroundJobs() {
   logger.info('Starting background jobs...');
-  setInterval(transitionInactiveUsers, 60 * 1000);
-  setInterval(cleanupExpiredSessions, 15 * 60 * 1000);
-  setInterval(transitionOfflineUsers, 5 * 60 * 1000);
-  // run once
+  
+  // Create intervals and store references
+  intervals.push(setInterval(transitionInactiveUsers, 60 * 1000));
+  intervals.push(setInterval(cleanupExpiredSessions, 15 * 60 * 1000));
+  intervals.push(setInterval(transitionOfflineUsers, 5 * 60 * 1000));
+  
+  // Unref intervals to allow graceful shutdown
+  intervals.forEach(interval => interval.unref());
+  
+  // run once on startup
   transitionInactiveUsers();
   cleanupExpiredSessions();
   transitionOfflineUsers();
+  
   logger.info('Background jobs started');
 }
 
-export default { startBackgroundJobs };
+function stopBackgroundJobs() {
+  logger.info('Stopping background jobs...');
+  intervals.forEach(interval => clearInterval(interval));
+  intervals.splice(0, intervals.length); // Clear all elements from array
+  logger.info('Background jobs stopped');
+}
+
+module.exports = { startBackgroundJobs, stopBackgroundJobs };
