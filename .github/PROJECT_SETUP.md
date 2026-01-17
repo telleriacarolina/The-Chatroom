@@ -6,7 +6,7 @@ This guide will help you set up a GitHub Project board to track all tasks from T
 
 ### 1. Create a New Project
 
-1. Go to <https://github.com/telleriacarolina/The-Chatroom/projects>
+1. Go to <https://github.com/Catarey-Territory/The-Chatroom/projects>
 2. Click "New project"
 3. Choose "Board" template
 4. Name it "The Chatroom Development"
@@ -128,7 +128,7 @@ See TASKS.md #2" \
 
 ### Using GitHub Web Interface
 
-1. Go to <https://github.com/telleriacarolina/The-Chatroom/issues/new>
+1. Go to <https://github.com/Catarey-Territory/The-Chatroom/issues/new>
 2. Copy task content from TASKS.md
 3. Add title, labels, and assignees
 4. Submit issue
@@ -203,9 +203,9 @@ gh issue edit 1 --milestone "Phase 1: Connect Frontend to Backend"
 
 ### In GitHub
 
-- View project board: <https://github.com/telleriacarolina/The-Chatroom/projects>
-- View all issues: <https://github.com/telleriacarolina/The-Chatroom/issues>
-- View by milestone: <https://github.com/telleriacarolina/The-Chatroom/milestones>
+- View project board: <https://github.com/Catarey-Territory/The-Chatroom/projects>
+- View all issues: <https://github.com/Catarey-Territory/The-Chatroom/issues>
+- View by milestone: <https://github.com/Catarey-Territory/The-Chatroom/milestones>
 
 ### In VS Code
 

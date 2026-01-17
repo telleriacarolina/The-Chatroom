@@ -4,9 +4,9 @@ This file contains GitHub-ready tasks that can be imported into GitHub Projects 
 
 **🔗 Quick Links:**
 
-- [Create New Issue](https://github.com/telleriacarolina/The-Chatroom/issues/new/choose)
-- [View Project Board](https://github.com/telleriacarolina/The-Chatroom/projects)
-- [View All Issues](https://github.com/telleriacarolina/The-Chatroom/issues)
+- [Create New Issue](https://github.com/Catarey-Territory/The-Chatroom/issues/new/choose)
+- [View Project Board](https://github.com/Catarey-Territory/The-Chatroom/projects)
+- [View All Issues](https://github.com/Catarey-Territory/The-Chatroom/issues)
 
 ---
 
@@ -724,7 +724,7 @@ Add toast notification system for errors and success messages
 
 ### Option 1: Create GitHub Issues Manually
 
-1. Go to [Issues](https://github.com/telleriacarolina/The-Chatroom/issues/new/choose)
+1. Go to [Issues](https://github.com/Catarey-Territory/The-Chatroom/issues/new/choose)
 2. Choose appropriate template (Bug/Feature/Task)
 3. Copy task content from above
 4. Add labels and assignees
@@ -739,7 +739,7 @@ gh issue create --title "Fix TypeScript Errors in Block.tsx" --body "See TASKS.m
 
 ### Option 3: Create GitHub Project Board
 
-1. Go to [Projects](https://github.com/telleriacarolina/The-Chatroom/projects)
+1. Go to [Projects](https://github.com/Catarey-Territory/The-Chatroom/projects)
 2. Create new project
 3. Add columns: Backlog, To Do, In Progress, Done
 4. Convert tasks to issues and add to project

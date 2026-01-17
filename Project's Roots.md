@@ -73,7 +73,7 @@ This is the standalone version of the error-routing and scenario-testing harness
 
 ```bash
 # Clone the repo
-git clone https://github.com/telleriacarolina/leaving-room-x-factor.git
+git clone https://github.com/Catarey-Territory/LEAVINGROOM4XFACTOR.git
 cd leaving-room-x-factor
 
 # Run scenario tests

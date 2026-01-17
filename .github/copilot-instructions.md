@@ -189,9 +189,6 @@ Key models: User, Session, TempSession, IDVerification, Lounge, LanguageRoom, Ch
 - Use `.env.example` for documentation only (no real values)
 - Required secrets: `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`, `PHONE_ENC_KEY`, `DATABASE_URL`
 - Optional secrets: Twilio credentials, AWS credentials (for S3 uploads)
-
-- **Never commit secrets:** Use `.env` files (gitignored)
-- **Environment variables:** Required secrets in `.env.example`
 - **Key rotation:** Plan for rotating JWT secrets and encryption keys
 - **Database credentials:** Never hardcode, always use environment variables
 
@@ -407,13 +404,15 @@ localStorage.debug = 'socket.io-client:*';
 ## Documentation
 
 **Key documentation files:**
-- `README.md` - Project overview, setup, and getting started
-- `ARCHITECTURE.md` - Combined architecture approach (root + packages)
-- `CONTRIBUTING.md` - Contribution guidelines and workflows
-- `docs/COMPLETE_CODEBASE.md` - Full codebase reference
-- `docs/update-scenarios/README.md` - Where to place changes
-- `docs/update-scenarios/UPDATE_WORKFLOW.md` - Step-by-step process
-- `.env.example` - Environment variable documentation
+- **[README.md](../README.md)** - Project overview, setup instructions, and features
+- **[ARCHITECTURE.md](../ARCHITECTURE.md)** - Combined architecture approach and folder structure
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines and workflow
+- **[DEPLOYMENT.md](../DEPLOYMENT.md)** - Deployment instructions and configurations
+- **[docs/COMPLETE_CODEBASE.md](../docs/COMPLETE_CODEBASE.md)** - Full codebase reference and API documentation
+- **[docs/update-scenarios/](../docs/update-scenarios/)** - Where to place changes and patterns
+- **[docs/update-scenarios/UPDATE_WORKFLOW.md](../docs/update-scenarios/UPDATE_WORKFLOW.md)** - Step-by-step update process
+- **`.env.example`** - Environment variable documentation
+- **Prisma Schema:** `packages/api/prisma/schema.prisma` - Database models and relationships
 
 **When to update documentation:**
 - New features that change user-facing behavior
@@ -422,15 +421,6 @@ localStorage.debug = 'socket.io-client:*';
 - New environment variables required
 - Significant architectural changes
 - New setup or deployment procedures
-
-- **[README.md](../README.md)** - Project overview, setup instructions, and features
-- **[ARCHITECTURE.md](../ARCHITECTURE.md)** - Combined architecture approach and folder structure
-- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines and workflow
-- **[DEPLOYMENT.md](../DEPLOYMENT.md)** - Deployment instructions and configurations
-- **[docs/COMPLETE_CODEBASE.md](../docs/COMPLETE_CODEBASE.md)** - Full codebase reference and API documentation
-- **[docs/update-scenarios/](../docs/update-scenarios/)** - Where to place changes and patterns
-- **[docs/update-scenarios/UPDATE_WORKFLOW.md](../docs/update-scenarios/UPDATE_WORKFLOW.md)** - Step-by-step update process
-- **Prisma Schema:** `packages/api/prisma/schema.prisma` - Database models and relationships
 
 ## Important Notes
 
@@ -451,14 +441,16 @@ localStorage.debug = 'socket.io-client:*';
 
 ## Getting Help
 
+**Resources:**
+- **Issues:** Open an issue on GitHub with detailed description and error logs
+- **Discussions:** Use GitHub Discussions for questions and general help
+- **Documentation:** Check the `docs/` folder for detailed guides
+- **Code examples:** Look at existing code for patterns and conventions
+
+**Before asking for help:**
 - Review documentation in `docs/` directory
 - Check existing code patterns before implementing new features
 - Test changes with all three servers running
 - Use health check endpoints to verify services are running
 - Review Prisma schema for database structure understanding
 - Check commit history for examples of similar changes
-
-- **Issues:** Open an issue on GitHub with detailed description and error logs
-- **Discussions:** Use GitHub Discussions for questions and general help
-- **Documentation:** Check the docs/ folder for detailed guides
-- **Code examples:** Look at existing code for patterns and conventions

@@ -72,7 +72,7 @@ export function RadioGroupItem({
       {...props}
     >
       {isChecked && (
-        <Circle className="h-2.5 w-2.5 fill-current text-current m-auto" />
+        React.createElement(Circle as any, { className: "h-2.5 w-2.5 fill-current text-current m-auto" })
       )}
     </button>
   )

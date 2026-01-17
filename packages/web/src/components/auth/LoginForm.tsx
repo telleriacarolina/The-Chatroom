@@ -1,174 +1,193 @@
-/**
- * LoginForm - Presentational Component
- * 
- * This component demonstrates the canonical loading-state ownership pattern.
- * It is a PRESENTATIONAL component that:
- * - Receives loading/error state as props
- * - Does NOT make API calls directly
- * - Does NOT manage loading/error state internally
- * - Disables inputs during loading
- * - Shows loading indicators
- */
+import { useState } from "react";
+import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { signin } from "@/lib/api";
+import { validatePhoneNumber } from "@/lib/phoneValidation";
 
-'use client';
-
-import { useState, FormEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert } from '@/components/ui/alert';
-
-export interface LoginFormData {
-  phoneNumber: string;
-  password: string;
-  staySignedIn?: boolean;
+interface LoginFormProps {
+  onSuccess?: () => void;
+  onSwitchToSignup?: () => void;
 }
 
-export interface LoginFormProps {
-  /**
-   * Callback invoked when the form is submitted
-   * Container component owns the actual API call
-   */
-  onSubmit: (data: LoginFormData) => void | Promise<void>;
-  
-  /**
-   * Loading state managed by container component
-   */
-  isLoading: boolean;
-  
-  /**
-   * Error message managed by container component
-   */
-  error: string | null;
-  
-  /**
-   * Optional: redirect to signup page
-   */
-  onSignupClick?: () => void;
-}
+export default function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps) {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [staySignedIn, setStaySignedIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-/**
- * LoginForm - Presentational component for user login
- * 
- * This component follows the canonical pattern:
- * - State is received via props from container
- * - No direct API calls
- * - Inputs are disabled during loading
- * - Shows loading indicators
- */
-export function LoginForm({ onSubmit, isLoading, error, onSignupClick }: LoginFormProps) {
-  // Only manage FORM data state, not loading/error
-  const [formData, setFormData] = useState<LoginFormData>({
-    phoneNumber: '',
-    password: '',
-    staySignedIn: false,
-  });
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!formData.phoneNumber || !formData.password) {
-      return;
-    }
-    
-    // Call the handler provided by container
-    // The container owns the loading state and API call
-    onSubmit(formData);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPhoneNumber(value);
+    // Clear error when user types
+    if (error) setError("");
   };
 
-  const handleInputChange = (field: keyof LoginFormData) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    // Validate phone number
+    const phoneValidation = validatePhoneNumber(phoneNumber);
+    if (!phoneValidation.isValid) {
+      setError(phoneValidation.error || "Invalid phone number");
+      return;
+    }
+
+    // Validate password
+    if (!password.trim()) {
+      setError("Password is required");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await signin({
+        phoneNumber,
+        password,
+        staySignedIn,
+      });
+
+      if (response.error) {
+        setError(response.error);
+      } else {
+        // Success! JWT tokens are now in httpOnly cookies
+        if (onSuccess) {
+          onSuccess();
+        }
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
+      <CardHeader className="text-center">
+        <div className="flex justify-center mb-4">
+          <LogIn className="w-12 h-12 text-primary" />
+        </div>
+        <CardTitle className="text-2xl">Sign In</CardTitle>
         <CardDescription>
-          Enter your credentials to access your account
+          Enter your phone number and password to access your account
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Error display - state comes from props */}
-          {error && (
-            <Alert variant="error">
-              {error}
-            </Alert>
-          )}
-
           {/* Phone Number Input */}
           <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input
-              id="phoneNumber"
+              id="phone"
               type="tel"
-              placeholder="+1 (555) 000-0000"
-              value={formData.phoneNumber}
-              onChange={handleInputChange('phoneNumber')}
-              disabled={isLoading} // ✅ Disabled during loading
+              placeholder="+1 (555) 123-4567"
+              value={phoneNumber}
+              onChange={handlePhoneChange}
+              disabled={isLoading}
               required
+              autoComplete="tel"
             />
           </div>
 
           {/* Password Input */}
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleInputChange('password')}
-              disabled={isLoading} // ✅ Disabled during loading
-              required
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError("");
+                }}
+                disabled={isLoading}
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                disabled={isLoading}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Stay Signed In Checkbox */}
-          <div className="flex items-center space-x-2">
-            <input
-              id="staySignedIn"
-              type="checkbox"
-              checked={formData.staySignedIn}
-              onChange={handleInputChange('staySignedIn')}
-              disabled={isLoading} // ✅ Disabled during loading
-              className="h-4 w-4"
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="stay-signed-in"
+              checked={staySignedIn}
+              onCheckedChange={(checked) => {
+                if (isLoading) return;
+                setStaySignedIn(!!checked);
+              }}
             />
-            <Label htmlFor="staySignedIn" className="text-sm">
-              Stay signed in
+            <Label
+              htmlFor="stay-signed-in"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Stay signed in (30 days)
             </Label>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
+              {error}
+            </div>
+          )}
 
           {/* Submit Button */}
           <Button
             type="submit"
             className="w-full"
-            disabled={isLoading || !formData.phoneNumber || !formData.password}
+            disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'} {/* ✅ Loading indicator */}
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </>
+            )}
           </Button>
 
-          {/* Signup Link */}
-          {onSignupClick && (
-            <div className="text-center text-sm">
-              Don't have an account?{' '}
-              <button
-                type="button"
-                onClick={onSignupClick}
-                className="text-primary hover:underline"
-                disabled={isLoading}
-              >
-                Sign up
-              </button>
+          {/* Switch to Signup */}
+          {onSwitchToSignup && (
+            <div className="text-center pt-4">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={onSwitchToSignup}
+                  className="text-primary hover:underline font-medium"
+                  disabled={isLoading}
+                >
+                  Sign Up
+                </button>
+              </p>
             </div>
           )}
         </form>

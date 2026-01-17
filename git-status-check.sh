@@ -43,4 +43,14 @@ REMOTE_URL=$(git remote get-url origin)
 echo "🔗 Remote: $REMOTE_URL"
 echo ""
 
+
 echo "✅ Everything is up to date!"
+echo ""
+
+# Show git commit signing info
+echo "=== Git Commit Signing Info ==="
+echo "User Name:    $(git config --get user.name)"
+echo "User Email:   $(git config --get user.email)"
+echo "Signing Key:  $(git config --get user.signingkey)"
+echo "GPG Program:  $(git config --get gpg.program)"
+echo "Commit GPGSign: $(git config --get commit.gpgsign)"

@@ -4,7 +4,6 @@ A real-time chat application with multi-tier authentication, language-specific l
 
 **📦 Monorepo Structure:** This project is fully consolidated with all code in the `packages/` directory.
 
----
 
 ## 📦 Packages
 
@@ -26,7 +25,6 @@ The-Chatroom/
 - **[@chatroom/socket](packages/socket/)** - WebSocket server (Socket.IO)
 - **[@chatroom/web](packages/web/)** - Frontend application (Next.js, React)
 - **[@chatroom/shared](packages/shared/)** - Shared types, schemas, and utilities
-
 ---
 
 ## Features
@@ -148,7 +146,6 @@ npm install
 ### 2. Configure Environment
 
 Each package has its own environment configuration:
-
 **API Package** (`packages/api/.env`):
 
 ```bash
@@ -158,7 +155,6 @@ REFRESH_TOKEN_SECRET="your-refresh-secret"
 PHONE_ENC_KEY="32-byte-encryption-key"
 PORT=3001
 ```
-
 **Socket Package** (`packages/socket/.env`):
 
 ```bash
@@ -176,7 +172,6 @@ NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ### 3. Set Up Database
 
 ```bash
-npm run prisma:generate
 npm run prisma:migrate
 ```
 
@@ -195,7 +190,6 @@ npm run dev:web      # Next.js (http://localhost:3000)
 ```
 
 ### Option C: Standalone Single-File App
-
 ```bash
 node app-standalone.js
 ```
@@ -206,7 +200,6 @@ node app-standalone.js
 - **API:** <http://localhost:3001>
 - **WebSocket:** <http://localhost:3002>
 
----
 
 ### Health Checks
 
@@ -216,7 +209,6 @@ Quickly verify the services are healthy and connected.
 # API health (expects a JSON response with status: ok)
 curl -s http://localhost:3001/health
 ```
-
 From the browser console on the frontend (<http://localhost:3000>):
 
 ```js
@@ -225,7 +217,6 @@ From the browser console on the frontend (<http://localhost:3000>):
   s.on('connect', () => console.log('socket connected:', s.id));
   s.on('chat message', (m) => console.log('message:', m));
   s.emit('chat message', 'hello from UI');
-})();
 ```
 
 ---
@@ -235,7 +226,6 @@ From the browser console on the frontend (<http://localhost:3000>):
 ```bash
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/chatroom"
-
 # JWT Secrets
 ACCESS_TOKEN_SECRET="your-access-secret"
 REFRESH_TOKEN_SECRET="your-refresh-secret"

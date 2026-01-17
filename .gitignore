@@ -1,5 +1,14 @@
 node_modules/
 dist/
 .env
-The-Chatroom
+*.local
 .next/
+.turbo/
+*.log
+coverage/
+.DS_Store
+*.tsbuildinfo
+
+# Test files
+test-forms.html
+

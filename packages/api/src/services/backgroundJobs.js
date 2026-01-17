@@ -1,11 +1,11 @@
-import { prisma } from '../lib/prisma';
-import logger from '../utils/logger';
+const { prisma } = require('../lib/prisma');
+const logger = require('../utils/logger');
 
 // Store interval references for cleanup
 const intervals = [];
 
 /** Transition users from Online -> Away after 5 minutes inactivity */
-export async function transitionInactiveUsers() {
+async function transitionInactiveUsers() {
   try {
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
     const result = await prisma.user.updateMany({
@@ -19,7 +19,7 @@ export async function transitionInactiveUsers() {
 }
 
 /** Clean up expired sessions and temp sessions */
-export async function cleanupExpiredSessions() {
+async function cleanupExpiredSessions() {
   try {
     const refresh = await prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
     const temp = await prisma.tempSession.deleteMany({ where: { expiresAt: { lt: new Date() } } });
@@ -30,7 +30,7 @@ export async function cleanupExpiredSessions() {
 }
 
 /** Transition users to OFFLINE if no heartbeat in 10 minutes */
-export async function transitionOfflineUsers() {
+async function transitionOfflineUsers() {
   try {
     const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000);
     const result = await prisma.user.updateMany({
@@ -43,7 +43,7 @@ export async function transitionOfflineUsers() {
   }
 }
 
-export function startBackgroundJobs() {
+function startBackgroundJobs() {
   logger.info('Starting background jobs...');
   
   // Create intervals and store references
@@ -62,11 +62,11 @@ export function startBackgroundJobs() {
   logger.info('Background jobs started');
 }
 
-export function stopBackgroundJobs() {
+function stopBackgroundJobs() {
   logger.info('Stopping background jobs...');
   intervals.forEach(interval => clearInterval(interval));
   intervals.splice(0, intervals.length); // Clear all elements from array
   logger.info('Background jobs stopped');
 }
 
-export default { startBackgroundJobs, stopBackgroundJobs };
+module.exports = { startBackgroundJobs, stopBackgroundJobs };
