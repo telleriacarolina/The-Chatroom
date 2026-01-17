@@ -136,6 +136,7 @@ model User {
   verifications          IDVerification[]
   chatMessages           ChatMessage[]
   deletedMessages        ChatMessage[] @relation("deletedBy")
+  messageReads           MessageRead[]
   marketplaceItems       MarketplaceItem[] @relation("SellerItems")
   transactionsAsBuyer    Transaction[] @relation("buyer")
   transactionsAsSeller   Transaction[] @relation("seller")
@@ -245,6 +246,7 @@ model ChatMessage {
   
   moderationActions ModerationAction[]
   reports           UserReport[]
+  reads             MessageRead[]
 }
 
 model MarketplaceItem {
@@ -346,4 +348,17 @@ model Post {
   updatedAt DateTime @updatedAt
   userId String
   user   User  @relation(fields: [userId], references: [id])
+}
+
+model MessageRead {
+  id        String      @id @default(uuid())
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  readAt    DateTime    @default(now())
+  
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
 }
