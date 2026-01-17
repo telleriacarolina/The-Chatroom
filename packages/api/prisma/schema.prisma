@@ -257,6 +257,7 @@ model MarketplaceItem {
   currency     Currency
   category     ItemCategory
   contentType  ContentType
+  fileUrl      String
   thumbnailUrl String
   previewUrls  Json?
   accessLevel  AccessLevel
@@ -285,9 +286,13 @@ model Transaction {
   paymentStatus  TransactionPaymentStatus
   transactionFee Decimal? @db.Decimal(12,2)
   sellerPayout   Decimal? @db.Decimal(12,2)
-  paymentIntentId String?
+  paymentIntentId String? @unique
   createdAt      DateTime @default(now())
   completedAt    DateTime?
+  
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([paymentStatus])
 }
 
 model ModerationAction {

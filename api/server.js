@@ -9,6 +9,7 @@ const { startBackgroundJobs } = require('./services/backgroundJobs');
 const { initializeSocketIO } = require('./services/socketio');
 const authRoutes = require('./routes/auth');
 const loungeRoutes = require('./routes/lounges');
+const marketRoutes = require('./routes/market');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -34,6 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/lounges', loungeRoutes);
+app.use('/api/market', marketRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
