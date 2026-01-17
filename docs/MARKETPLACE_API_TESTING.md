@@ -202,8 +202,8 @@ curl -X GET "http://localhost:3001/api/market/creator/sales?page=1&limit=10" \
       "platformFee": "1.00",
       "payout": "8.99",
       "status": "COMPLETED",
-      "createdAt": "2026-01-17T06:00:00.000Z",
-      "completedAt": "2026-01-17T06:01:00.000Z"
+      "createdAt": "2024-01-17T06:00:00.000Z",
+      "completedAt": "2024-01-17T06:01:00.000Z"
     }
   ],
   "pagination": {
@@ -244,8 +244,8 @@ curl -X GET "http://localhost:3001/api/market/creator/items?status=ACTIVE&page=1
       "status": "ACTIVE",
       "viewCount": 100,
       "purchaseCount": 5,
-      "createdAt": "2026-01-17T06:00:00.000Z",
-      "updatedAt": "2026-01-17T06:00:00.000Z"
+      "createdAt": "2024-01-17T06:00:00.000Z",
+      "updatedAt": "2024-01-17T06:00:00.000Z"
     }
   ],
   "pagination": {
@@ -296,7 +296,7 @@ curl -X GET "http://localhost:3001/api/market/items?category=PHOTOS&sort=popular
       },
       "viewCount": 100,
       "purchaseCount": 5,
-      "createdAt": "2026-01-17T06:00:00.000Z"
+      "createdAt": "2024-01-17T06:00:00.000Z"
     }
   ],
   "pagination": {
@@ -341,8 +341,8 @@ curl -X GET http://localhost:3001/api/market/items/ITEM_UUID
     },
     "viewCount": 101,
     "purchaseCount": 5,
-    "createdAt": "2026-01-17T06:00:00.000Z",
-    "updatedAt": "2026-01-17T06:00:00.000Z"
+    "createdAt": "2024-01-17T06:00:00.000Z",
+    "updatedAt": "2024-01-17T06:00:00.000Z"
   }
 }
 ```
