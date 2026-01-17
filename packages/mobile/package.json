@@ -19,11 +19,7 @@
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
     "axios": "^1.6.0",
-<<<<<<< HEAD
     "expo": "^54.0.31",
-=======
-    "expo": "^54.0.30",
->>>>>>> origin/15-create-error-boundary-component
     "expo-status-bar": "~1.11.0",
     "lucide-react-native": "^0.294.0",
     "nodemailer": "7.0.12",

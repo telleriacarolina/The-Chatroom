@@ -59,18 +59,11 @@
   },
   "devDependencies": {
     "@nx/workspace": "^22.3.3",
-<<<<<<< HEAD
-    "@types/react": "^18.2.0",
-=======
     "@types/node": "^25.0.8",
     "@types/react": "19.2.7",
     "@types/react-native": "^0.73.0",
-<<<<<<< HEAD
     "install": "^0.13.0",
     "npm": "^11.7.0",
->>>>>>> origin/copilot/create-error-boundary-component
-=======
->>>>>>> origin/15-create-error-boundary-component
     "turbo": "^2.7.2",
     "typescript": "5.9.3"
   },

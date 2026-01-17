@@ -154,6 +154,7 @@ model Session {
   user             User     @relation(fields: [userId], references: [id])
   userId           String
   sessionToken     String   @unique
+  refreshToken     String?  @unique
   ipAddress        String?
   userAgent        String?
   isActive         Boolean  @default(true)
@@ -172,6 +173,14 @@ model TempSession {
   sessionToken      String?   @unique
   expiresAt         DateTime
   createdAt         DateTime  @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  phone     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model IDVerification {

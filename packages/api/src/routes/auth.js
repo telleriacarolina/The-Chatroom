@@ -66,6 +66,7 @@ router.post('/signin', authLimiter, async (req, res) => {
     await prisma.session.create({ data: {
       userId: user.id,
       sessionToken: refreshToken,
+      refreshToken: refreshToken, // Store in both fields for compatibility
       expiresAt: new Date(Date.now() + (staySignedIn ? 30*24*60*60*1000 : 24*60*60*1000))
     }});
 
@@ -142,6 +143,132 @@ router.post('/logout', async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     console.error(e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+/**
+ * Request password reset - generates a token and stores it in database
+ * In production, this would send the token via SMS
+ */
+router.post('/request-password-reset', authLimiter, async (req, res) => {
+  const { phoneNumber } = req.body || {};
+  if (!phoneNumber) return res.status(400).json({ error: 'phoneNumber required' });
+  
+  try {
+    const encryptedPhone = encryptPhone(phoneNumber);
+    const user = await prisma.user.findUnique({ where: { phoneNumber: encryptedPhone } });
+    
+    // Return success even if user doesn't exist (security best practice)
+    if (!user) {
+      return res.json({ 
+        message: 'If this phone number is registered, a reset token will be sent via SMS',
+        ok: true 
+      });
+    }
+
+    // Generate secure reset token
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    // Clean up any existing reset tokens for this phone
+    await prisma.passwordReset.deleteMany({ 
+      where: { phone: encryptedPhone }
+    }).catch(() => {});
+
+    // Store the reset token
+    await prisma.passwordReset.create({
+      data: {
+        phone: encryptedPhone,
+        token: resetToken,
+        expiresAt
+      }
+    });
+
+    // TODO: In production, send resetToken via SMS using Twilio
+    // For now, return it in development mode only
+    const response = { 
+      message: 'If this phone number is registered, a reset token will be sent via SMS',
+      ok: true 
+    };
+    
+    if (process.env.NODE_ENV === 'development') {
+      response.resetToken = resetToken; // Only for testing
+    }
+
+    res.json(response);
+  } catch (e) {
+    console.error('Password reset request error:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+/**
+ * Reset password using the token
+ */
+router.post('/reset-password', authLimiter, async (req, res) => {
+  const { phoneNumber, token, newPassword } = req.body || {};
+  
+  if (!phoneNumber || !token || !newPassword) {
+    return res.status(400).json({ error: 'phoneNumber, token, and newPassword required' });
+  }
+
+  // Validate password strength
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+
+  try {
+    const encryptedPhone = encryptPhone(phoneNumber);
+    
+    // Find valid reset token
+    const resetRecord = await prisma.passwordReset.findFirst({
+      where: {
+        phone: encryptedPhone,
+        token: token,
+        expiresAt: { gt: new Date() }
+      }
+    });
+
+    if (!resetRecord) {
+      return res.status(401).json({ error: 'Invalid or expired reset token' });
+    }
+
+    // Find user
+    const user = await prisma.user.findUnique({ 
+      where: { phoneNumber: encryptedPhone } 
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Hash new password
+    const newHash = await bcrypt.hash(newPassword, 12);
+
+    // Update password and invalidate all sessions
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: newHash }
+    });
+
+    await prisma.session.updateMany({
+      where: { userId: user.id },
+      data: { isActive: false }
+    }).catch(() => {});
+
+    // Delete the used reset token
+    await prisma.passwordReset.delete({
+      where: { id: resetRecord.id }
+    }).catch(() => {});
+
+    res.json({ 
+      ok: true, 
+      message: 'Password reset successfully. Please sign in with your new password.' 
+    });
+  } catch (e) {
+    console.error('Password reset error:', e);
     res.status(500).json({ error: 'Server error' });
   }
 });

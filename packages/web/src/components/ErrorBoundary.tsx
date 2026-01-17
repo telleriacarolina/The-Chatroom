@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Error Boundary must be a Client Component because it uses React lifecycle methods
  * (getDerivedStateFromError, componentDidCatch) and state, which are only available
@@ -8,14 +7,11 @@
 
 import React, { Component, ReactNode } from 'react'
 import { AlertCircle, RefreshCcw } from 'lucide-react'
-=======
-import React from "react";
 
 type ErrorBoundaryProps = {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 };
->>>>>>> origin/copilot/create-error-boundary-component
 
 type ErrorBoundaryState = {
   hasError: boolean;
@@ -37,10 +33,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     // console.error("ErrorBoundary caught an error", error, errorInfo);
   }
 
+  handleReload = () => {
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
-<<<<<<< HEAD
-      return (
+      return this.props.fallback ?? (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
           <div className="max-w-md w-full">
             <div className="bg-red-50 border border-red-300 rounded-lg p-6 mb-4">
@@ -75,12 +74,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               Reload Page
             </button>
           </div>
-=======
-      return this.props.fallback ?? (
-        <div className="p-4 text-red-600">
-          <h2>Something went wrong.</h2>
-          <pre>{this.state.error?.message}</pre>
->>>>>>> origin/copilot/create-error-boundary-component
         </div>
       );
     }
