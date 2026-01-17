@@ -29,6 +29,74 @@ async function cleanupExpiredSessions() {
   }
 }
 
+/** Auto-unban users with expired temporary bans */
+async function processExpiredBans() {
+  try {
+    const now = new Date();
+    const result = await prisma.user.updateMany({
+      where: {
+        isBanned: true,
+        banExpiresAt: { not: null, lt: now }
+      },
+      data: {
+        isBanned: false,
+        banExpiresAt: null,
+        accountStatus: 'ACTIVE',
+        banReason: null
+      }
+    });
+
+    if (result.count > 0) {
+      logger.info(`Auto-unbanned ${result.count} users with expired bans`);
+      
+      // Deactivate corresponding moderation actions
+      await prisma.moderationAction.updateMany({
+        where: {
+          actionType: { in: ['BAN_TEMP'] },
+          isActive: true,
+          expiresAt: { not: null, lt: now }
+        },
+        data: { isActive: false }
+      });
+    }
+  } catch (e) {
+    logger.error('Error processing expired bans', e);
+  }
+}
+
+/** Auto-unmute users with expired mutes */
+async function processExpiredMutes() {
+  try {
+    const now = new Date();
+    const result = await prisma.user.updateMany({
+      where: {
+        isMuted: true,
+        muteExpiresAt: { not: null, lt: now }
+      },
+      data: {
+        isMuted: false,
+        muteExpiresAt: null
+      }
+    });
+
+    if (result.count > 0) {
+      logger.info(`Auto-unmuted ${result.count} users with expired mutes`);
+      
+      // Deactivate corresponding moderation actions
+      await prisma.moderationAction.updateMany({
+        where: {
+          actionType: 'MUTE',
+          isActive: true,
+          expiresAt: { not: null, lt: now }
+        },
+        data: { isActive: false }
+      });
+    }
+  } catch (e) {
+    logger.error('Error processing expired mutes', e);
+  }
+}
+
 /** Transition users to OFFLINE if no heartbeat in 10 minutes */
 async function transitionOfflineUsers() {
   try {
@@ -50,6 +118,8 @@ function startBackgroundJobs() {
   intervals.push(setInterval(transitionInactiveUsers, 60 * 1000));
   intervals.push(setInterval(cleanupExpiredSessions, 15 * 60 * 1000));
   intervals.push(setInterval(transitionOfflineUsers, 5 * 60 * 1000));
+  intervals.push(setInterval(processExpiredBans, 2 * 60 * 1000)); // Check every 2 minutes
+  intervals.push(setInterval(processExpiredMutes, 2 * 60 * 1000)); // Check every 2 minutes
   
   // Unref intervals to allow graceful shutdown
   intervals.forEach(interval => interval.unref());
@@ -58,6 +128,8 @@ function startBackgroundJobs() {
   transitionInactiveUsers();
   cleanupExpiredSessions();
   transitionOfflineUsers();
+  processExpiredBans();
+  processExpiredMutes();
   
   logger.info('Background jobs started');
 }
