@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const logger = require('./lib/logger');
+const { initChat } = require('./initChat');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,18 +17,8 @@ const io = new Server(server, {
 
 app.use(express.static(path.join(__dirname, '../../public')));
 
-io.on('connection', (socket) => {
-  logger.info(`User connected: ${socket.id}`);
-
-  socket.on('chat message', (msg) => {
-    logger.debug(`Chat message: ${msg}`);
-    io.emit('chat message', msg);
-  });
-
-  socket.on('disconnect', () => {
-    logger.info(`User disconnected: ${socket.id}`);
-  });
-});
+// Initialize chat handlers with presence tracking and message management
+initChat(io);
 
 const PORT = process.env.SOCKET_PORT || 3002;
 server.listen(PORT, () => {
