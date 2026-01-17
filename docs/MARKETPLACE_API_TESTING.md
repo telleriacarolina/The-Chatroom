@@ -90,7 +90,7 @@ curl -X POST http://localhost:3001/api/market/content \
     "contentType": "SFW",
     "thumbnailUrl": "https://...",
     "status": "ACTIVE",
-    "createdAt": "2026-01-17T06:00:00.000Z"
+    "createdAt": "2024-01-17T06:00:00.000Z"
   }
 }
 ```
