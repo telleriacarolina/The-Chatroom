@@ -5,6 +5,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const helmet = require('helmet');
+
 const { startBackgroundJobs } = require('./services/backgroundJobs');
 const { initializeSocketIO } = require('./services/socketio');
 const authRoutes = require('./routes/auth');
@@ -34,7 +35,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+<<<<<<< Updated upstream
 app.use('/api/chatroom', chatroomRoutes);
+=======
+>>>>>>> Stashed changes
 app.use('/api/lounges', loungeRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

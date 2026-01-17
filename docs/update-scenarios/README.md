@@ -198,7 +198,8 @@ router.post('/profile', apiLimiter, async (req, res) => { /* ... */ });
 ```json
 {
   "scripts": {
-    "dev:debug": "nodemon --inspect server/server.js"
+    "dev:debug": "nodemon --inspect server/server.js",
+    "build": "your-build-command"
   }
 }
 ```

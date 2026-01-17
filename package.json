@@ -25,10 +25,11 @@
     "comment_5": "=== Utilities ===",
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "build": "npm run build -w @chatroom/api & npm run build -w @chatroom/web & npm run build -w @chatroom/socket"
   },
   "dependencies": {
-    "@prisma/client": "^5.11.0",
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cookie": "^0.7.0",
     "cookie-parser": "^1.4.6",

@@ -13,10 +13,7 @@ This file contains GitHub-ready tasks that can be imported into GitHub Projects 
 ## 🎯 IMMEDIATE ACTIONS (High Priority)
 
 ### #1 Fix TypeScript Errors in Block.tsx
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
 **Package:** `@chatroom/web`  
 **Labels:** `bug`, `typescript`, `high-priority`  
 **Time:** 5 minutes  
@@ -26,10 +23,7 @@ This file contains GitHub-ready tasks that can be imported into GitHub Projects 
 Fix type error on line 14 of `components/chat/Block.tsx`
 
 **Tasks:**
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
 - [ ] Change `useState(null)` to `useState<string | null>(null)`
 - [ ] Verify no TypeScript errors with `npm run build`
 - [ ] Test component renders correctly

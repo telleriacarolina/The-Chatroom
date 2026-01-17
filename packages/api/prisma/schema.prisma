@@ -144,6 +144,8 @@ model User {
   reportsReceived        UserReport[] @relation("reportedUser")
   reportsReviewed        UserReport[] @relation("reviewer")
   auditLogs              AuditLog[]
+
+  posts                  Post[]
 }
 
 model Session {
@@ -331,4 +333,14 @@ model AuditLog {
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime @default(now())
+}
+
+model Post {
+  id     String   @id @default(uuid())
+  title  String
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId String
+  user   User  @relation(fields: [userId], references: [id])
 }

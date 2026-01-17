@@ -774,7 +774,7 @@ npx prisma generate
 **3. Prisma Client Usage:**
 
 ```javascript
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Replace in-memory users Map

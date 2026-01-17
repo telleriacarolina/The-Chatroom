@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+    
     {
       "name": "Dev: Express + Next (nodemon)",
       "type": "node",
@@ -12,6 +13,21 @@
       "restart": true,
       "skipFiles": ["<node_internals>/**"]
     },
+
+      {
+        "name": "DEBUG: API (Inspect)",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["run", "dev:api"],
+        "cwd": "${workspaceFolder}",
+        "console": "integratedTerminal",
+        "restart": true,
+        "skipFiles": ["<node_internals>/**"],
+        "env": {
+          "NODE_ENV": "development"
+        }
+      },
     {
       "name": "Start: Production Server",
       "type": "node",

@@ -5,17 +5,20 @@
       "label": "npm install",
       "type": "shell",
       "command": "npm",
-      "args": ["install"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "args": [
+        "install"
+      ],
+      "group": "build",
+      "problemMatcher": []
     },
     {
       "label": "Next.js dev server",
       "type": "shell",
       "command": "npm",
-      "args": ["run", "next:dev"],
+      "args": [
+        "run",
+        "next:dev"
+      ],
       "isBackground": true,
       "group": {
         "kind": "build"
@@ -55,6 +58,28 @@
           "endsPattern": "^.*ready.*"
         }
       }
+    },
+    {
+      "type": "java (build)",
+      "paths": [
+        "${workspace}"
+      ],
+      "isFullBuild": true,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "label": "java (build): Build Workspace",
+      "detail": "$(tools) Build all the Java projects in workspace."
     }
-  ]
+  ],
+  "routes": {
+    "chatroom": "./routes/chatroom",
+    "lounges": "./routes/lounges"
+  },
+  "dependencies": {
+    "chatroomRoutes": "./routes/chatroom",
+    "loungeRoutes": "./routes/lounges"
+  }
 }
