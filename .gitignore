@@ -1,3 +1,39 @@
+# Order: Documentation, Config, Source, Packages, Database, Public
+# Documentation
+README.md
+LICENSE
+ARCHITECTURE.md
+DEPLOYMENT.md
+CONTRIBUTING.md
+docs/
+
+# Config
+.env.example
+.nvmrc
+.gitignore
+package.json
+tsconfig.json
+vercel.json
+
+# Source
+api/
+socket/
+web/
+shared/
+
+# Packages
+packages/
+
+# Database
+prisma/
+
+# Node modules and build
+node_modules/
+.next/
+
+# Misc
+.vscode/
+.github/
 node_modules/
 dist/
 .env
