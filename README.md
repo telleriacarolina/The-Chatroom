@@ -1,8 +1,30 @@
+
 # The Chatroom
 
-A real-time chat application with multi-tier authentication, language-specific lounges, user marketplace, moderation, and verification system. Built with Node.js, Express, Socket.IO, Next.js, and PostgreSQL.
+## Project Overview
 
-** Monorepo Structure:** This project is fully consolidated with all code in the `packages/` directory.
+The Chatroom is a real-time chat application featuring multi-tier authentication, language-specific lounges, a user marketplace, moderation, and verification systems. Built with Node.js, Express, Socket.IO, Next.js, and PostgreSQL.
+
+## Quick Start
+
+1. Install dependencies:
+  ```bash
+  npm install
+  ```
+2. Set up environment variables in `.env` files (see `.env.example`).
+3. Run database migrations:
+  ```bash
+  npm run prisma:migrate
+  npm run prisma:generate
+  ```
+4. Start servers:
+  ```bash
+  npm run dev:api      # API server (port 3001)
+  npm run dev:socket   # Socket.IO server (port 3002)
+  npm run dev:web      # Next.js frontend (port 3000)
+  ```
+
+For more details, see [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/API.md](docs/API.md).
 
 
 ##  Packages
