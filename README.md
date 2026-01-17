@@ -7,7 +7,10 @@ A real-time chat application with multi-tier authentication, language-specific l
 
 ##  Packages
 
-```
+```bash
+
+##Packages 
+
 The-Chatroom/
 ├── packages/
 │   ├── api/          # Backend REST API (Express + Prisma + PostgreSQL)
@@ -101,6 +104,7 @@ The-Chatroom/
 
 ## Project Structure
 
+
 The-Chatroom/
 ├── server/           # API and Socket.IO servers
 ├── routes/           # API routes
@@ -141,12 +145,14 @@ Alternatively, install Node 18 via your preferred manager (asdf/Volta) before ru
 
 ```bash
 npm install
+npm run dev
 ```
 
 ### 2. Configure Environment
 
 Each package has its own environment configuration:
 **API Package** (`packages/api/.env`):
+
 
 ```bash
 DATABASE_URL="postgresql://user:password@localhost:5432/chatroom"
@@ -157,12 +163,14 @@ PORT=3001
 ```
 **Socket Package** (`packages/socket/.env`):
 
+
 ```bash
 SOCKET_PORT=3002
 FRONTEND_URL="http://localhost:3000"
 ```
 
 **Web Package** (`packages/web/.env.local`):
+
 
 ```bash
 NEXT_PUBLIC_API_URL="http://localhost:3001"
@@ -179,17 +187,37 @@ npm run prisma:migrate
 
 ### Option A: All-in-One Script (Recommended)
 
+#### Option A: All-in-One Script (Recommended)
+
 ```bash
 # Run all services
 npm run dev
 
 # Or run individually:
+# First time setup
+./start-all.sh --setup
+
+# Start all services
+./start-all.sh
+
+# View logs
+./start-all.sh --logs
+
+# Get help
+./start-all.sh --help
+```
+
+#### Option B: Individual Services
+
+```bash
 npm run dev:api      # API server (http://localhost:3001)
 npm run dev:socket   # Socket.IO (http://localhost:3002)
 npm run dev:web      # Next.js (http://localhost:3000)
 ```
 
 ### Option C: Standalone Single-File App
+#### Option C: Standalone Single-File App
+
 ```bash
 node app-standalone.js
 ```
@@ -199,6 +227,10 @@ node app-standalone.js
 - **Frontend:** http://localhost:3000
 - **API:** http://localhost:3001
 - **WebSocket:** http://localhost:3002
+- **🌐 Frontend:** <http://localhost:3000>
+- **📡 API:** <http://localhost:3001>
+- **🔌 WebSocket:** <http://localhost:3002>
+- **📊 Health Check:** <http://localhost:3001/health>
 
 ---
 
@@ -211,7 +243,7 @@ Quickly verify the services are healthy and connected.
 curl -s http://localhost:3001/health
 ```
 
-From the browser console on the frontend (http://localhost:3000):
+From the browser console on the frontend (<http://localhost:3000>):
 
 ```js
 (() => {
@@ -252,6 +284,7 @@ NODE_ENV="development"
 
 ### Development
 
+
 ```bash
 npm run dev              # Run all services
 npm run dev:api          # API server only
@@ -260,6 +293,7 @@ npm run dev:web          # Next.js frontend only
 ```
 
 ### Production
+
 
 ```bash
 npm run build            # Build all packages
@@ -271,12 +305,14 @@ npm run start:web        # Start Next.js only
 ```
 
 ### Database
+
 ```bash
 npm run prisma:generate  # Generate Prisma client
 npm run prisma:migrate   # Run database migrations
 ```
 
 ### Utilities
+
 
 ```bash
 npm run clean            # Clean all build artifacts and node_modules
@@ -291,7 +327,7 @@ npm run clean            # Clean all build artifacts and node_modules
 
 ---
 
-_Last updated: December 28, 2025_
+### Last updated: December 28, 2025
 
 ⸻
 
