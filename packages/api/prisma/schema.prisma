@@ -245,10 +245,6 @@ model ChatMessage {
   
   moderationActions ModerationAction[]
   reports           UserReport[]
-  
-  @@index([loungeId, createdAt(sort: Desc)])
-  @@index([userId])
-  @@index([isDeleted])
 }
 
 model MarketplaceItem {
