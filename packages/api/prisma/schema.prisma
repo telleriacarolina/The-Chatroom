@@ -130,12 +130,20 @@ model User {
   isOnline               Boolean  @default(false)
   stayOnline             Boolean  @default(false)
   stayOnlineUntil        DateTime?
+  
+  // Moderation fields
+  role                   String   @default("USER") // USER, MODERATOR, ADMIN
+  isFlagged              Boolean  @default(false)
+  isBanned               Boolean  @default(false)
+  isMuted                Boolean  @default(false)
+  muteExpiresAt          DateTime?
 
   sessions               Session[]
   tempSessions           TempSession[]
   verifications          IDVerification[]
   chatMessages           ChatMessage[]
   deletedMessages        ChatMessage[] @relation("deletedBy")
+  messageReads           MessageRead[]
   marketplaceItems       MarketplaceItem[] @relation("SellerItems")
   transactionsAsBuyer    Transaction[] @relation("buyer")
   transactionsAsSeller   Transaction[] @relation("seller")
@@ -145,6 +153,8 @@ model User {
   reportsReceived        UserReport[] @relation("reportedUser")
   reportsReviewed        UserReport[] @relation("reviewer")
   auditLogs              AuditLog[]
+  moderationAppeals      ModerationAppeal[]
+  reviewedAppeals        ModerationAppeal[] @relation("appealReviewer")
 
   posts                  Post[]
 }
@@ -154,6 +164,7 @@ model Session {
   user             User     @relation(fields: [userId], references: [id])
   userId           String
   sessionToken     String   @unique
+  refreshToken     String?  @unique
   ipAddress        String?
   userAgent        String?
   isActive         Boolean  @default(true)
@@ -172,6 +183,14 @@ model TempSession {
   sessionToken      String?   @unique
   expiresAt         DateTime
   createdAt         DateTime  @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  phone     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model IDVerification {
@@ -245,6 +264,7 @@ model ChatMessage {
   
   moderationActions ModerationAction[]
   reports           UserReport[]
+  reads             MessageRead[]
 }
 
 model MarketplaceItem {
@@ -306,6 +326,12 @@ model ModerationAction {
   expiresAt      DateTime?
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
+  
+  appeals        ModerationAppeal[]
+  
+  @@index([targetUserId])
+  @@index([moderatorId])
+  @@index([isActive])
 }
 
 model UserReport {
@@ -325,6 +351,10 @@ model UserReport {
   reviewedById     String?
   reviewedAt       DateTime?
   createdAt        DateTime @default(now())
+  
+  @@index([reportedUserId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model AuditLog {
@@ -336,6 +366,28 @@ model AuditLog {
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+model ModerationAppeal {
+  id              String   @id @default(uuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  moderationAction ModerationAction @relation(fields: [moderationActionId], references: [id])
+  moderationActionId String
+  reason          String
+  status          String   @default("PENDING")
+  reviewedBy      User?    @relation("appealReviewer", fields: [reviewedById], references: [id])
+  reviewedById    String?
+  reviewNotes     String?
+  reviewedAt      DateTime?
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([status])
 }
 
 model Post {
@@ -346,4 +398,17 @@ model Post {
   updatedAt DateTime @updatedAt
   userId String
   user   User  @relation(fields: [userId], references: [id])
+}
+
+model MessageRead {
+  id        String      @id @default(uuid())
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  readAt    DateTime    @default(now())
+  
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
 }
