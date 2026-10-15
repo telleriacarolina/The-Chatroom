@@ -22,6 +22,7 @@
     "comment_4": "=== Testing ===",
     "test:startup": "node scripts/test-startup.js",
     "test:startup:bash": "bash scripts/test-startup.sh",
+    "test:csrf": "node scripts/test-csrf.js",
     "comment_5": "=== Utilities ===",
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",

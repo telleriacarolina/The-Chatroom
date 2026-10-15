@@ -6,14 +6,16 @@ This file documents all API endpoints for The Chatroom project.
 
 ### CSRF Token
 - **POST /auth/csrf**
-  - Generate a CSRF token for protecting form submissions
+  - Generate a CSRF token for protecting state-changing requests
   - No authentication required
   - Response: `{ csrfToken: string }`
-  - Sets `csrfToken` cookie
+  - Sets `csrfToken` cookie (`HttpOnly`, `SameSite=Lax` for same-origin, `SameSite=None; Secure` for HTTPS cross-origin)
+  - Send the token back on unsafe requests in `X-CSRF-Token` (or `X-CSRF`) while including cookies
 
 ### User Registration
 - **POST /auth/signup**
   - Register a new user with phone number
+  - Requires valid CSRF header + `csrfToken` cookie
   - Rate limited: 5 attempts per 15 minutes
   - Body: `{ phoneNumber, firstName?, lastName?, birthYear? }`
   - Response: `{ message, userId }`
@@ -23,6 +25,7 @@ This file documents all API endpoints for The Chatroom project.
 ### Sign In
 - **POST /auth/signin**
   - Authenticate user with phone and password
+  - Requires valid CSRF header + `csrfToken` cookie
   - Rate limited: 5 attempts per 15 minutes
   - Body: `{ phoneNumber, password, staySignedIn? }`
   - Response: `{ ok: true, user: { id, phoneNumber } }`
@@ -32,6 +35,7 @@ This file documents all API endpoints for The Chatroom project.
 ### Guest Session
 - **POST /auth/guest**
   - Create temporary guest session
+  - Requires valid CSRF header + `csrfToken` cookie
   - No authentication required
   - Body: `{ ageCategory: "18+RED" | "PLUS_18" }`
   - Response: `{ tempSessionToken, guestId, expiresAt }`
