@@ -5,9 +5,36 @@ const { prisma } = require('../lib/prisma');
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 
 function normalizeAgeCategory(value) {
-  const normalized = String(value || '').trim().toUpperCase().replace(/[^A-Z0-9_]/g, '');
-  if (normalized === 'PLUS_18' || normalized === '_18PLUS' || normalized === '18+') return 'PLUS_18';
-  if (normalized === 'PLUS_18_RED' || normalized === '_18PLUS_RED' || normalized === '18+RED') return 'PLUS_18_RED';
+  const normalized = String(value ?? '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, '')
+    .replace(/[^A-Z0-9+_]/g, '');
+
+  if (!normalized) return null;
+
+  const variants = new Set([
+    'PLUS_18',
+    '_18PLUS',
+    '18+',
+    '18PLUS',
+    'PLUS18',
+    'PLUS_18_RED',
+    '_18PLUS_RED',
+    '18+RED',
+    '18RED',
+    '18_PLUS_RED',
+    'PLUS18RED'
+  ]);
+
+  if (normalized === 'PLUS_18' || normalized === '_18PLUS' || normalized === '18+' || normalized === '18PLUS' || normalized === 'PLUS18') {
+    return 'PLUS_18';
+  }
+
+  if (variants.has(normalized) && (normalized.includes('RED') || normalized === 'PLUS_18_RED' || normalized === '_18PLUS_RED' || normalized === '18+RED' || normalized === '18RED' || normalized === '18_PLUS_RED' || normalized === 'PLUS18RED')) {
+    return 'PLUS_18_RED';
+  }
+
   return null;
 }
 
@@ -50,6 +77,10 @@ function validateUserAccess(user, { accessLevel = null } = {}) {
 
   if (user.isBanned) {
     return { ok: false, status: 403, message: 'Account is banned' };
+  }
+
+  if (user.isMuted) {
+    return { ok: false, status: 403, message: 'Account is muted' };
   }
 
   if (accessLevel) {
