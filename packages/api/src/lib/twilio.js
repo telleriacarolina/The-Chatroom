@@ -1,12 +1,17 @@
-const Twilio = require('twilio');
-
 function createSmsSender({
   accountSid = process.env.TWILIO_ACCOUNT_SID,
   authToken = process.env.TWILIO_AUTH_TOKEN,
   fromNumber = process.env.TWILIO_FROM_NUMBER,
-  twilioFactory = Twilio
+  twilioFactory
 } = {}) {
-  const client = accountSid && authToken ? twilioFactory(accountSid, authToken) : null;
+  const resolvedFactory = twilioFactory || (() => {
+    try {
+      return require('twilio');
+    } catch (_) {
+      return null;
+    }
+  })();
+  const client = accountSid && authToken && resolvedFactory ? resolvedFactory(accountSid, authToken) : null;
 
   return async function sendSms(to, body) {
     if (!to || !body) {
