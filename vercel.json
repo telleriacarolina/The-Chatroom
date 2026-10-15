@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build -w @chatroom/web",
+  "buildCommand": "npm run build:web",
   "devCommand": "npm run dev -w @chatroom/web",
   "installCommand": "npm install",
   "framework": null,

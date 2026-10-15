@@ -123,10 +123,24 @@ function createFakePrismaState() {
   };
 }
 
-async function startApiServiceTarget(modulePath, prismaModulePath) {
+function setMockModule(modulePath, exportsValue) {
+  const resolved = require.resolve(modulePath);
+  require.cache[resolved] = {
+    id: resolved,
+    filename: resolved,
+    loaded: true,
+    exports: exportsValue
+  };
+}
+
+async function startApiServiceTarget(modulePath, prismaModulePath, mockModules = {}) {
   const { prisma, state } = createFakePrismaState();
   global.prisma = prisma;
   delete require.cache[require.resolve(prismaModulePath)];
+  for (const mockPath of Object.keys(mockModules)) {
+    delete require.cache[require.resolve(mockPath)];
+    setMockModule(mockPath, mockModules[mockPath]);
+  }
   delete require.cache[require.resolve(modulePath)];
   const { initializeSocketIO } = require(modulePath);
   const server = http.createServer((_req, res) => res.end('ok'));
@@ -269,7 +283,15 @@ async function main() {
       'packages/api/src/services/socketio',
       () => startApiServiceTarget(
         `${ROOT}/packages/api/src/services/socketio.js`,
-        `${ROOT}/packages/api/src/lib/prisma.js`
+        `${ROOT}/packages/api/src/lib/prisma.js`,
+        {
+          [`${ROOT}/packages/api/src/utils/logger.js`]: {
+            info: () => {},
+            warn: () => {},
+            error: () => {},
+            debug: () => {}
+          }
+        }
       )
     );
     await runSuite(
