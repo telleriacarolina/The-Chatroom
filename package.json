@@ -8,17 +8,17 @@
   ],
   "scripts": {
     "comment_1": "=== PRIMARY: Root-level development ===",
-    "dev:api": "nodemon api/server.js",
-    "dev:socket": "nodemon socket/socket-server.js",
-    "dev:web": "cd web && npm run dev",
-    "dev": "node scripts/start-all.js --run",
+    "dev:api": "npm run dev -w @chatroom/api",
+    "dev:socket": "npm run dev -w @chatroom/socket",
+    "dev:web": "npm run dev -w @chatroom/web",
+    "dev": "npm run dev:api & npm run dev:socket & npm run dev:web",
     "comment_2": "=== SECONDARY: Package workspaces (optional) ===",
     "pkgs:dev": "npm run dev --workspaces --if-present",
     "pkgs:build": "npm run build --workspaces --if-present",
     "pkgs:start": "npm run start --workspaces --if-present",
     "comment_3": "=== Database & Prisma ===",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate --schema packages/api/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema packages/api/prisma/schema.prisma",
     "comment_4": "=== Testing ===",
     "test:startup": "node scripts/test-startup.js",
     "test:startup:bash": "bash scripts/test-startup.sh",
@@ -26,7 +26,8 @@
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "build": "npm run build -w @chatroom/api & npm run build -w @chatroom/web & npm run build -w @chatroom/socket"
+    "build:web": "npm run build -w @chatroom/web",
+    "build": "npm run build -w @chatroom/api & npm run build:web & npm run build -w @chatroom/socket"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
