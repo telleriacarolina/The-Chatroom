@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const chatroomRoutes = require('./routes/chatroom');
 const loungeRoutes = require('./routes/lounges');
 const moderationRoutes = require('./routes/moderation');
+const csrfProtection = require('./middleware/csrf');
 const logger = require('./utils/logger');
 
 const app = express();
@@ -36,9 +37,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/chatroom', chatroomRoutes);
+app.use('/api/chatroom', csrfProtection, chatroomRoutes);
 app.use('/api/lounges', loungeRoutes);
-app.use('/api/moderation', moderationRoutes);
+app.use('/api/moderation', csrfProtection, moderationRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 

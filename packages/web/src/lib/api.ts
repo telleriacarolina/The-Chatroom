@@ -4,6 +4,8 @@
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const CSRF_HEADER_NAME = 'x-csrf-token';
+const SAFE_HTTP_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -24,6 +26,40 @@ export interface SigninData {
   staySignedIn?: boolean;
 }
 
+function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+
+  const cookie = document.cookie
+    .split('; ')
+    .find((part) => part.startsWith(`${name}=`));
+
+  if (!cookie) return null;
+  return decodeURIComponent(cookie.split('=').slice(1).join('='));
+}
+
+async function fetchCSRFToken(): Promise<string | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/csrf`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!response.ok) return null;
+    const data = await response.json().catch(() => null);
+    return data?.csrfToken || readCookie('csrfToken');
+  } catch (error) {
+    console.error('Failed to bootstrap CSRF token:', error);
+    return null;
+  }
+}
+
+async function ensureCSRFToken(): Promise<string | null> {
+  const existingToken = readCookie('csrfToken');
+  if (existingToken) return existingToken;
+  return fetchCSRFToken();
+}
+
 /**
  * Generic fetch wrapper with error handling
  */
@@ -32,13 +68,24 @@ async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = new Headers(options.headers || {});
+
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    if (!SAFE_HTTP_METHODS.has(method) && endpoint !== '/api/auth/csrf') {
+      const csrfToken = await ensureCSRFToken();
+      if (csrfToken) {
+        headers.set(CSRF_HEADER_NAME, csrfToken);
+      }
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       credentials: 'include', // Important for httpOnly cookies
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
 
     const contentType = response.headers.get('content-type') || '';
