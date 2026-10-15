@@ -4,7 +4,9 @@ const bcrypt = require('bcryptjs');
 const { signAccess, signRefresh, verifyRefresh } = require('../lib/jwt');
 const { prisma } = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
+const { sendSms } = require('../lib/twilio');
 const { generateCSRFToken } = require('../utils/security');
+const { validatePasswordStrength, generateOneTimeCode, hashOneTimeCode } = require('../utils/passwordPolicy');
 const { authLimiter } = require('../middleware/rateLimiter');
 
 function setCookie(res, name, value, opts = {}) {
@@ -24,15 +26,18 @@ router.post('/csrf', (req, res) => {
 });
 
 router.post('/signup', authLimiter, async (req, res) => {
-  const { phoneNumber, firstName, lastName, birthYear } = req.body || {};
-  if (!phoneNumber) return res.status(400).json({ error: 'phoneNumber required' });
+  const { phoneNumber, password } = req.body || {};
+  if (!phoneNumber || !password) return res.status(400).json({ error: 'phoneNumber and password required' });
+
+  const passwordValidation = validatePasswordStrength(password);
+  if (!passwordValidation.ok) return res.status(400).json({ error: passwordValidation.error });
+
   try {
     const encryptedPhone = encryptPhone(phoneNumber);
     const existing = await prisma.user.findUnique({ where: { phoneNumber: encryptedPhone } });
     if (existing) return res.status(409).json({ error: 'User already exists' });
 
-    const defaultPassword = `${(firstName||'User').slice(0,3)}${birthYear||'2000'}${(lastName||'').slice(0,3)}!`;
-    const passwordHash = await bcrypt.hash(defaultPassword, 12);
+    const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({ data: {
       phoneNumber: encryptedPhone,
@@ -41,8 +46,7 @@ router.post('/signup', authLimiter, async (req, res) => {
       accountType: 'REGISTERED'
     }});
 
-    // Note: Twilio send handled elsewhere if configured
-    res.json({ message: 'Default password sent via SMS', userId: user.id });
+    res.status(201).json({ ok: true, message: 'Account created', userId: user.id });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Server error' });
@@ -101,6 +105,10 @@ router.post('/guest', async (req, res) => {
 router.post('/change-password', authLimiter, async (req, res) => {
   const { phoneNumber, currentPassword, newPassword } = req.body || {};
   if (!phoneNumber || !currentPassword || !newPassword) return res.status(400).json({ error: 'Missing fields' });
+
+  const passwordValidation = validatePasswordStrength(newPassword);
+  if (!passwordValidation.ok) return res.status(400).json({ error: passwordValidation.error });
+
   try {
     const encryptedPhone = encryptPhone(phoneNumber);
     const user = await prisma.user.findUnique({ where: { phoneNumber: encryptedPhone } });
@@ -124,7 +132,11 @@ router.post('/refresh', async (req, res) => {
     const payload = verifyRefresh(refresh);
     const userId = payload.userId;
     const session = await prisma.session.findUnique({ where: { sessionToken: refresh } });
-    if (!session || !session.isActive) return res.status(401).json({ error: 'Invalid session' });
+    if (!session || !session.isActive || session.userId !== userId) return res.status(401).json({ error: 'Invalid session' });
+    if (session.expiresAt <= new Date()) {
+      await prisma.session.updateMany({ where: { id: session.id }, data: { isActive: false } }).catch(() => {});
+      return res.status(401).json({ error: 'Session expired' });
+    }
     const accessToken = signAccess({ userId });
     setCookie(res, 'accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000 });
     res.json({ accessToken });
@@ -148,8 +160,7 @@ router.post('/logout', async (req, res) => {
 });
 
 /**
- * Request password reset - generates a token and stores it in database
- * In production, this would send the token via SMS
+ * Request password reset - generates and delivers a one-time code.
  */
 router.post('/request-password-reset', authLimiter, async (req, res) => {
   const { phoneNumber } = req.body || {};
@@ -162,39 +173,47 @@ router.post('/request-password-reset', authLimiter, async (req, res) => {
     // Return success even if user doesn't exist (security best practice)
     if (!user) {
       return res.json({ 
-        message: 'If this phone number is registered, a reset token will be sent via SMS',
+        message: 'If this phone number is registered, a reset code will be sent via SMS',
         ok: true 
       });
     }
 
-    // Generate secure reset token
-    const crypto = require('crypto');
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetCode = generateOneTimeCode();
+    const resetTokenHash = hashOneTimeCode(resetCode);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    // Clean up any existing reset tokens for this phone
     await prisma.passwordReset.deleteMany({ 
       where: { phone: encryptedPhone }
     }).catch(() => {});
 
-    // Store the reset token
     await prisma.passwordReset.create({
       data: {
         phone: encryptedPhone,
-        token: resetToken,
+        token: resetTokenHash,
         expiresAt
       }
     });
 
-    // TODO: In production, send resetToken via SMS using Twilio
-    // For now, return it in development mode only
+    const smsBody = `Your Chatroom password reset code is ${resetCode}. It expires in 15 minutes.`;
+    let deliveredBySms = true;
+    try {
+      await sendSms(phoneNumber, smsBody);
+    } catch (smsError) {
+      deliveredBySms = false;
+      await prisma.passwordReset.deleteMany({ where: { phone: encryptedPhone } }).catch(() => {});
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(503).json({ error: 'Unable to deliver reset code right now' });
+      }
+    }
+
     const response = { 
-      message: 'If this phone number is registered, a reset token will be sent via SMS',
+      message: 'If this phone number is registered, a reset code will be sent via SMS',
       ok: true 
     };
     
-    if (process.env.NODE_ENV === 'development') {
-      response.resetToken = resetToken; // Only for testing
+    if (!deliveredBySms && process.env.NODE_ENV !== 'production') {
+      response.resetCode = resetCode;
+      response.delivery = 'development-fallback';
     }
 
     res.json(response);
@@ -205,34 +224,33 @@ router.post('/request-password-reset', authLimiter, async (req, res) => {
 });
 
 /**
- * Reset password using the token
+ * Reset password using one-time code
  */
 router.post('/reset-password', authLimiter, async (req, res) => {
-  const { phoneNumber, token, newPassword } = req.body || {};
+  const { phoneNumber, code, token, newPassword } = req.body || {};
+  const providedCode = code || token;
   
-  if (!phoneNumber || !token || !newPassword) {
-    return res.status(400).json({ error: 'phoneNumber, token, and newPassword required' });
+  if (!phoneNumber || !providedCode || !newPassword) {
+    return res.status(400).json({ error: 'phoneNumber, code, and newPassword required' });
   }
 
-  // Validate password strength
-  if (newPassword.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters' });
-  }
+  const passwordValidation = validatePasswordStrength(newPassword);
+  if (!passwordValidation.ok) return res.status(400).json({ error: passwordValidation.error });
 
   try {
     const encryptedPhone = encryptPhone(phoneNumber);
+    const tokenHash = hashOneTimeCode(providedCode);
     
-    // Find valid reset token
     const resetRecord = await prisma.passwordReset.findFirst({
       where: {
         phone: encryptedPhone,
-        token: token,
+        token: tokenHash,
         expiresAt: { gt: new Date() }
       }
     });
 
     if (!resetRecord) {
-      return res.status(401).json({ error: 'Invalid or expired reset token' });
+      return res.status(401).json({ error: 'Invalid or expired reset code' });
     }
 
     // Find user
@@ -244,10 +262,8 @@ router.post('/reset-password', authLimiter, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Hash new password
     const newHash = await bcrypt.hash(newPassword, 12);
 
-    // Update password and invalidate all sessions
     await prisma.user.update({
       where: { id: user.id },
       data: { passwordHash: newHash }
@@ -258,9 +274,8 @@ router.post('/reset-password', authLimiter, async (req, res) => {
       data: { isActive: false }
     }).catch(() => {});
 
-    // Delete the used reset token
-    await prisma.passwordReset.delete({
-      where: { id: resetRecord.id }
+    await prisma.passwordReset.deleteMany({
+      where: { phone: encryptedPhone }
     }).catch(() => {});
 
     res.json({ 
