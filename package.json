@@ -13,6 +13,10 @@
     "dev:web": "cd web && npm run dev",
     "build:web": "npm run build -w @chatroom/web",
     "dev": "node scripts/start-all.js --run",
+    "dev:api": "npm run dev -w @chatroom/api",
+    "dev:socket": "npm run dev -w @chatroom/socket",
+    "dev:web": "npm run dev -w @chatroom/web",
+    "dev": "npm run dev:api & npm run dev:socket & npm run dev:web",
     "comment_2": "=== SECONDARY: Package workspaces (optional) ===",
     "pkgs:dev": "npm run dev --workspaces --if-present",
     "pkgs:build": "npm run build --workspaces --if-present",
@@ -28,7 +32,8 @@
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "build": "npm run build:web"
+    "build:web": "npm run build -w @chatroom/web",
+    "build": "npm run build -w @chatroom/api && npm run build -w @chatroom/socket && npm run build -w @chatroom/web"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
