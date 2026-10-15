@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { prisma } = require('../lib/prisma');
+const { apiLimiter } = require('../middleware/rateLimiter');
 const multer = require('multer');
 const path = require('path');
 
@@ -115,7 +116,7 @@ function calculateFees(amount) {
  * Upload marketplace content with file storage
  * Body: multipart/form-data with file, thumbnail, title, description, price, category, contentType, accessLevel
  */
-router.post('/content', authenticate, upload.fields([
+router.post('/content', apiLimiter, authenticate, upload.fields([
   { name: 'file', maxCount: 1 },
   { name: 'thumbnail', maxCount: 1 }
 ]), async (req, res) => {
@@ -202,7 +203,7 @@ router.post('/content', authenticate, upload.fields([
  * Initiate a purchase with payment processing
  * Body: { itemId, paymentMethod }
  */
-router.post('/purchase', authenticate, async (req, res) => {
+router.post('/purchase', apiLimiter, authenticate, async (req, res) => {
   try {
     const { itemId, paymentMethod = 'STRIPE' } = req.body;
     
@@ -440,7 +441,7 @@ router.post('/webhook/stripe', express.raw({ type: 'application/json' }), async 
  * GET /api/market/creator/stats
  * Get creator statistics (total sales, revenue, items)
  */
-router.get('/creator/stats', authenticate, async (req, res) => {
+router.get('/creator/stats', apiLimiter, authenticate, async (req, res) => {
   try {
     // Get total items created by this user
     const totalItems = await prisma.marketplaceItem.count({
@@ -496,7 +497,7 @@ router.get('/creator/stats', authenticate, async (req, res) => {
  * Get detailed sales history for creator
  * Query params: page, limit
  */
-router.get('/creator/sales', authenticate, async (req, res) => {
+router.get('/creator/sales', apiLimiter, authenticate, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -564,7 +565,7 @@ router.get('/creator/sales', authenticate, async (req, res) => {
  * Get all items created by this seller
  * Query params: status, page, limit
  */
-router.get('/creator/items', authenticate, async (req, res) => {
+router.get('/creator/items', apiLimiter, authenticate, async (req, res) => {
   try {
     const status = req.query.status;
     const page = parseInt(req.query.page) || 1;
