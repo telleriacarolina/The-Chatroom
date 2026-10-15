@@ -7,10 +7,15 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { startBackgroundJobs } = require('./services/backgroundJobs');
 const { initializeSocketIO } = require('./services/socketio');
+const logger = require('./utils/logger');
 const authRoutes = require('./routes/auth');
 const loungeRoutes = require('./routes/lounges');
-const messagesRoutes = require('./routes/messages');
-const logger = require('./utils/logger');
+let messagesRoutes = null;
+try {
+  messagesRoutes = require('./routes/messages');
+} catch (error) {
+  logger.warn('Message routes unavailable at startup:', error.message);
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -38,7 +43,9 @@ app.use('/api/lounges', loungeRoutes);
 // Message-related endpoints (including Message History API).
 // Detailed endpoint specification, usage examples, error codes,
 // and performance notes are documented in docs/MESSAGE_HISTORY_API.md.
-app.use('/api/messages', messagesRoutes);
+if (messagesRoutes) {
+  app.use('/api/messages', messagesRoutes);
+}
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
