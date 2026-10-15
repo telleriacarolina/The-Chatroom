@@ -1,12 +1,23 @@
 import { Server, Socket } from "socket.io";
 const prisma = require("./lib/prisma");
 const logger = require("./lib/logger");
+const { validatePayload, chatMessageSchema } = require("../shared/schemas");
 
 /**
  * Socket connection tracking for presence management
  * Maps userId to array of socket IDs (for multiple device/tab support)
  */
 const userSockets = new Map<string, Set<string>>();
+const userMessageTimestamps = new Map<string, number[]>();
+
+function enforceMessageThrottle(userId: string) {
+  const now = Date.now();
+  const timestamps = userMessageTimestamps.get(userId) || [];
+  const recent = timestamps.filter((timestamp) => now - timestamp < 60000);
+  recent.push(now);
+  userMessageTimestamps.set(userId, recent);
+  return recent.length <= 12;
+}
 
 /**
  * Initialize chat handlers for Socket.IO server
@@ -152,18 +163,35 @@ export const initChat = (io: Server) => {
       messageType?: "TEXT" | "IMAGE" | "VIDEO" | "LINK" | "SYSTEM";
     }) => {
       try {
-        // Validate messageType
+        const payload = validatePayload({
+          loungeId,
+          languageRoomId,
+          userId,
+          content,
+          displayUsername,
+          messageType
+        }, chatMessageSchema.create);
+
+        if (!payload.valid) {
+          socket.emit("error", { message: "Invalid message payload", details: payload.errors });
+          return;
+        }
+
+        if (!enforceMessageThrottle(userId)) {
+          socket.emit("error", { message: "Too many messages. Please slow down." });
+          return;
+        }
+
         const validMessageTypes = ["TEXT", "IMAGE", "VIDEO", "LINK", "SYSTEM"];
         const validatedMessageType = validMessageTypes.includes(messageType) ? messageType : "TEXT";
-        
-        // Create message in database
+
         const message = await prisma.chatMessage.create({
           data: {
-            loungeId,
-            languageRoomId,
-            userId,
-            displayUsername,
-            messageText: content,
+            loungeId: payload.value.loungeId,
+            languageRoomId: payload.value.languageRoomId,
+            userId: payload.value.userId,
+            displayUsername: payload.value.displayUsername,
+            messageText: payload.value.content,
             messageType: validatedMessageType,
             moderationStatus: "APPROVED"
           },
@@ -179,7 +207,6 @@ export const initChat = (io: Server) => {
           }
         });
 
-        // Broadcast message to all users in the lounge
         io.to(loungeId).emit("message", {
           id: message.id,
           loungeId: message.loungeId,
@@ -194,7 +221,7 @@ export const initChat = (io: Server) => {
           user: message.user
         });
 
-        logger.info(`Message ${message.id} created by user ${userId} in lounge ${loungeId}`);
+        logger.info(`User ${userId} sent message to lounge ${loungeId}`);
       } catch (error) {
         logger.error("Error in message creation:", error);
         socket.emit("error", { message: "Failed to send message" });
@@ -217,9 +244,20 @@ export const initChat = (io: Server) => {
       loungeId: string;
     }) => {
       try {
-        // Verify the user owns the message
+        const payload = validatePayload({
+          messageId,
+          userId,
+          newContent,
+          loungeId
+        }, chatMessageSchema.edit);
+
+        if (!payload.valid) {
+          socket.emit("error", { message: "Invalid edit payload", details: payload.errors });
+          return;
+        }
+
         const existingMessage = await prisma.chatMessage.findUnique({
-          where: { id: messageId }
+          where: { id: payload.value.messageId }
         });
 
         if (!existingMessage) {
@@ -227,16 +265,15 @@ export const initChat = (io: Server) => {
           return;
         }
 
-        if (existingMessage.userId !== userId) {
+        if (existingMessage.userId !== payload.value.userId) {
           socket.emit("error", { message: "Not authorized to edit this message" });
           return;
         }
 
-        // Update message
         const updatedMessage = await prisma.chatMessage.update({
-          where: { id: messageId },
+          where: { id: payload.value.messageId },
           data: {
-            messageText: newContent,
+            messageText: payload.value.newContent,
             isEdited: true,
             editedAt: new Date()
           },
@@ -252,22 +289,19 @@ export const initChat = (io: Server) => {
           }
         });
 
-        // Broadcast the edited message to all users in the lounge
-        io.to(loungeId).emit("message-edited", {
+        io.to(payload.value.loungeId).emit("message-edited", {
           id: updatedMessage.id,
           content: updatedMessage.messageText,
           isEdited: updatedMessage.isEdited,
           editedAt: updatedMessage.editedAt,
           userId: updatedMessage.userId
         });
-
-        logger.info(`Message ${messageId} edited by user ${userId}`);
+        logger.info(`Message ${payload.value.messageId} edited by user ${payload.value.userId}`);
       } catch (error) {
         logger.error("Error in edit-message:", error);
         socket.emit("error", { message: "Failed to edit message" });
       }
     });
-
     /**
      * Handle message deletion
      * Marks message as deleted in DB and broadcasts the deletion
@@ -282,9 +316,14 @@ export const initChat = (io: Server) => {
       loungeId: string;
     }) => {
       try {
-        // Verify the user owns the message or is a moderator
+        const payload = validatePayload({ messageId, userId, loungeId }, chatMessageSchema.delete);
+        if (!payload.valid) {
+          socket.emit("error", { message: "Invalid delete payload", details: payload.errors });
+          return;
+        }
+
         const existingMessage = await prisma.chatMessage.findUnique({
-          where: { id: messageId }
+          where: { id: payload.value.messageId }
         });
 
         if (!existingMessage) {
@@ -292,31 +331,28 @@ export const initChat = (io: Server) => {
           return;
         }
 
-        // Check if user is the owner (for now, skip moderator check for simplicity)
-        if (existingMessage.userId !== userId) {
+        if (existingMessage.userId !== payload.value.userId) {
           socket.emit("error", { message: "Not authorized to delete this message" });
           return;
         }
 
-        // Soft delete the message
         const deletedMessage = await prisma.chatMessage.update({
-          where: { id: messageId },
+          where: { id: payload.value.messageId },
           data: {
             isDeleted: true,
             deletedAt: new Date(),
-            deletedById: userId
+            deletedById: payload.value.userId
           }
         });
 
-        // Broadcast the deletion to all users in the lounge
-        io.to(loungeId).emit("message-deleted", {
+        io.to(payload.value.loungeId).emit("message-deleted", {
           id: deletedMessage.id,
           userId: deletedMessage.userId,
           deletedAt: deletedMessage.deletedAt,
           deletedById: deletedMessage.deletedById
         });
 
-        logger.info(`Message ${messageId} deleted by user ${userId}`);
+        logger.info(`Message ${payload.value.messageId} deleted by user ${payload.value.userId}`);
       } catch (error) {
         logger.error("Error in delete-message:", error);
         socket.emit("error", { message: "Failed to delete message" });
