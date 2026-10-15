@@ -14,6 +14,7 @@ The Chatroom is a real-time chat application featuring multi-tier authentication
 2. Set up environment variables in `.env` files (see `.env.example`).
 3. Run database migrations:
   ```bash
+  PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test" npm run prisma:migrate:test
   npm run prisma:migrate
   npm run prisma:generate
   ```
@@ -202,6 +203,7 @@ NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ### 3. Set Up Database
 
 ```bash
+PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test" npm run prisma:migrate:test
 npm run prisma:migrate
 ```
 
@@ -331,6 +333,7 @@ npm run start:web        # Start Next.js only
 ```bash
 npm run prisma:generate  # Generate Prisma client
 npm run prisma:migrate   # Run database migrations
+npm run prisma:migrate:test # Validate migrations on disposable PostgreSQL first
 ```
 
 ### Utilities
@@ -396,7 +399,7 @@ npm run clean            # Clean all build artifacts and node_modules
 - **UserReport** – Reporting system
 - **AuditLog** – System audit trail
 
-See the full schema in [prisma/schema.prisma](prisma/schema.prisma) and detailed docs in [docs/COMPLETE_CODEBASE.md](docs/COMPLETE_CODEBASE.md).
+See the full schema in [packages/api/prisma/schema.prisma](packages/api/prisma/schema.prisma) and detailed docs in [docs/COMPLETE_CODEBASE.md](docs/COMPLETE_CODEBASE.md).
 
 ---
 
