@@ -47,11 +47,16 @@ Server runs on http://localhost:3002
 
 ### Client → Server
 
-- `chat message` - Send a message to the room
+- `join_room` - Join a language room within a lounge (`{ loungeId, languageRoomId }`)
+- `leave_room` - Leave a joined language room (`{ languageRoomId }`)
+- `chat_message` - Send a room-scoped message (`{ loungeId, languageRoomId, messageText, messageType? }`)
 
 ### Server → Client
 
-- `chat message` - Receive a message from another user
+- `room_joined` - Join acknowledgement for the current socket
+- `chat_message` - Receive a persisted room message
+- `user_joined` / `user_left` - Room presence updates
+- `user_typing` - Typing indicator updates
 
 ## Test Client
 
