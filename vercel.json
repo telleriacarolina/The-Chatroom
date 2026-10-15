@@ -1,7 +1,35 @@
 {
-  "buildCommand": "npm run build:web",
-  "devCommand": "npm run dev:web",
-  "installCommand": "npm install",
-  "framework": null,
-  "outputDirectory": "packages/web/.next"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": "packages/web",
+      "framework": "nextjs",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "api",
+          "format": "url",
+          "env": "API_INTERNAL_URL"
+        }
+      ]
+    },
+    "api": {
+      "root": "packages/api",
+      "framework": "express"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "web"
+      }
+    }
+  ]
 }

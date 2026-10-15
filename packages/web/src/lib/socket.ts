@@ -11,7 +11,13 @@ import { io, Socket } from 'socket.io-client';
 // Configuration
 // ============================================================================
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3002';
+function resolveSocketUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_SOCKET_URL || '';
+  }
+
+  return process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
+}
 
 // ============================================================================
 // Types
@@ -56,7 +62,7 @@ export function getSocket(): TypedSocket | null {
   }
 
   if (!socket) {
-    socket = io(SOCKET_URL, {
+    socket = io(resolveSocketUrl(), {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,

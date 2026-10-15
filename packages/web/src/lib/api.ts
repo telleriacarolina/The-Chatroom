@@ -3,7 +3,13 @@
  * Handles communication with the backend API server
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+function resolveApiBaseUrl(): string {
+  if (typeof window === 'undefined') {
+    return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '';
+  }
+
+  return process.env.NEXT_PUBLIC_API_URL || '';
+}
 
 export interface ApiResponse<T = any> {
   data?: T;
@@ -32,7 +38,8 @@ async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const baseUrl = resolveApiBaseUrl();
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       ...options,
       credentials: 'include', // Important for httpOnly cookies
       headers: {
