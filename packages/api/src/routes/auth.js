@@ -6,6 +6,7 @@ const { prisma } = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
 const { generateCSRFToken } = require('../utils/security');
 const { authLimiter } = require('../middleware/rateLimiter');
+const { normalizeAgeCategory, validateUserAccess } = require('../middleware/auth');
 
 function setCookie(res, name, value, opts = {}) {
   const options = { httpOnly: !!opts.httpOnly, path: '/', maxAge: opts.maxAge || 0 };
@@ -60,20 +61,25 @@ router.post('/signin', authLimiter, async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
+    const accessCheck = validateUserAccess(user);
+    if (!accessCheck.ok) {
+      return res.status(accessCheck.status).json({ error: accessCheck.message });
+    }
+
     const accessToken = signAccess({ userId: user.id });
     const refreshToken = signRefresh({ userId: user.id });
 
     await prisma.session.create({ data: {
       userId: user.id,
       sessionToken: refreshToken,
-      refreshToken: refreshToken, // Store in both fields for compatibility
+      refreshToken: refreshToken,
       expiresAt: new Date(Date.now() + (staySignedIn ? 30*24*60*60*1000 : 24*60*60*1000))
     }});
 
     setCookie(res, 'accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000 });
     setCookie(res, 'refreshToken', refreshToken, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
 
-    res.json({ ok: true, user: { id: user.id, phoneNumber: user.phoneNumber } });
+    res.json({ ok: true, user: { id: user.id, phoneNumber: user.phoneNumber, accountStatus: user.accountStatus } });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Server error' });
@@ -82,16 +88,21 @@ router.post('/signin', authLimiter, async (req, res) => {
 
 router.post('/guest', async (req, res) => {
   const { ageCategory } = req.body || {};
+  const normalizedAgeCategory = normalizeAgeCategory(ageCategory);
   const temporaryUsername = `guest_${Math.random().toString(36).slice(2,8)}`;
   const token = require('uuid').v4();
   try {
+    if (!normalizedAgeCategory) {
+      return res.status(400).json({ error: 'Valid ageCategory is required' });
+    }
+
     const temp = await prisma.tempSession.create({ data: {
       temporaryUsername,
-      ageCategory: ageCategory === '18+RED' ? 'PLUS_18_RED' : 'PLUS_18',
+      ageCategory: normalizedAgeCategory,
       sessionToken: token,
       expiresAt: new Date(Date.now() + 24*60*60*1000)
     }});
-    res.json({ tempSessionToken: token, guestId: temp.id, expiresAt: temp.expiresAt });
+    res.json({ tempSessionToken: token, guestId: temp.id, expiresAt: temp.expiresAt, ageCategory: normalizedAgeCategory });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Server error' });

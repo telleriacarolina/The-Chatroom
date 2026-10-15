@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const { prisma } = require('../lib/prisma');
-const { authenticateSocket } = require('../middleware/auth');
+const { authenticateSocket, validateUserAccess } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 function initializeSocketIO(server) {
@@ -20,13 +20,36 @@ function initializeSocketIO(server) {
     // Join a language room
     socket.on('join_room', async ({ loungeId, languageRoomId }) => {
       try {
-        // Verify room exists
         const room = await prisma.languageRoom.findUnique({
-          where: { id: languageRoomId }
+          where: { id: languageRoomId },
+          include: { lounge: true }
         });
 
         if (!room) {
           socket.emit('error', { message: 'Room not found' });
+          return;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { id: socket.userId },
+          select: {
+            id: true,
+            accountStatus: true,
+            isBanned: true,
+            isMuted: true,
+            ageVerified: true,
+            idVerified: true
+          }
+        });
+
+        const accessCheck = validateUserAccess(user, { accessLevel: room.lounge.accessLevel });
+        if (!accessCheck.ok) {
+          socket.emit('error', { message: accessCheck.message });
+          return;
+        }
+
+        if (user.isMuted) {
+          socket.emit('error', { message: 'You are muted and cannot enter this room' });
           return;
         }
 
@@ -35,8 +58,7 @@ function initializeSocketIO(server) {
         socket.currentLounge = loungeId;
 
         logger.info(`User ${socket.userId} joined room ${languageRoomId}`);
-        
-        // Notify room members
+
         socket.to(languageRoomId).emit('user_joined', {
           userId: socket.userId,
           timestamp: new Date().toISOString()
@@ -73,12 +95,28 @@ function initializeSocketIO(server) {
           select: {
             id: true,
             permanentUsername: true,
-            avatarUrl: true
+            avatarUrl: true,
+            accountStatus: true,
+            isBanned: true,
+            isMuted: true,
+            ageVerified: true,
+            idVerified: true
           }
         });
 
         if (!user) {
           socket.emit('error', { message: 'User not found' });
+          return;
+        }
+
+        const accessCheck = validateUserAccess(user, { accessLevel: 'MAIN_LOUNGE' });
+        if (!accessCheck.ok) {
+          socket.emit('error', { message: accessCheck.message });
+          return;
+        }
+
+        if (user.isMuted) {
+          socket.emit('error', { message: 'You are muted and cannot send messages' });
           return;
         }
 
