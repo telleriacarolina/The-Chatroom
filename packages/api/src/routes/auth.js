@@ -6,6 +6,7 @@ const { prisma } = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
 const { generateCSRFToken } = require('../utils/security');
 const { authLimiter } = require('../middleware/rateLimiter');
+const csrfProtection = require('../middleware/csrf');
 
 function setCookie(res, name, value, opts = {}) {
   const options = { httpOnly: !!opts.httpOnly, path: '/', maxAge: opts.maxAge || 0 };
@@ -21,6 +22,11 @@ router.post('/csrf', (req, res) => {
   // double-submit: set cookie and return token
   res.cookie('csrfToken', token, { maxAge: 24 * 60 * 60 * 1000 });
   res.json({ csrfToken: token });
+});
+
+router.use((req, res, next) => {
+  if (req.path === '/csrf') return next();
+  return csrfProtection(req, res, next);
 });
 
 router.post('/signup', authLimiter, async (req, res) => {
@@ -127,7 +133,7 @@ router.post('/refresh', async (req, res) => {
     if (!session || !session.isActive) return res.status(401).json({ error: 'Invalid session' });
     const accessToken = signAccess({ userId });
     setCookie(res, 'accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000 });
-    res.json({ accessToken });
+    res.json({ ok: true });
   } catch (e) {
     console.error(e);
     res.status(401).json({ error: 'Invalid refresh token' });
