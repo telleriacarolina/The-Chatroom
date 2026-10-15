@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./types": "./src/types/index.ts",
     "./schemas": "./src/schemas/index.ts",
-    "./utils": "./src/utils/index.ts"
+    "./utils": "./src/utils/index.ts",
+    "./socket-protocol": "./src/socketProtocol.js"
   },
   "dependencies": {},
   "devDependencies": {
