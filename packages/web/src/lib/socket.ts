@@ -6,7 +6,7 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
+import { SOCKET_EVENTS } from '../../../shared/src/socketProtocol.js';
 
 // ============================================================================
 // Configuration
@@ -85,13 +85,13 @@ export function connect(): TypedSocket | null {
     socket.connect();
   }
 
-  export function setAuthToken(token: string): void {
-    const socket = getSocket();
-    if (!socket) return;
-    socket.auth = { token };
-  }
-
   return socket;
+}
+
+export function setAuthToken(token: string): void {
+  const socket = getSocket();
+  if (!socket) return;
+  socket.auth = { token };
 }
 
 /**

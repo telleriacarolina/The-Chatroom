@@ -2,32 +2,13 @@ const { Server } = require('socket.io');
 const { prisma } = require('../lib/prisma');
 const { authenticateSocket } = require('../middleware/auth');
 const logger = require('../utils/logger');
-const { SOCKET_EVENTS, SOCKET_ERROR_CODES } = require('@chatroom/shared/socket-protocol');
+const { SOCKET_EVENTS, SOCKET_ERROR_CODES } = require('../../../shared/src/socketProtocol.js');
+const { isRoomMembershipValid, isUserRestrictedFromMessaging } = require('./socketGuards');
 
 const VALID_MESSAGE_TYPES = new Set(['TEXT', 'IMAGE', 'VIDEO', 'LINK', 'SYSTEM']);
 
 function emitSocketError(socket, code, message) {
   socket.emit(SOCKET_EVENTS.SERVER.ERROR, { code, message });
-}
-
-function isRoomMembershipValid(socket, loungeId, languageRoomId) {
-  const memberships = socket.data.memberships;
-  if (!memberships) return false;
-  return memberships.get(languageRoomId) === loungeId;
-}
-
-function isUserRestrictedFromMessaging(user, now = new Date()) {
-  if (!user) return { restricted: true, reason: 'User not found' };
-  if (user.accountStatus !== 'ACTIVE') return { restricted: true, reason: 'Account is not active' };
-  if (user.isBanned) return { restricted: true, reason: 'User is banned from chat' };
-
-  if (user.isMuted) {
-    if (!user.muteExpiresAt || user.muteExpiresAt > now) {
-      return { restricted: true, reason: 'User is muted from chat' };
-    }
-  }
-
-  return { restricted: false };
 }
 
 function initializeSocketIO(server) {
@@ -214,7 +195,5 @@ function initializeSocketIO(server) {
 }
 
 module.exports = {
-  initializeSocketIO,
-  isRoomMembershipValid,
-  isUserRestrictedFromMessaging
+  initializeSocketIO
 };
