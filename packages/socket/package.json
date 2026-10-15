@@ -5,7 +5,8 @@
   "main": "src/socket-server.js",
   "scripts": {
     "start": "node src/socket-server.js",
-    "dev": "nodemon src/socket-server.js"
+    "dev": "nodemon src/socket-server.js",
+    "build": "node --check src/socket-server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
