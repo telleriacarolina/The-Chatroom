@@ -222,6 +222,25 @@ async function runSuite(label, starter) {
     assert.strictEqual(roomMessage.messageText, 'hello room 1');
     await expectNoEvent(carol, 'chat_message');
 
+    const imageMessagePromise = waitForEvent(bob, 'chat_message');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageType: 'IMAGE', attachmentUrl: 'https://example.com/test.png', messageText: '   ' });
+    const imageMessage = await imageMessagePromise;
+    assert.strictEqual(imageMessage.messageType, 'IMAGE');
+    assert.strictEqual(imageMessage.messageText, '');
+    assert.strictEqual(imageMessage.attachmentUrl, 'https://example.com/test.png');
+
+    const linkMessagePromise = waitForEvent(bob, 'chat_message');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageType: 'LINK', attachmentUrl: 'https://example.com/article', messageText: '' });
+    const linkMessage = await linkMessagePromise;
+    assert.strictEqual(linkMessage.messageType, 'LINK');
+    assert.strictEqual(linkMessage.messageText, '');
+    assert.strictEqual(linkMessage.attachmentUrl, 'https://example.com/article');
+
+    const invalidEmptyMessagePromise = waitForEvent(alice, 'error');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: '   ', attachmentUrl: '   ' });
+    const invalidEmptyMessage = await invalidEmptyMessagePromise;
+    assert.ok(String(invalidEmptyMessage?.message || '').toLowerCase().includes('message text or an attachment'));
+
     carol.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: 'intrude' });
     const notJoinedErr = await waitForEvent(carol, 'error');
     assert.ok(String(notJoinedErr?.message || '').includes('Not joined'));

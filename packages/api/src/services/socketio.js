@@ -92,8 +92,10 @@ function initializeSocketIO(server) {
           socket.emit('error', { message: 'loungeId and languageRoomId are required' });
           return;
         }
-        if ((!messageText || !messageText.trim()) && !attachmentUrl) {
-          socket.emit('error', { message: 'Message content is required' });
+        const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : !!messageText;
+        const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : !!attachmentUrl;
+        if (!hasText && !hasAttachment) {
+          emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_MESSAGE, 'Message text or an attachment is required');
           return;
         }
 
@@ -162,6 +164,9 @@ function initializeSocketIO(server) {
           return;
         }
 
+        const normalizedMessageText = typeof messageText === 'string' ? messageText.trim() : '';
+        const normalizedAttachmentUrl = typeof attachmentUrl === 'string' ? attachmentUrl.trim() : attachmentUrl;
+
         // Create message in database
         const message = await prisma.chatMessage.create({
           data: {
@@ -169,9 +174,9 @@ function initializeSocketIO(server) {
             languageRoomId,
             userId: socket.userId,
             displayUsername: user.permanentUsername || user.preferredName || 'Anonymous',
-            messageText: messageText?.trim() || '',
+            messageText: normalizedMessageText,
             messageType: ['TEXT', 'IMAGE', 'VIDEO', 'LINK', 'SYSTEM'].includes(messageType) ? messageType : 'TEXT',
-            attachmentUrl,
+            attachmentUrl: normalizedAttachmentUrl || null,
             moderationStatus: 'APPROVED'
           },
           include: {
@@ -218,7 +223,7 @@ function initializeSocketIO(server) {
     // Handle disconnection
     socket.on('disconnect', () => {
       logger.info(`User disconnected: ${socket.userId}`);
-      
+
       if (socket.data.currentRoom) {
         socket.to(socket.data.currentRoom).emit('user_left', {
           userId: socket.userId,
