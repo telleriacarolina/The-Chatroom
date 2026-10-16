@@ -11,10 +11,12 @@ import { io, Socket } from 'socket.io-client';
 // Configuration
 // ============================================================================
 
-const DEFAULT_SOCKET_URL = 'http://localhost:3002';
-
 function resolveSocketUrl(): string {
-  return process.env.NEXT_PUBLIC_SOCKET_URL || DEFAULT_SOCKET_URL;
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_SOCKET_URL || '';
+  }
+
+  return process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin;
 }
 
 // ============================================================================
