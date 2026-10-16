@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import '../styles/globals.css'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 export const metadata: Metadata = {
   title: 'The Chatroom',
@@ -34,6 +35,7 @@ export default function RootLayout({
           <ThemeToggle />
         </div>
         {children}
+        <SpeedInsights />
       </body>
     </html>
   )
