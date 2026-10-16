@@ -157,13 +157,13 @@ async function startApiServiceTarget(modulePath, prismaModulePath, mockModules =
   };
 }
 
-async function startStandaloneTarget() {
+async function startStandaloneTarget(modulePath = `${ROOT}/packages/socket/src/socket-server.js`) {
   const { prisma, state } = createFakePrismaState();
   global.prisma = prisma;
   const port = 3200 + Math.floor(Math.random() * 1000);
   process.env.SOCKET_PORT = String(port);
-  delete require.cache[require.resolve(`${ROOT}/packages/socket/src/socket-server.js`)];
-  const server = require(`${ROOT}/packages/socket/src/socket-server.js`);
+  delete require.cache[require.resolve(modulePath)];
+  const server = require(modulePath);
   await delay(200);
   return {
     url: `http://127.0.0.1:${port}`,
@@ -301,7 +301,7 @@ async function main() {
     );
     await runSuite(
       'packages/socket/src/socket-server',
-      () => startStandaloneTarget()
+      () => startStandaloneTarget(`${ROOT}/packages/socket/src/socket-server.js`)
     );
     console.log('\nAll socket regression checks passed.');
   } catch (error) {
