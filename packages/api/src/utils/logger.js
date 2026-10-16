@@ -1,4 +1,10 @@
-const { routeProblem } = require('../LEAVING ROOM FOR THE X FACTOR/error-router');
+let routeProblem = null;
+
+try {
+  ({ routeProblem } = require('../LEAVING ROOM FOR THE X FACTOR/error-router'));
+} catch (error) {
+  routeProblem = null;
+}
 
 const isDev = process.env.NODE_ENV !== 'production';
 const enableDebug = isDev || process.env.LOG_LEVEL === 'debug';
@@ -12,7 +18,7 @@ function log(level, ...args) {
   const printer = level === 'warn' ? console.warn : level === 'error' ? console.error : console.log;
   printer(prefix, ...args);
 
-  if (level === 'warn' || level === 'error') {
+  if ((level === 'warn' || level === 'error') && routeProblem) {
     routeProblem({
       source: 'app',
       severity: level,
