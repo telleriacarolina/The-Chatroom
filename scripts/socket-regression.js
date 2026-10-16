@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 const assert = require('assert');
 const http = require('http');
+const path = require('path');
 const jwt = require('jsonwebtoken');
 const { io: createClient } = require('socket.io-client');
 
-const ROOT = '/home/runner/work/The-Chatroom/The-Chatroom';
+const ROOT = path.resolve(__dirname, '..');
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 
 function delay(ms) {
