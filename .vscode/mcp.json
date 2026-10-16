@@ -1,21 +1,126 @@
 {
-	"servers": {
-		"io.github.github/github-mcp-server": {
-			"type": "http",
-			"url": "https://api.githubcopilot.com/mcp/",
-			"headers": {
-				"Authorization": "${input:Authorization}"
-			},
-			"gallery": "https://api.mcp.github.com",
-			"version": "0.26.3"
-		}
-	},
-	"inputs": [
-		{
-			"id": "Authorization",
-			"type": "promptString",
-			"description": "Authentication token (PAT or App token)",
-			"password": true
-		}
-	]
+  "servers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ]
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ]
+    },
+    "search": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${input:brave-api-key}"
+      }
+    },
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github-token}"
+      }
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "${input:database-url}"
+      ]
+    },
+    "redis": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-redis"
+      ],
+      "env": {
+        "REDIS_URL": "${input:redis-url}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "terminal": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-shell"
+      ]
+    },
+    "conversation": {
+      "type": "http",
+      "url": "https://api.tellcaro.com/mcp/conversations",
+      "headers": {
+        "Authorization": "******"
+      }
+    },
+    "memory": {
+      "type": "http",
+      "url": "https://api.tellcaro.com/mcp/memory"
+    }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "brave-api-key",
+      "description": "Brave Search API key",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "github-token",
+      "description": "GitHub personal access token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "database-url",
+      "description": "PostgreSQL connection URL",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "redis-url",
+      "description": "Redis connection URL",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "api-token",
+      "description": "Tellcaro API token",
+      "password": true
+    }
+  ]
 }

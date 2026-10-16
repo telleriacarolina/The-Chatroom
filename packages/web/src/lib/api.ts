@@ -3,14 +3,107 @@
  * Handles communication with the backend API server
  */
 
-const DEFAULT_API_URL = 'http://localhost:3001';
+const LOCAL_API_ORIGIN = 'http://localhost:3001';
+const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 
-function resolveApiBaseUrl(): string {
-  if (typeof window === 'undefined') {
-    return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+function ensureLeadingSlash(value: string): string {
+  return value.startsWith('/') ? value : `/${value}`;
+}
+
+function stripTrailingSlash(value: string): string {
+  return value.replace(/\/+$/, '');
+}
+
+function normalizeApiBase(rawValue?: string): string | null {
+  if (!rawValue) {
+    return null;
   }
 
-  return process.env.NEXT_PUBLIC_API_URL || window.location.origin;
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed.startsWith('/')) {
+    return stripTrailingSlash(ensureLeadingSlash(trimmed)) || '/';
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const pathname = stripTrailingSlash(parsed.pathname);
+    const normalizedPath = pathname && pathname !== '/' ? pathname : '';
+    return `${parsed.origin}${normalizedPath}`;
+  } catch {
+    return null;
+  }
+}
+
+export function resolveApiBaseUrl(): string {
+  const browserApiUrl = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL);
+  const serverInternalApiUrl = normalizeApiBase(process.env.API_INTERNAL_URL);
+
+  if (typeof window !== 'undefined') {
+    if (browserApiUrl) {
+      return browserApiUrl;
+    }
+
+    if (LOCAL_HOSTNAMES.has(window.location.hostname)) {
+      return LOCAL_API_ORIGIN;
+    }
+
+    return '';
+  }
+
+  if (serverInternalApiUrl) {
+    return serverInternalApiUrl;
+  }
+
+  if (browserApiUrl) {
+    return browserApiUrl;
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  return LOCAL_API_ORIGIN;
+}
+
+export function buildApiUrl(baseUrl: string, endpoint: string): string {
+  if (/^https?:\/\//i.test(endpoint)) {
+    throw new Error('Endpoint must be a relative API path.');
+  }
+
+  const [rawPath, rawQuery] = endpoint.split('?');
+  let endpointPath = ensureLeadingSlash(rawPath || '/');
+  const queryString = rawQuery ? `?${rawQuery}` : '';
+
+  const normalizedBase = baseUrl.trim();
+  const baseHasApiPath = normalizedBase.endsWith('/api');
+
+  if (baseHasApiPath && endpointPath.startsWith('/api')) {
+    endpointPath = endpointPath.replace(/^\/api(?=\/|$)/, '') || '/';
+  }
+
+  if (!normalizedBase) {
+    return `${endpointPath}${queryString}`;
+  }
+
+  if (normalizedBase.startsWith('/')) {
+    const relativeBase = stripTrailingSlash(ensureLeadingSlash(normalizedBase));
+    return `${relativeBase}${endpointPath}${queryString}`;
+  }
+
+  try {
+    const url = new URL(normalizedBase);
+    const basePath = stripTrailingSlash(url.pathname);
+    const joinedPath = `${basePath}${endpointPath}` || '/';
+    url.pathname = joinedPath.startsWith('/') ? joinedPath : `/${joinedPath}`;
+    url.search = queryString;
+    return url.toString();
+  } catch {
+    throw new Error('Invalid API base URL configuration.');
+  }
 }
 
 export interface ApiResponse<T = any> {
@@ -40,8 +133,7 @@ async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    const baseUrl = resolveApiBaseUrl();
-    const response = await fetch(`${baseUrl}${endpoint}`, {
+    const response = await fetch(buildApiUrl(resolveApiBaseUrl(), endpoint), {
       ...options,
       credentials: 'include', // Important for httpOnly cookies
       headers: {
