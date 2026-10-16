@@ -15,9 +15,9 @@ import { useChat } from '../contexts/ChatContext';
 interface Message {
   id: string;
   userId: string;
-  username: string;
+  username?: string;
   text: string;
-  timestamp: Date;
+  timestamp: Date | string;
 }
 
 export default function ChatScreen({ route }: any) {
@@ -29,17 +29,25 @@ export default function ChatScreen({ route }: any) {
 
   useEffect(() => {
     if (socket && lounge) {
-      // Join the lounge
-      socket.emit('join-room', lounge.id);
+      const loungeId = (lounge as any).loungeId || lounge.id;
+      const languageRoomId = lounge.id;
 
-      // Listen for messages
-      socket.on('chat message', (msg: Message) => {
-        setMessages((prev) => [...prev, msg]);
+      socket.emit('join_room', { loungeId, languageRoomId });
+
+      socket.on('chat_message', (msg: any) => {
+        const parsedMessage: Message = {
+          id: msg.id,
+          userId: msg.userId,
+          username: msg.displayUsername || msg.user?.permanentUsername || msg.user?.preferredName || 'Anonymous',
+          text: msg.messageText || msg.text || '',
+          timestamp: msg.createdAt || msg.timestamp || new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, parsedMessage]);
       });
 
       return () => {
-        socket.emit('leave-room', lounge.id);
-        socket.off('chat message');
+        socket.emit('leave_room', { languageRoomId });
+        socket.off('chat_message');
       };
     }
   }, [socket, lounge]);
@@ -47,15 +55,15 @@ export default function ChatScreen({ route }: any) {
   const sendMessage = () => {
     if (!inputText.trim() || !socket || !user) return;
 
-    const message: Message = {
-      id: Date.now().toString(),
-      userId: user.id,
-      username: user.username,
-      text: inputText.trim(),
-      timestamp: new Date(),
-    };
+    const loungeId = (lounge as any).loungeId || lounge.id;
+    const languageRoomId = lounge.id;
 
-    socket.emit('chat message', message);
+    socket.emit('chat_message', {
+      loungeId,
+      languageRoomId,
+      messageText: inputText.trim(),
+      messageType: 'TEXT',
+    });
     setInputText('');
   };
 
