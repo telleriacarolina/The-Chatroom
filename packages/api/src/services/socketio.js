@@ -137,11 +137,6 @@ function initializeSocketIO(server) {
           return;
         }
 
-        if (!messageText || !String(messageText).trim()) {
-          emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_MESSAGE, 'Message text is required');
-          return;
-        }
-
         if (!VALID_MESSAGE_TYPES.has(messageType)) {
           emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_MESSAGE, 'Invalid message type');
           return;
@@ -229,7 +224,7 @@ function initializeSocketIO(server) {
           userId: socket.userId,
           timestamp: new Date().toISOString()
         });
-      });
+      }
     });
   });
 
