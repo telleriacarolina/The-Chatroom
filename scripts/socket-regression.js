@@ -301,7 +301,7 @@ async function main() {
     );
     await runSuite(
       'packages/socket/src/socket-server',
-      async () => startStandaloneTarget()
+      () => startStandaloneTarget()
     );
     console.log('\nAll socket regression checks passed.');
   } catch (error) {
