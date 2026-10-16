@@ -3,12 +3,14 @@
  * Handles communication with the backend API server
  */
 
+const DEFAULT_API_URL = 'http://localhost:3001';
+
 function resolveApiBaseUrl(): string {
   if (typeof window === 'undefined') {
-    return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '';
+    return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
   }
 
-  return process.env.NEXT_PUBLIC_API_URL || '';
+  return process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
 }
 
 export interface ApiResponse<T = any> {

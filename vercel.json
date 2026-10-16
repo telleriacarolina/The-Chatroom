@@ -1,7 +1,47 @@
 {
+  "version": 2,
   "buildCommand": "npm run build:web",
   "devCommand": "npm run dev -w @chatroom/web",
   "installCommand": "npm install",
   "framework": null,
-  "outputDirectory": "packages/web/.next"
+  "outputDirectory": "packages/web/.next",
+  "services": [
+    {
+      "id": "web",
+      "src": "packages/web",
+      "use": "@vercel/next"
+    },
+    {
+      "id": "api",
+      "src": "packages/api",
+      "use": "@vercel/node"
+    },
+    {
+      "id": "socket",
+      "src": "packages/socket",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://$API_INTERNAL_URL/api/$1"
+    },
+    {
+      "source": "/socket.io/(.*)",
+      "destination": "https://$SOCKET_INTERNAL_URL/socket.io/$1"
+    }
+  ],
+  "bindings": [
+    {
+      "source": "web",
+      "target": "api",
+      "name": "API_INTERNAL_URL"
+    },
+    {
+      "source": "web",
+      "target": "socket",
+      "name": "SOCKET_INTERNAL_URL"
+    }
+  ]
 }
