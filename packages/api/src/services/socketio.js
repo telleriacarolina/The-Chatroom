@@ -30,31 +30,31 @@ function initializeSocketIO(server) {
     socket.on(SOCKET_EVENTS.CLIENT.JOIN_ROOM, async ({ loungeId, languageRoomId }) => {
       try {
         if (!loungeId || !languageRoomId) {
-          emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_ROOM_MEMBERSHIP, 'loungeId and languageRoomId are required');
+          socket.emit('error', { message: 'loungeId and languageRoomId are required' });
           return;
         }
 
+        // Verify room exists and belongs to lounge
         const room = await prisma.languageRoom.findFirst({
           where: {
             id: languageRoomId,
             loungeId,
-            isActive: true,
-            lounge: {
-              isActive: true
-            }
+            isActive: true
           }
         });
 
         if (!room) {
-          emitSocketError(socket, SOCKET_ERROR_CODES.ROOM_NOT_FOUND, 'Room not found');
+          socket.emit('error', { message: 'Room not found for lounge' });
           return;
         }
 
         socket.join(languageRoomId);
-        socket.data.memberships.set(languageRoomId, loungeId);
+        socket.data.currentRoom = languageRoomId;
+        socket.data.currentLounge = loungeId;
 
         logger.info(`User ${socket.userId} joined room ${languageRoomId}`);
-        
+
+        socket.emit('room_joined', { loungeId, languageRoomId });
         // Notify room members
         socket.to(languageRoomId).emit(SOCKET_EVENTS.SERVER.USER_JOINED, {
           userId: socket.userId,
@@ -67,11 +67,16 @@ function initializeSocketIO(server) {
     });
 
     // Leave a room
-    socket.on(SOCKET_EVENTS.CLIENT.LEAVE_ROOM, ({ languageRoomId }) => {
-      if (!languageRoomId) return;
+    socket.on('leave_room', ({ languageRoomId }) => {
+      if (!languageRoomId) {
+        return;
+      }
       socket.leave(languageRoomId);
-      socket.data.memberships.delete(languageRoomId);
-      socket.to(languageRoomId).emit(SOCKET_EVENTS.SERVER.USER_LEFT, {
+      if (socket.data.currentRoom === languageRoomId) {
+        socket.data.currentRoom = null;
+        socket.data.currentLounge = null;
+      }
+      socket.to(languageRoomId).emit('user_left', {
         userId: socket.userId,
         timestamp: new Date().toISOString()
       });
@@ -83,8 +88,30 @@ function initializeSocketIO(server) {
       try {
         const { loungeId, languageRoomId, messageText, messageType = 'TEXT', attachmentUrl } = data;
 
-        if (!isRoomMembershipValid(socket, loungeId, languageRoomId)) {
-          emitSocketError(socket, SOCKET_ERROR_CODES.ROOM_MEMBERSHIP_REQUIRED, 'Not in this room');
+        if (!loungeId || !languageRoomId) {
+          socket.emit('error', { message: 'loungeId and languageRoomId are required' });
+          return;
+        }
+        if ((!messageText || !messageText.trim()) && !attachmentUrl) {
+          socket.emit('error', { message: 'Message content is required' });
+          return;
+        }
+
+        if (socket.data.currentRoom !== languageRoomId || !socket.rooms.has(languageRoomId)) {
+          socket.emit('error', { message: 'Not joined to this room' });
+          return;
+        }
+
+        const room = await prisma.languageRoom.findFirst({
+          where: {
+            id: languageRoomId,
+            loungeId,
+            isActive: true
+          },
+          select: { id: true }
+        });
+        if (!room) {
+          socket.emit('error', { message: 'Room not found for lounge' });
           return;
         }
 
@@ -93,9 +120,11 @@ function initializeSocketIO(server) {
           select: {
             id: true,
             permanentUsername: true,
+            preferredName: true,
             avatarUrl: true,
             accountStatus: true,
             isBanned: true,
+            banExpiresAt: true,
             isMuted: true,
             muteExpiresAt: true
           }
@@ -127,15 +156,35 @@ function initializeSocketIO(server) {
           return;
         }
 
+        const now = new Date();
+        const banActive = user.isBanned && (!user.banExpiresAt || user.banExpiresAt > now);
+        if (banActive || user.accountStatus === 'SUSPENDED' || user.accountStatus === 'BANNED') {
+          socket.emit('error', { message: 'User is banned from chat' });
+          return;
+        }
+
+        const muteExpired = user.isMuted && user.muteExpiresAt && user.muteExpiresAt <= now;
+        if (muteExpired) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { isMuted: false, muteExpiresAt: null }
+          });
+          user.isMuted = false;
+        }
+        if (user.isMuted) {
+          socket.emit('error', { message: 'User is muted and cannot send messages' });
+          return;
+        }
+
         // Create message in database
         const message = await prisma.chatMessage.create({
           data: {
             loungeId,
             languageRoomId,
             userId: socket.userId,
-            displayUsername: user.permanentUsername || 'Anonymous',
-            messageText: String(messageText).trim(),
-            messageType,
+            displayUsername: user.permanentUsername || user.preferredName || 'Anonymous',
+            messageText: messageText?.trim() || '',
+            messageType: ['TEXT', 'IMAGE', 'VIDEO', 'LINK', 'SYSTEM'].includes(messageType) ? messageType : 'TEXT',
             attachmentUrl,
             moderationStatus: 'APPROVED'
           },
@@ -144,6 +193,7 @@ function initializeSocketIO(server) {
               select: {
                 id: true,
                 permanentUsername: true,
+                preferredName: true,
                 avatarUrl: true
               }
             }
@@ -161,29 +211,30 @@ function initializeSocketIO(server) {
     });
 
     // Typing indicator
-    socket.on(SOCKET_EVENTS.CLIENT.TYPING_START, ({ loungeId, languageRoomId }) => {
-      if (!isRoomMembershipValid(socket, loungeId, languageRoomId)) return;
-      socket.to(languageRoomId).emit(SOCKET_EVENTS.SERVER.USER_TYPING, {
-        userId: socket.userId,
-        isTyping: true
-      });
+    socket.on('typing_start', ({ languageRoomId }) => {
+      if (languageRoomId && socket.rooms.has(languageRoomId)) {
+        socket.to(languageRoomId).emit('user_typing', {
+          userId: socket.userId,
+          isTyping: true
+        });
+      }
     });
 
-    socket.on(SOCKET_EVENTS.CLIENT.TYPING_STOP, ({ loungeId, languageRoomId }) => {
-      if (!isRoomMembershipValid(socket, loungeId, languageRoomId)) return;
-      socket.to(languageRoomId).emit(SOCKET_EVENTS.SERVER.USER_TYPING, {
-        userId: socket.userId,
-        isTyping: false
-      });
+    socket.on('typing_stop', ({ languageRoomId }) => {
+      if (languageRoomId && socket.rooms.has(languageRoomId)) {
+        socket.to(languageRoomId).emit('user_typing', {
+          userId: socket.userId,
+          isTyping: false
+        });
+      }
     });
 
     // Handle disconnection
     socket.on('disconnect', () => {
       logger.info(`User disconnected: ${socket.userId}`);
-
-      const joinedRooms = socket.data.memberships ? [...socket.data.memberships.keys()] : [];
-      joinedRooms.forEach((roomId) => {
-        socket.to(roomId).emit(SOCKET_EVENTS.SERVER.USER_LEFT, {
+      
+      if (socket.data.currentRoom) {
+        socket.to(socket.data.currentRoom).emit('user_left', {
           userId: socket.userId,
           timestamp: new Date().toISOString()
         });

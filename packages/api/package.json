@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "build": "node --check src/server.js",
     "dev:api": "nodemon --inspect src/server.js",
     "dev:socket": "nodemon ../socket/socket-server.js",
     "prisma:generate": "prisma generate",
