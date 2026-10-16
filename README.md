@@ -196,8 +196,11 @@ FRONTEND_URL="http://localhost:3000"
 
 ```bash
 NEXT_PUBLIC_API_URL="http://localhost:3001"
+API_INTERNAL_URL="http://localhost:3001"
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ```
+
+`API_INTERNAL_URL` is server-side only and should be configured in Vercel Project Settings (Development, Preview, and Production) for the web project so `/api/*` rewrites can reach the Express API deployment without exposing private endpoints to browser code.
 
 ### 3. Set Up Database
 
