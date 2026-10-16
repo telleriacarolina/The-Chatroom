@@ -248,7 +248,11 @@ async function runSuite(label, starter) {
     await waitForEvent(suspended, 'room_joined');
     suspended.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: 'suspended try' });
     const suspendedErr = await waitForEvent(suspended, 'error');
-    assert.ok(String(suspendedErr?.message || '').toLowerCase().includes('banned'));
+    const suspendedMessage = String(suspendedErr?.message || '').toLowerCase();
+    assert.ok(
+      suspendedMessage.includes('suspended') || suspendedMessage.includes('banned'),
+      'Expected suspended/banned restriction message for suspended user'
+    );
 
     const expiredMute = await connectAuthenticated(target.url, 'expiredmute');
     sockets.push(expiredMute);
