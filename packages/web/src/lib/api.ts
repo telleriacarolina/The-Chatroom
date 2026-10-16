@@ -10,7 +10,7 @@ function resolveApiBaseUrl(): string {
     return process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
   }
 
-  return process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+  return process.env.NEXT_PUBLIC_API_URL || window.location.origin;
 }
 
 export interface ApiResponse<T = any> {
