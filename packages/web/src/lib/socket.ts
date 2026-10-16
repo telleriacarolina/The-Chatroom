@@ -6,7 +6,7 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS } from '../../../shared/src/socketProtocol.js';
+import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
 
 // ============================================================================
 // Configuration
