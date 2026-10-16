@@ -97,7 +97,7 @@ function initializeSocketIO(server) {
           return;
         }
 
-        if (socket.data.currentRoom !== languageRoomId || !socket.rooms.has(languageRoomId)) {
+        if (!isRoomMembershipValid(socket, languageRoomId)) {
           socket.emit('error', { message: 'Not joined to this room' });
           return;
         }
