@@ -147,15 +147,6 @@ function initializeSocketIO(server) {
           return;
         }
 
-        const room = await prisma.languageRoom.findFirst({
-          where: { id: languageRoomId, loungeId, isActive: true },
-          select: { id: true }
-        });
-        if (!room) {
-          emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_ROOM_MEMBERSHIP, 'Room does not belong to lounge');
-          return;
-        }
-
         const now = new Date();
         const banActive = user.isBanned && (!user.banExpiresAt || user.banExpiresAt > now);
         if (banActive || user.accountStatus === 'SUSPENDED' || user.accountStatus === 'BANNED') {
