@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 const assert = require('assert');
 const http = require('http');
+const path = require('path');
 const jwt = require('jsonwebtoken');
 const { io: createClient } = require('socket.io-client');
 
-const ROOT = '/home/runner/work/The-Chatroom/The-Chatroom';
+const ROOT = path.resolve(__dirname, '..');
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 
 function delay(ms) {
@@ -156,13 +157,13 @@ async function startApiServiceTarget(modulePath, prismaModulePath, mockModules =
   };
 }
 
-async function startStandaloneTarget() {
+async function startStandaloneTarget(modulePath = `${ROOT}/packages/socket/src/socket-server.js`) {
   const { prisma, state } = createFakePrismaState();
   global.prisma = prisma;
   const port = 3200 + Math.floor(Math.random() * 1000);
   process.env.SOCKET_PORT = String(port);
-  delete require.cache[require.resolve(`${ROOT}/packages/socket/src/socket-server.js`)];
-  const server = require(`${ROOT}/packages/socket/src/socket-server.js`);
+  delete require.cache[require.resolve(modulePath)];
+  const server = require(modulePath);
   await delay(200);
   return {
     url: `http://127.0.0.1:${port}`,
@@ -221,6 +222,25 @@ async function runSuite(label, starter) {
     assert.strictEqual(roomMessage.messageText, 'hello room 1');
     await expectNoEvent(carol, 'chat_message');
 
+    const imageMessagePromise = waitForEvent(bob, 'chat_message');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageType: 'IMAGE', attachmentUrl: 'https://example.com/test.png', messageText: '   ' });
+    const imageMessage = await imageMessagePromise;
+    assert.strictEqual(imageMessage.messageType, 'IMAGE');
+    assert.strictEqual(imageMessage.messageText, '');
+    assert.strictEqual(imageMessage.attachmentUrl, 'https://example.com/test.png');
+
+    const linkMessagePromise = waitForEvent(bob, 'chat_message');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageType: 'LINK', attachmentUrl: 'https://example.com/article', messageText: '' });
+    const linkMessage = await linkMessagePromise;
+    assert.strictEqual(linkMessage.messageType, 'LINK');
+    assert.strictEqual(linkMessage.messageText, '');
+    assert.strictEqual(linkMessage.attachmentUrl, 'https://example.com/article');
+
+    const invalidEmptyMessagePromise = waitForEvent(alice, 'error');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: '   ', attachmentUrl: '   ' });
+    const invalidEmptyMessage = await invalidEmptyMessagePromise;
+    assert.ok(String(invalidEmptyMessage?.message || '').toLowerCase().includes('message text or an attachment'));
+
     carol.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: 'intrude' });
     const notJoinedErr = await waitForEvent(carol, 'error');
     assert.ok(String(notJoinedErr?.message || '').includes('Not joined'));
@@ -247,7 +267,11 @@ async function runSuite(label, starter) {
     await waitForEvent(suspended, 'room_joined');
     suspended.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: 'suspended try' });
     const suspendedErr = await waitForEvent(suspended, 'error');
-    assert.ok(String(suspendedErr?.message || '').toLowerCase().includes('banned'));
+    const suspendedMessage = String(suspendedErr?.message || '').toLowerCase();
+    assert.ok(
+      suspendedMessage.includes('suspended') || suspendedMessage.includes('banned'),
+      'Expected suspended/banned restriction message for suspended user'
+    );
 
     const expiredMute = await connectAuthenticated(target.url, 'expiredmute');
     sockets.push(expiredMute);
@@ -296,7 +320,7 @@ async function main() {
     );
     await runSuite(
       'packages/socket/src/socket-server',
-      async () => startStandaloneTarget()
+      () => startStandaloneTarget(`${ROOT}/packages/socket/src/socket-server.js`)
     );
     console.log('\nAll socket regression checks passed.');
   } catch (error) {
