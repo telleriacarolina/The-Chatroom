@@ -60,12 +60,25 @@ The-Chatroom/
   - ✅ Guest sessions with temporary usernames
   - ✅ Age verification (18+ check at entry)
   - ✅ JWT token structure (access & refresh tokens)
+  - ✅ Authenticated Socket.IO access with JWT validation
 
-- **Real-time Chat Foundation**
+- **Real-time Chat**
   - ✅ Language-based room structure (8 languages)
   - ✅ Country-specific lounges
-  - ✅ Socket.IO server setup
+  - ✅ Socket.IO server setup and authenticated connections
+  - ✅ Room join/leave flows with join/leave notifications
+  - ✅ Presence tracking for users in chat rooms
+  - ✅ Typing indicators for room participants
+  - ✅ Message broadcasting to room members
+  - ✅ Message persistence to the database with moderation metadata
   - ✅ UI for room selection and messaging
+
+- **Moderation**
+  - ✅ User reporting flow
+  - ✅ Moderation actions and enforcement (mute, ban, warning, removals)
+  - ✅ Audit logging for moderation events
+  - ✅ Content flagging and message/item removal support
+  - ✅ Moderator-only routes and role-based access controls
 
 - **Account Tiers UI**
   - ✅ Creator account features displayed
@@ -80,24 +93,11 @@ The-Chatroom/
   - 🚧 Session persistence to database
   - 🚧 Sign in / Sign up flows
 
-- **Real-time Chat**
-  - 🚧 Message storage to database
-  - 🚧 Message history/pagination
-  - 🚧 Online/offline presence tracking
-  - 🚧 Typing indicators
-  - 🚧 User list per lounge
-
 - **Marketplace**
   - 🚧 User-generated content uploads
   - 🚧 Content sales & payments
   - 🚧 Payment transaction management
   - 🚧 Creator marketplace dashboard
-
-- **Moderation**
-  - 🚧 User reporting system
-  - 🚧 Moderation actions & enforcement
-  - 🚧 Audit logs for moderation events
-  - 🚧 Content flagging/removal
 
 - **Verification**
   - 🚧 ID/document verification
