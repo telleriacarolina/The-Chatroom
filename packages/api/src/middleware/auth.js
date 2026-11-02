@@ -1,8 +1,6 @@
-const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { prisma } = require('../lib/prisma');
-
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const { verifyAccess } = require('../lib/jwt');
 
 function normalizeAgeCategory(value) {
   const normalized = String(value ?? '')
@@ -99,7 +97,7 @@ function validateUserAccess(user, { accessLevel = null } = {}) {
 
 function verifyAccessToken(token) {
   try {
-    return jwt.verify(token, ACCESS_SECRET);
+    return verifyAccess(token);
   } catch (error) {
     return null;
   }
