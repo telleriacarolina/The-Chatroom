@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { signAccess, signRefresh, verifyRefresh } = require('../lib/jwt');
 const { prisma } = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
@@ -8,19 +9,36 @@ const { generateCSRFToken } = require('../utils/security');
 const { authLimiter } = require('../middleware/rateLimiter');
 const csrfProtection = require('../middleware/csrf');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+function hashSessionToken(sessionToken) {
+  return crypto.createHash('sha256').update(sessionToken).digest('hex');
+}
+
+function getCookieOptions(opts = {}) {
+  const sameSite = isProduction ? 'none' : 'lax';
+  const secure = isProduction;
+  return {
+    path: '/',
+    maxAge: opts.maxAge || 0,
+    sameSite,
+    secure,
+    ...('httpOnly' in opts ? { httpOnly: !!opts.httpOnly } : {}),
+  };
+}
+
 function setCookie(res, name, value, opts = {}) {
-  const options = { httpOnly: !!opts.httpOnly, path: '/', maxAge: opts.maxAge || 0 };
-  if (!options.httpOnly) {
-    res.cookie(name, value, { maxAge: options.maxAge });
-  } else {
-    res.cookie(name, value, { httpOnly: true, maxAge: options.maxAge });
-  }
+  res.cookie(name, value, getCookieOptions(opts));
+}
+
+function clearCookie(res, name, opts = {}) {
+  res.clearCookie(name, getCookieOptions(opts));
 }
 
 router.post('/csrf', (req, res) => {
   const token = generateCSRFToken();
   // double-submit: set cookie and return token
-  res.cookie('csrfToken', token, { maxAge: 24 * 60 * 60 * 1000 });
+  setCookie(res, 'csrfToken', token, { maxAge: 24 * 60 * 60 * 1000 });
   res.json({ csrfToken: token });
 });
 
@@ -68,11 +86,12 @@ router.post('/signin', authLimiter, async (req, res) => {
 
     const accessToken = signAccess({ userId: user.id });
     const refreshToken = signRefresh({ userId: user.id });
+    const refreshTokenHash = hashSessionToken(refreshToken);
 
     await prisma.session.create({ data: {
       userId: user.id,
-      sessionToken: refreshToken,
-      refreshToken: refreshToken, // Store in both fields for compatibility
+      sessionToken: refreshTokenHash,
+      refreshToken: refreshTokenHash, // Store in both fields for compatibility
       expiresAt: new Date(Date.now() + (staySignedIn ? 30*24*60*60*1000 : 24*60*60*1000))
     }});
 
@@ -127,10 +146,13 @@ router.post('/refresh', async (req, res) => {
   try {
     const refresh = req.cookies?.refreshToken;
     if (!refresh) return res.status(401).json({ error: 'No refresh token' });
+    const refreshTokenHash = hashSessionToken(refresh);
     const payload = verifyRefresh(refresh);
     const userId = payload.userId;
-    const session = await prisma.session.findUnique({ where: { sessionToken: refresh } });
-    if (!session || !session.isActive) return res.status(401).json({ error: 'Invalid session' });
+    const session = await prisma.session.findUnique({ where: { sessionToken: refreshTokenHash } });
+    if (!session || !session.isActive || session.userId !== userId || session.expiresAt <= new Date()) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
     const accessToken = signAccess({ userId });
     setCookie(res, 'accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000 });
     res.json({ ok: true });
@@ -143,9 +165,13 @@ router.post('/refresh', async (req, res) => {
 router.post('/logout', async (req, res) => {
   try {
     const refresh = req.cookies?.refreshToken;
-    if (refresh) await prisma.session.updateMany({ where: { sessionToken: refresh }, data: { isActive: false } }).catch(() => {});
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    if (refresh) {
+      const refreshTokenHash = hashSessionToken(refresh);
+      await prisma.session.updateMany({ where: { sessionToken: refreshTokenHash }, data: { isActive: false } }).catch(() => {});
+    }
+    clearCookie(res, 'accessToken', { httpOnly: true });
+    clearCookie(res, 'refreshToken', { httpOnly: true });
+    clearCookie(res, 'csrfToken');
     res.json({ ok: true });
   } catch (e) {
     console.error(e);
