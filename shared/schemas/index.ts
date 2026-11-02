@@ -46,7 +46,7 @@ export function sanitizeLogData(value: unknown, seen = new WeakSet<object>()): u
     const result: Record<string, unknown> = {};
     for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
       const lowerKey = key.toLowerCase();
-      if (REDACTED_KEYS.has(lowerKey) || lowerKey.includes('authorization') || lowerKey.includes('token') || lowerKey.includes('password') || lowerKey.includes('cookie') || lowerKey.includes('secret') || lowerKey.includes('phonenumber') || lowerKey.includes('content') || lowerKey.includes('body')) {
+      if (REDACTED_KEYS.has(lowerKey) || lowerKey.includes('authorization') || lowerKey.includes('token') || lowerKey.includes('password') || lowerKey.includes('cookie') || lowerKey.includes('secret') || lowerKey.includes('phonenumber') || lowerKey.includes('content') || lowerKey.includes('body') || lowerKey.includes('message')) {
         result[key] = '[REDACTED]';
         continue;
       }
