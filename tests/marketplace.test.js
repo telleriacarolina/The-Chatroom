@@ -187,6 +187,13 @@ async function run() {
     .expect(201);
   assert.equal(purchaseRes.body.transaction.paymentStatus, 'PENDING');
 
+  const duplicatePurchaseRes = await request(app)
+    .post('/api/marketplace/purchase')
+    .set('x-user-id', 'buyer-1')
+    .send({ itemId: createdId, paymentMethod: 'STRIPE' })
+    .expect(409);
+  assert.match(duplicatePurchaseRes.body.error, /already pending/i);
+
   const confirmRes = await request(app)
     .post(`/api/marketplace/payments/${purchaseRes.body.paymentIntentId}/confirm`)
     .set('x-user-id', 'buyer-1')
@@ -196,6 +203,13 @@ async function run() {
 
   const itemAfterPurchase = listings.get(createdId);
   assert.equal(itemAfterPurchase.status, 'SOLD');
+
+  const invalidPurchaseRes = await request(app)
+    .post('/api/marketplace/purchase')
+    .set('x-user-id', 'buyer-1')
+    .send({ itemId: 'missing-item', paymentMethod: 'STRIPE' })
+    .expect(404);
+  assert.match(invalidPurchaseRes.body.error, /not found/i);
 
   console.log('Marketplace route tests passed');
 }
