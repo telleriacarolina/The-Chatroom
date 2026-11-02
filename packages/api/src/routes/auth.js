@@ -179,7 +179,7 @@ router.post('/request-password-reset', authLimiter, async (req, res) => {
     }
 
     const resetCode = generateOneTimeCode();
-    const resetTokenHash = hashOneTimeCode(resetCode);
+    const resetTokenHash = hashOneTimeCode(resetCode, encryptedPhone);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
     await prisma.passwordReset.deleteMany({ 
@@ -200,8 +200,8 @@ router.post('/request-password-reset', authLimiter, async (req, res) => {
       await sendSms(phoneNumber, smsBody);
     } catch (smsError) {
       deliveredBySms = false;
-      await prisma.passwordReset.deleteMany({ where: { phone: encryptedPhone } }).catch(() => {});
       if (process.env.NODE_ENV === 'production') {
+        await prisma.passwordReset.deleteMany({ where: { phone: encryptedPhone } }).catch(() => {});
         return res.status(503).json({ error: 'Unable to deliver reset code right now' });
       }
     }
@@ -239,7 +239,7 @@ router.post('/reset-password', authLimiter, async (req, res) => {
 
   try {
     const encryptedPhone = encryptPhone(phoneNumber);
-    const tokenHash = hashOneTimeCode(providedCode);
+    const tokenHash = hashOneTimeCode(providedCode, encryptedPhone);
     
     const resetRecord = await prisma.passwordReset.findFirst({
       where: {
