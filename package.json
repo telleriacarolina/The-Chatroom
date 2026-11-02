@@ -11,7 +11,7 @@
     "dev:api": "npm run dev -w @chatroom/api",
     "dev:socket": "npm run dev -w @chatroom/socket",
     "dev:web": "npm run dev -w @chatroom/web",
-    "dev": "npm run dev:api & npm run dev:socket & npm run dev:web",
+    "dev": "node scripts/start-all.js",
     "comment_2": "=== SECONDARY: Package workspaces (optional) ===",
     "pkgs:dev": "npm run dev --workspaces --if-present",
     "pkgs:build": "npm run build --workspaces --if-present",
@@ -27,7 +27,7 @@
     "test": "npm test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "build:web": "npm run build -w @chatroom/web",
-    "build": "npm run build -w @chatroom/api & npm run build:web & npm run build -w @chatroom/socket"
+    "build": "npm run build:web"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
