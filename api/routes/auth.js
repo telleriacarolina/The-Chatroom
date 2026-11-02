@@ -1,15 +1,11 @@
 // Authentication routes
 const express = require('express');
 const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
 const router = express.Router();
 const logger = require('../utils/logger');
+const { signAccess } = require('../utils/jwt');
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
-
-function signAccessToken(payload) {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });
-}
+const GUEST_ALLOWED_LOUNGES = ['1', '2', '3'];
 
 router.post('/csrf', (req, res) => {
   const token = crypto.randomBytes(32).toString('hex');
@@ -22,12 +18,17 @@ router.post('/guest', async (req, res) => {
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
     const sessionToken = crypto.randomBytes(32).toString('hex');
     const guestId = crypto.randomBytes(8).toString('hex');
+    const sessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const jwtId = crypto.randomBytes(16).toString('hex');
 
-    const accessToken = signAccessToken({
+    const accessToken = signAccess({
       userId: guestId,
       sessionType: 'guest',
-      allowedLoungeIds: ['1', '2', '3'],
+      allowedLoungeIds: GUEST_ALLOWED_LOUNGES,
+      jti: jwtId,
       permissions: ['chat:connect', 'chat:join', 'chat:message']
+    }, {
+      expiresIn: '60m'
     });
 
     res.json({
@@ -35,7 +36,7 @@ router.post('/guest', async (req, res) => {
       accessToken,
       guestId,
       username: temporaryUsername,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      expiresAt: sessionExpiresAt
     });
   } catch (e) {
     logger.error('Error creating guest session:', e);
@@ -52,7 +53,7 @@ router.post('/signin', async (req, res) => {
 
     // TODO: Replace with real account verification and permission resolution.
     const userId = crypto.randomBytes(8).toString('hex');
-    const accessToken = signAccessToken({
+    const accessToken = signAccess({
       userId,
       sessionType: 'user',
       permissions: ['chat:connect', 'chat:join', 'chat:message']
@@ -79,7 +80,7 @@ router.post('/signup', async (req, res) => {
 
     // TODO: Replace with real account creation and permission resolution.
     const userId = crypto.randomBytes(8).toString('hex');
-    const accessToken = signAccessToken({
+    const accessToken = signAccess({
       userId,
       sessionType: 'user',
       permissions: ['chat:connect', 'chat:join', 'chat:message']

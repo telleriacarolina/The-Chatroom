@@ -1,10 +1,9 @@
 "use strict";
 
-const jwt = require('jsonwebtoken');
 const prisma = require('./lib/prisma');
 const logger = require('./lib/logger');
+const { verifyAccess } = require('../api/utils/jwt');
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 const MESSAGE_RATE_WINDOW_MS = Number(process.env.MESSAGE_RATE_WINDOW_MS || 10000);
 const MESSAGE_RATE_LIMIT_PER_ROOM = Number(process.env.MESSAGE_RATE_LIMIT_PER_ROOM || 8);
 const KNOWN_LOUNGE_IDS = new Set(['1', '2', '3']);
@@ -41,7 +40,7 @@ function extractAccessToken(socket) {
 
 function verifyAccessToken(token) {
   try {
-    return jwt.verify(token, ACCESS_SECRET);
+    return verifyAccess(token);
   } catch (error) {
     return null;
   }
@@ -131,7 +130,10 @@ async function hasSessionAccess(userId, sessionType) {
     const activeSession = await prisma.session.findFirst({
       where: {
         userId,
-        isActive: true
+        isActive: true,
+        expiresAt: {
+          gt: new Date()
+        }
       },
       select: { id: true }
     });
@@ -157,6 +159,95 @@ async function canAccessLounge(socket, loungeId) {
   }
 
   return true;
+}
+
+async function getUserModerationState(userId, sessionType) {
+  if (sessionType === 'guest') {
+    return {
+      exists: true,
+      banned: false,
+      muted: false
+    };
+  }
+
+  if (!prisma.user || typeof prisma.user.findUnique !== 'function') {
+    return {
+      exists: false,
+      banned: true,
+      muted: false
+    };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      accountStatus: true,
+      isBanned: true,
+      isMuted: true,
+      muteExpiresAt: true,
+      banExpiresAt: true
+    }
+  });
+
+  if (!user) {
+    return {
+      exists: false,
+      banned: true,
+      muted: false
+    };
+  }
+
+  const now = new Date();
+  const banActive = Boolean(user.isBanned) && (!user.banExpiresAt || user.banExpiresAt > now);
+  const muted = Boolean(user.isMuted) && (!user.muteExpiresAt || user.muteExpiresAt > now);
+
+  return {
+    exists: true,
+    banned: banActive || user.accountStatus === 'SUSPENDED' || user.accountStatus === 'BANNED',
+    muted
+  };
+}
+
+async function ensureActionAllowed(socket, action) {
+  const userId = socket.data.userId;
+  const sessionType = socket.data.sessionType || 'user';
+
+  const hasSession = await hasSessionAccess(userId, sessionType);
+  if (!hasSession) {
+    return {
+      allowed: false,
+      code: 'AUTH_INVALID',
+      message: 'Active session required'
+    };
+  }
+
+  const moderationState = await getUserModerationState(userId, sessionType);
+  if (!moderationState.exists) {
+    return {
+      allowed: false,
+      code: 'AUTHZ_DENIED',
+      message: 'Account not found'
+    };
+  }
+
+  if (moderationState.banned) {
+    return {
+      allowed: false,
+      code: 'AUTHZ_DENIED',
+      message: 'Account is banned'
+    };
+  }
+
+  if (action === 'message' && moderationState.muted) {
+    return {
+      allowed: false,
+      code: 'AUTHZ_DENIED',
+      message: 'Account is muted'
+    };
+  }
+
+  return { allowed: true };
 }
 
 const initChat = (io) => {
@@ -191,6 +282,12 @@ const initChat = (io) => {
 
     socket.on('join-lounge', async ({ loungeId } = {}) => {
       try {
+        const actionState = await ensureActionAllowed(socket, 'join');
+        if (!actionState.allowed) {
+          emitSocketError(socket, actionState.code, actionState.message);
+          return;
+        }
+
         const normalizedLoungeId = typeof loungeId === 'string' ? loungeId.trim() : '';
         if (!normalizedLoungeId) {
           emitSocketError(socket, 'VALIDATION_ERROR', 'loungeId is required');
@@ -237,22 +334,39 @@ const initChat = (io) => {
       }
     });
 
-    socket.on('typing', ({ loungeId, isTyping } = {}) => {
-      const normalizedLoungeId = typeof loungeId === 'string' ? loungeId.trim() : '';
-      if (!normalizedLoungeId || !socket.data.joinedLounges.has(normalizedLoungeId)) {
-        emitSocketError(socket, 'AUTHZ_DENIED', 'Cannot send typing for a lounge you have not joined');
-        return;
-      }
+    socket.on('typing', async ({ loungeId, isTyping } = {}) => {
+      try {
+        const actionState = await ensureActionAllowed(socket, 'typing');
+        if (!actionState.allowed) {
+          emitSocketError(socket, actionState.code, actionState.message);
+          return;
+        }
 
-      socket.to(normalizedLoungeId).emit('user-typing', {
-        userId,
-        isTyping: Boolean(isTyping),
-        timestamp: new Date()
-      });
+        const normalizedLoungeId = typeof loungeId === 'string' ? loungeId.trim() : '';
+        if (!normalizedLoungeId || !socket.data.joinedLounges.has(normalizedLoungeId)) {
+          emitSocketError(socket, 'AUTHZ_DENIED', 'Cannot send typing for a lounge you have not joined');
+          return;
+        }
+
+        socket.to(normalizedLoungeId).emit('user-typing', {
+          userId,
+          isTyping: Boolean(isTyping),
+          timestamp: new Date()
+        });
+      } catch (error) {
+        logger.error('Error in typing authorization:', error);
+        emitSocketError(socket, 'INTERNAL_ERROR', 'Failed to process typing status');
+      }
     });
 
     socket.on('message', async (payload = {}) => {
       try {
+        const actionState = await ensureActionAllowed(socket, 'message');
+        if (!actionState.allowed) {
+          emitSocketError(socket, actionState.code, actionState.message);
+          return;
+        }
+
         const validation = validateMessagePayload(payload);
         if (!validation.valid) {
           emitSocketError(socket, 'VALIDATION_ERROR', 'Invalid message payload', {
@@ -327,6 +441,12 @@ const initChat = (io) => {
 
     socket.on('edit-message', async ({ messageId, newContent, loungeId } = {}) => {
       try {
+        const actionState = await ensureActionAllowed(socket, 'message');
+        if (!actionState.allowed) {
+          emitSocketError(socket, actionState.code, actionState.message);
+          return;
+        }
+
         const normalizedMessageId = typeof messageId === 'string' ? messageId.trim() : '';
         const normalizedLoungeId = typeof loungeId === 'string' ? loungeId.trim() : '';
         const normalizedContent = typeof newContent === 'string' ? newContent.trim() : '';
@@ -376,6 +496,12 @@ const initChat = (io) => {
 
     socket.on('delete-message', async ({ messageId, loungeId } = {}) => {
       try {
+        const actionState = await ensureActionAllowed(socket, 'message');
+        if (!actionState.allowed) {
+          emitSocketError(socket, actionState.code, actionState.message);
+          return;
+        }
+
         const normalizedMessageId = typeof messageId === 'string' ? messageId.trim() : '';
         const normalizedLoungeId = typeof loungeId === 'string' ? loungeId.trim() : '';
 
