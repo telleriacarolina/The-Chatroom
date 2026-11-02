@@ -10,6 +10,7 @@ This file documents all API endpoints for The Chatroom project.
   - No authentication required
   - Response: `{ csrfToken: string }`
   - Sets `csrfToken` cookie (`HttpOnly`, `SameSite=Lax` for same-origin, `SameSite=None; Secure` for HTTPS cross-origin)
+  - If `COOKIE_DOMAIN` is set, the CSRF cookie includes that `Domain` attribute (useful for subdomain deployments)
   - Send the token back on unsafe requests in `X-CSRF-Token` (or `X-CSRF`) while including cookies
 
 ### User Registration

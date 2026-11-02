@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const { startBackgroundJobs } = require('./services/backgroundJobs');
 const { initializeSocketIO } = require('./services/socketio');
+const { getCorsOptions } = require('./utils/cors');
 const authRoutes = require('./routes/auth');
 const loungeRoutes = require('./routes/lounges');
 const messagesRoutes = require('./routes/messages');
@@ -15,25 +16,13 @@ const logger = require('./utils/logger');
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
 
 // Initialize Socket.io
 const io = initializeSocketIO(server);
 
 app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, false);
-  },
-  credentials: true
-}));
+app.use(cors(getCorsOptions()));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

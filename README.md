@@ -299,6 +299,8 @@ TWILIO_FROM_NUMBER="+1234567890"
 PORT=3001
 SOCKET_PORT=3002
 FRONTEND_URL="http://localhost:3000"
+# Optional for production cross-subdomain auth cookies
+# COOKIE_DOMAIN=".example.com"
 NODE_ENV="development"
 ```
 
