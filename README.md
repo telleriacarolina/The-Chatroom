@@ -14,7 +14,7 @@ The Chatroom is a real-time chat application featuring multi-tier authentication
 2. Set up environment variables in `.env` files (see `.env.example`).
 3. Run database migrations:
   ```bash
-  PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test" npm run prisma:migrate:test
+  PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test?schema=chatroom_migration_test" npm run prisma:migrate:test
   npm run prisma:migrate
   npm run prisma:generate
   ```
@@ -203,9 +203,15 @@ NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ### 3. Set Up Database
 
 ```bash
-PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test" npm run prisma:migrate:test
+PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test?schema=chatroom_migration_test" npm run prisma:migrate:test
 npm run prisma:migrate
 ```
+
+Migration gate notes:
+- `PRISMA_TEST_DATABASE_URL` is required and cannot be omitted.
+- It must use PostgreSQL and include a non-`public` schema (`?schema=...`) so validation stays isolated.
+- `npm run prisma:migrate:test` runs `prisma migrate reset`, so the test role needs permissions to create/drop objects in the disposable schema.
+- The script only injects the disposable URL into Prisma subprocesses and does not mutate your shell environment.
 
 ### 4. Run Development Servers
 
@@ -284,6 +290,8 @@ From the browser console on the frontend (<http://localhost:3000>):
 ```bash
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/chatroom"
+# Disposable migration validation target (must use non-public schema)
+PRISMA_TEST_DATABASE_URL="******localhost:5432/chatroom_migration_test?schema=chatroom_migration_test"
 # JWT Secrets
 ACCESS_TOKEN_SECRET="your-access-secret"
 REFRESH_TOKEN_SECRET="your-refresh-secret"
