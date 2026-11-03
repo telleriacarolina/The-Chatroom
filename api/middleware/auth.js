@@ -1,11 +1,9 @@
-const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
-
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const { verifyAccess } = require('../utils/jwt');
 
 function verifyAccessToken(token) {
   try {
-    return jwt.verify(token, ACCESS_SECRET);
+    return verifyAccess(token);
   } catch (error) {
     return null;
   }
