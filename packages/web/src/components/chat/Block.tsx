@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
+import ConnectionStatus from "@/components/ConnectionStatus";
+import { useSocket } from "@/hooks/useSocket";
+import { requestLoungeCounts, setAuthToken } from "@/lib/socket";
 
 interface BlockProps {
   onShowLogin?: () => void;
@@ -22,6 +25,9 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
   const [isLoadingLounges, setIsLoadingLounges] = useState(false);
+  const [loungeCounts, setLoungeCounts] = useState<Record<string, number>>({});
+
+  const { socket, isConnected } = useSocket({ autoConnect: true });
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
@@ -33,7 +39,7 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
       
       if (storedUsername && storedToken) {
         setTempUsername(storedUsername);
-        setGuestToken(storedToken);
+        setAuthToken(storedToken);
       }
     }
   }, []);
