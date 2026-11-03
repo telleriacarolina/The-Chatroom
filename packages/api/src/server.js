@@ -11,6 +11,7 @@ const { initializeSocketIO } = require('./services/socketio');
 const authRoutes = require('./routes/auth');
 const chatroomRoutes = require('./routes/chatroom');
 const loungeRoutes = require('./routes/lounges');
+const marketRoutes = require('./routes/market');
 const moderationRoutes = require('./routes/moderation');
 const logger = require('./utils/logger');
 
@@ -38,6 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/chatroom', chatroomRoutes);
 app.use('/api/lounges', loungeRoutes);
+app.use('/api/market', marketRoutes);
 app.use('/api/moderation', moderationRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
