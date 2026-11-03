@@ -5,6 +5,10 @@
 
 const LOCAL_API_ORIGIN = 'http://localhost:3001';
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
+const CLIENT_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || 'unknown';
+const CLIENT_RELEASE_ID = process.env.NEXT_PUBLIC_APP_RELEASE_ID || CLIENT_APP_VERSION;
+const API_VERSION_HEADER = 'x-chatroom-api-version';
+const RELEASE_ID_HEADER = 'x-chatroom-release-id';
 
 function ensureLeadingSlash(value: string): string {
   return value.startsWith('/') ? value : `/${value}`;
@@ -125,6 +129,32 @@ export interface SigninData {
   staySignedIn?: boolean;
 }
 
+function buildVersionMismatchError(serverReleaseId: string, serverVersion: string | null): string {
+  const serverLabel = serverVersion ? `API ${serverVersion}` : `release ${serverReleaseId}`;
+  return `Deployment version mismatch detected (${serverLabel} vs client ${CLIENT_APP_VERSION}). Refresh the page to load the latest client build.`;
+}
+
+function getHeaderValue(headers: Headers, name: string): string | null {
+  const rawValue = headers.get(name);
+  const normalized = rawValue?.trim();
+  return normalized || null;
+}
+
+function getCompatibilityError(response: Response): string | null {
+  const serverReleaseId = getHeaderValue(response.headers, RELEASE_ID_HEADER);
+
+  if (!serverReleaseId || !CLIENT_RELEASE_ID) {
+    return null;
+  }
+
+  if (serverReleaseId === CLIENT_RELEASE_ID) {
+    return null;
+  }
+
+  const serverVersion = getHeaderValue(response.headers, API_VERSION_HEADER);
+  return buildVersionMismatchError(serverReleaseId, serverVersion);
+}
+
 /**
  * Generic fetch wrapper with error handling
  */
@@ -141,6 +171,11 @@ async function apiFetch<T>(
         ...options.headers,
       },
     });
+
+    const compatibilityError = getCompatibilityError(response);
+    if (compatibilityError) {
+      return { error: compatibilityError };
+    }
 
     const contentType = response.headers.get('content-type') || '';
     let data: any = null;

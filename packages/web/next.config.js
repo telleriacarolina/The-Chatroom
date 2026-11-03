@@ -1,3 +1,5 @@
+const { version: webVersion } = require('./package.json');
+
 function stripTrailingSlash(value) {
   return value.replace(/\/+$/, '');
 }
@@ -22,6 +24,14 @@ function getApiRewriteBase() {
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@chatroom/shared'],
+  env: {
+    NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || webVersion,
+    NEXT_PUBLIC_APP_RELEASE_ID:
+      process.env.NEXT_PUBLIC_APP_RELEASE_ID
+      || process.env.APP_RELEASE_ID
+      || process.env.VERCEL_GIT_COMMIT_SHA
+      || webVersion,
+  },
   async rewrites() {
     const rewriteBase = getApiRewriteBase();
 
