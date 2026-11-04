@@ -29,8 +29,18 @@ function hashOneTimeCode(code, scope = '') {
     .digest('hex');
 }
 
+function verifyOneTimeCode(code, storedHash, scope = '') {
+  if (typeof storedHash !== 'string' || !storedHash) return false;
+  const candidateHash = hashOneTimeCode(code, scope);
+  const candidateBuffer = Buffer.from(candidateHash, 'utf8');
+  const storedBuffer = Buffer.from(storedHash, 'utf8');
+  if (candidateBuffer.length !== storedBuffer.length) return false;
+  return crypto.timingSafeEqual(candidateBuffer, storedBuffer);
+}
+
 module.exports = {
   validatePasswordStrength,
   generateOneTimeCode,
-  hashOneTimeCode
+  hashOneTimeCode,
+  verifyOneTimeCode
 };

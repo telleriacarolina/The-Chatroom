@@ -6,8 +6,13 @@ const { prisma } = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
 const { sendSms } = require('../lib/twilio');
 const { generateCSRFToken } = require('../utils/security');
-const { validatePasswordStrength, generateOneTimeCode, hashOneTimeCode } = require('../utils/passwordPolicy');
-const { authLimiter } = require('../middleware/rateLimiter');
+const {
+  validatePasswordStrength,
+  generateOneTimeCode,
+  hashOneTimeCode,
+  verifyOneTimeCode
+} = require('../utils/passwordPolicy');
+const { authLimiter, resetRequestLimiter, resetVerifyLimiter } = require('../middleware/rateLimiter');
 
 function setCookie(res, name, value, opts = {}) {
   const options = { httpOnly: !!opts.httpOnly, path: '/', maxAge: opts.maxAge || 0 };
@@ -162,7 +167,7 @@ router.post('/logout', async (req, res) => {
 /**
  * Request password reset - generates and delivers a one-time code.
  */
-router.post('/request-password-reset', authLimiter, async (req, res) => {
+router.post('/request-password-reset', resetRequestLimiter, async (req, res) => {
   const { phoneNumber } = req.body || {};
   if (!phoneNumber) return res.status(400).json({ error: 'phoneNumber required' });
   
@@ -226,7 +231,7 @@ router.post('/request-password-reset', authLimiter, async (req, res) => {
 /**
  * Reset password using one-time code
  */
-router.post('/reset-password', authLimiter, async (req, res) => {
+router.post('/reset-password', resetVerifyLimiter, async (req, res) => {
   const { phoneNumber, code, token, newPassword } = req.body || {};
   const providedCode = code || token;
   
@@ -239,17 +244,15 @@ router.post('/reset-password', authLimiter, async (req, res) => {
 
   try {
     const encryptedPhone = encryptPhone(phoneNumber);
-    const tokenHash = hashOneTimeCode(providedCode, encryptedPhone);
-    
     const resetRecord = await prisma.passwordReset.findFirst({
       where: {
         phone: encryptedPhone,
-        token: tokenHash,
         expiresAt: { gt: new Date() }
-      }
+      },
+      orderBy: { createdAt: 'desc' }
     });
 
-    if (!resetRecord) {
+    if (!resetRecord || !verifyOneTimeCode(providedCode, resetRecord.token, encryptedPhone)) {
       return res.status(401).json({ error: 'Invalid or expired reset code' });
     }
 
