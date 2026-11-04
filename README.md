@@ -56,7 +56,7 @@ The-Chatroom/
 
 ### ✅ Currently Implemented
 
-The current implementation is backed by the live Socket.IO server in [packages/api/src/services/socketio.js](packages/api/src/services/socketio.js), the moderation routes in [packages/api/src/routes/moderation.js](packages/api/src/routes/moderation.js), the RBAC check in [packages/api/src/middleware/rbac.js](packages/api/src/middleware/rbac.js), the audit utility in [packages/api/src/utils/audit.js](packages/api/src/utils/audit.js), and the regression coverage in [scripts/socket-regression.js](scripts/socket-regression.js) and [scripts/validate-moderation.js](scripts/validate-moderation.js).
+The current implementation is backed by the live Socket.IO server in [packages/api/src/services/socketio.js](packages/api/src/services/socketio.js), the moderation routes in [packages/api/src/routes/moderation.js](packages/api/src/routes/moderation.js), the RBAC check in [packages/api/src/middleware/rbac.js](packages/api/src/middleware/rbac.js), the audit utility in [packages/api/src/utils/audit.js](packages/api/src/utils/audit.js), and the runtime regression coverage in [scripts/socket-regression.js](scripts/socket-regression.js) and [scripts/validate-moderation.js](scripts/validate-moderation.js). Features in this section are marked as implemented only when they are exercised by the active runtime checks, not merely because a route or helper exists.
 
 - **Multi-tier Authentication**
   - ✅ Guest sessions with temporary usernames
