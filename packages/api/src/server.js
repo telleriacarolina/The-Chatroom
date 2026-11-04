@@ -29,7 +29,8 @@ const io = initializeSocketIO(server);
 app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['x-chatroom-api-version', 'x-chatroom-release-id']
 }));
 
 app.use(express.json());
