@@ -47,6 +47,11 @@ function getAccessRequirements(accessLevel) {
   }
 }
 
+function hasExpiredRestriction(expiresAt) {
+  if (!expiresAt) return false;
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
 async function loadUserForAccess(userId) {
   if (!userId) return null;
   return prisma.user.findUnique({
@@ -56,12 +61,42 @@ async function loadUserForAccess(userId) {
       accountStatus: true,
       isBanned: true,
       isMuted: true,
+      banExpiresAt: true,
+      muteExpiresAt: true,
       ageVerified: true,
       idVerified: true,
       role: true,
       permanentUsername: true
     }
   });
+}
+
+function validateGuestAccess(guest, { accessLevel = null } = {}) {
+  if (!guest) {
+    return { ok: false, status: 404, message: 'Guest not found' };
+  }
+
+  if (guest.isBanned && !hasExpiredRestriction(guest.banExpiresAt)) {
+    return { ok: false, status: 403, message: 'Guest account is banned' };
+  }
+
+  if (guest.isMuted && !hasExpiredRestriction(guest.muteExpiresAt)) {
+    return { ok: false, status: 403, message: 'Guest account is muted' };
+  }
+
+  if (accessLevel) {
+    const requirements = getAccessRequirements(accessLevel);
+    const ageClaim = normalizeAgeCategory(guest.ageCategory || guest.ageClaim);
+    if (requirements.ageVerified && !ageClaim) {
+      return { ok: false, status: 403, message: 'Age verification is required for this room' };
+    }
+
+    if (requirements.idVerified) {
+      return { ok: false, status: 403, message: 'ID verification is required for this room' };
+    }
+  }
+
+  return { ok: true, guest };
 }
 
 function validateUserAccess(user, { accessLevel = null } = {}) {
@@ -73,11 +108,11 @@ function validateUserAccess(user, { accessLevel = null } = {}) {
     return { ok: false, status: 403, message: 'Account is not active' };
   }
 
-  if (user.isBanned) {
+  if (user.isBanned && !hasExpiredRestriction(user.banExpiresAt)) {
     return { ok: false, status: 403, message: 'Account is banned' };
   }
 
-  if (user.isMuted) {
+  if (user.isMuted && !hasExpiredRestriction(user.muteExpiresAt)) {
     return { ok: false, status: 403, message: 'Account is muted' };
   }
 
