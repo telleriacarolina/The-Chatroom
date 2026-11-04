@@ -13,9 +13,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { LoginForm, type LoginFormData } from '@/components/auth/LoginForm';
-import { authApi } from '@/lib/api';
-import { useApiRequest } from '@/hooks';
+import LoginForm from '@/components/auth/LoginForm';
 
 /**
  * LoginPage - Container component that owns state and handles API calls
@@ -29,32 +27,6 @@ import { useApiRequest } from '@/hooks';
 export default function LoginPage() {
   const router = useRouter();
 
-  // ✅ Container owns loading/error state via custom hook
-  const { execute: handleLogin, isLoading, error } = useApiRequest(
-    authApi.signin,
-    {
-      // ✅ Handle side effects here (navigation)
-      onSuccess: (result) => {
-        console.log('Login successful:', result);
-        router.push('/'); // Redirect to dashboard/home
-      },
-      onError: (err) => {
-        console.error('Login failed:', err);
-        // Error is already captured in the hook's error state
-      },
-    }
-  );
-
-  // ✅ Handler that calls the API (no state management here, it's in the hook)
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      await handleLogin(data);
-    } catch (err) {
-      // Error is already handled by the hook
-      // This catch is optional, for any additional handling
-    }
-  };
-
   const handleSignupClick = () => {
     router.push('/signup');
   };
@@ -63,10 +35,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <LoginForm
-        onSubmit={onSubmit}
-        isLoading={isLoading}
-        error={error}
-        onSignupClick={handleSignupClick}
+        onSuccess={() => router.push('/')}
+        onSwitchToSignup={handleSignupClick}
       />
     </div>
   );

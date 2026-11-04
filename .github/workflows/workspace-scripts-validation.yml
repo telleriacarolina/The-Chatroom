@@ -42,9 +42,22 @@ jobs:
       - name: Build Socket workspace
         run: npm run build:socket
 
-      - name: Verify root build fails when any workspace build fails
+      - name: Build Web workspace
+        run: npm run build:web
+
+      - name: Verify root build succeeds with healthy workspaces
+        run: npm run build
+
+      - name: Verify root build fails when a required workspace build fails
+        env:
+          FORCE_WORKSPACE_BUILD_FAIL: socket
         run: |
           if npm run build; then
-            echo "Expected root build to fail when one workspace build fails."
+            echo "Expected root build to fail when a required workspace build fails."
             exit 1
           fi
+
+      - name: Verify Prisma commands use canonical schema from root
+        run: |
+          npm run prisma:generate
+          npm run prisma:migrate -- --help

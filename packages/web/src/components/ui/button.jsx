@@ -27,7 +27,6 @@ export function Button({
   return (
     <button
       className={clsx(base, variantClasses[variant], sizeClasses[size], className)}
-      disabled={disabled}
       {...props}
     >
       {children}

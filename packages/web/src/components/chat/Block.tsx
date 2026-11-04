@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getSocket, isConnected as socketIsConnected, requestLoungeCounts } from "@/lib/socket";
+import ConnectionStatus from "@/components/ConnectionStatus";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 
 interface BlockProps {
@@ -19,9 +21,13 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedLounge, setSelectedLounge] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [guestToken, setGuestToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
   const [isLoadingLounges, setIsLoadingLounges] = useState(false);
+  const [loungeCounts, setLoungeCounts] = useState<Record<string, number>>({});
+  const socket = getSocket();
+  const isConnected = socketIsConnected();
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
