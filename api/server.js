@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const loungeRoutes = require('./routes/lounges');
 const messagesRoutes = require('./routes/messages');
 const logger = require('./utils/logger');
+const { authLimiter, apiLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,12 +34,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/lounges', loungeRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/lounges', apiLimiter, loungeRoutes);
 // Message-related endpoints (including Message History API).
 // Detailed endpoint specification, usage examples, error codes,
 // and performance notes are documented in docs/MESSAGE_HISTORY_API.md.
-app.use('/api/messages', messagesRoutes);
+app.use('/api/messages', apiLimiter, messagesRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 

@@ -1,9 +1,15 @@
-// Simple logger utility
+const { sanitizeLogData } = require('../../shared/schemas');
+
+function formatLog(level, ...args) {
+  const safeArgs = args.map((arg) => sanitizeLogData(arg));
+  return console[level](`[${level.toUpperCase()}]`, new Date().toISOString(), ...safeArgs);
+}
+
 module.exports = {
-  info: (...args) => console.log('[INFO]', new Date().toISOString(), ...args),
-  warn: (...args) => console.warn('[WARN]', new Date().toISOString(), ...args),
-  error: (...args) => console.error('[ERROR]', new Date().toISOString(), ...args),
+  info: (...args) => formatLog('log', ...args),
+  warn: (...args) => formatLog('warn', ...args),
+  error: (...args) => formatLog('error', ...args),
   debug: (...args) => {
-    if (process.env.DEBUG) console.log('[DEBUG]', new Date().toISOString(), ...args);
+    if (process.env.DEBUG) formatLog('log', ...args);
   }
 };
