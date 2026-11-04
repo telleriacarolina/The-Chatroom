@@ -36,17 +36,17 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: {
+  'chat_message': (data: {
     loungeId: string;
     languageRoomId: string;
     messageText: string;
     messageType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'SYSTEM';
     attachmentUrl?: string;
   }) => void;
-  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: { languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: { loungeId: string; languageRoomId: string }) => void;
+  'join_room': (data: { loungeId: string; languageRoomId: string }) => void;
+  'leave_room': (data: { languageRoomId: string }) => void;
+  'typing_start': (data: { loungeId: string; languageRoomId: string }) => void;
+  'typing_stop': (data: { loungeId: string; languageRoomId: string }) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -204,7 +204,7 @@ export function requestLoungeCounts(): void {
 // Exports
 // ============================================================================
 
-export default {
+const socketClient = {
   getSocket,
   connect,
   setAuthToken,
@@ -219,3 +219,5 @@ export default {
   sendTyping,
   requestLoungeCounts,
 };
+
+export default socketClient;
