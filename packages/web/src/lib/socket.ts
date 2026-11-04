@@ -6,7 +6,23 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
+
+const SOCKET_EVENTS = {
+  CLIENT: {
+    JOIN_ROOM: 'join_room',
+    LEAVE_ROOM: 'leave_room',
+    CHAT_MESSAGE: 'chat_message',
+    TYPING_START: 'typing_start',
+    TYPING_STOP: 'typing_stop',
+  },
+  SERVER: {
+    CHAT_MESSAGE: 'chat_message',
+    USER_JOINED: 'user_joined',
+    USER_LEFT: 'user_left',
+    USER_TYPING: 'user_typing',
+    ERROR: 'error',
+  },
+} as const;
 
 // ============================================================================
 // Configuration
@@ -25,11 +41,11 @@ function resolveSocketUrl(): string {
 // ============================================================================
 
 export interface ServerToClientEvents {
-  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: unknown) => void;
-  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
-  [SOCKET_EVENTS.SERVER.ERROR]: (data: { code: string; message: string }) => void;
+  'chat_message': (message: unknown) => void;
+  'user_joined': (data: { userId: string; timestamp: string }) => void;
+  'user_left': (data: { userId: string; timestamp: string }) => void;
+  'user_typing': (data: { userId: string; isTyping: boolean }) => void;
+  'error': (data: { code: string; message: string }) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;
