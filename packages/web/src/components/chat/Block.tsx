@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
-import ConnectionStatus from "@/components/ConnectionStatus";
 
 interface BlockProps {
   onShowLogin?: () => void;
@@ -223,7 +222,6 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
             </div>
 
             <div className="mt-4 flex justify-center">
-              <ConnectionStatus />
             </div>
           </CardContent>
         </Card>
@@ -244,7 +242,6 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
               <UserCircle className="w-4 h-4" />
               {tempUsername}
             </Badge>
-            <ConnectionStatus />
           </div>
           <Button 
             variant="outline" 
@@ -444,7 +441,6 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
             <UserCircle className="w-4 h-4" />
             {tempUsername}
           </Badge>
-          <ConnectionStatus />
         </div>
         <Button 
           variant="outline" 
