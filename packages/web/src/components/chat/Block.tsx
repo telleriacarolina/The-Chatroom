@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import { useSocket } from "@/hooks/useSocket";
-import { setAuthToken } from "@/lib/socket";
+import { restoreStoredAuthToken, setAuthToken } from "@/lib/socket";
 
 interface BlockProps {
   onShowLogin?: () => void;
@@ -25,37 +25,38 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingLanguages, setIsLoadingLanguages] = useState(false);
   const [isLoadingLounges, setIsLoadingLounges] = useState(false);
-  const [loungeCounts, setLoungeCounts] = useState<Record<string, number>>({});
 
-  const { socket, isConnected } = useSocket({ autoConnect: true });
+  const { socket, isConnected } = useSocket({ autoConnect: false });
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
-  // Restore session from localStorage on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUsername = localStorage.getItem('guestUsername');
-      const storedToken = localStorage.getItem('guestToken');
-      
-      if (storedUsername && storedToken) {
-        setTempUsername(storedUsername);
-        setAuthToken(storedToken);
-      }
+    if (typeof window === 'undefined') return;
+
+    const storedUsername = localStorage.getItem('guestUsername');
+    if (storedUsername) {
+      setTempUsername(storedUsername);
+    }
+
+    const storedToken = restoreStoredAuthToken();
+    if (storedToken) {
+      setAuthToken(storedToken);
     }
   }, []);
 
-  // Socket real-time counts are not part of the current server contract.
-  // Keep the local state for static lounge member counts without subscribing to unknown events.
   useEffect(() => {
-    if (!socket || !isConnected) return;
+    if (!socket || typeof window === 'undefined') return;
 
-    setLoungeCounts({});
-  }, [socket, isConnected]);
+    const token = localStorage.getItem('guestToken')?.trim();
+    if (token) {
+      socket.auth = { token };
+    }
+  }, [socket]);
 
   // Language categories with All Users Lounge + Country-specific lounges.
   // These member counts are static demo values and are not updated from Socket.IO data.
   const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
-    return loungeCounts[loungeId] ?? defaultCount;
+    return defaultCount;
   };
 
   const languageCategories = {

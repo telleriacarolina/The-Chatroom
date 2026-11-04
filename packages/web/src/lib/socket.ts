@@ -110,10 +110,31 @@ export function connect(): TypedSocket | null {
   return socket;
 }
 
+export function getStoredAuthToken(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const token = localStorage.getItem('guestToken');
+  return token && token.trim() ? token : null;
+}
+
+export function restoreStoredAuthToken(): string | null {
+  const storedToken = getStoredAuthToken();
+  if (storedToken) {
+    setAuthToken(storedToken);
+  }
+  return storedToken;
+}
+
 export function setAuthToken(token: string): void {
   const socket = getSocket();
-  if (!socket) return;
-  socket.auth = { token };
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('guestToken', token);
+  }
+  if (socket) {
+    socket.auth = { token };
+  }
 }
 
 /**
