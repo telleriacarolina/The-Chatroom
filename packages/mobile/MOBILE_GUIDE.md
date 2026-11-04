@@ -126,14 +126,14 @@ packages/mobile/
 
 **Emit:**
 ```typescript
-socket.emit('join-room', loungeId);
-socket.emit('leave-room', loungeId);
-socket.emit('chat message', message);
+socket.emit('join_room', { loungeId, languageRoomId });
+socket.emit('leave_room', { languageRoomId });
+socket.emit('chat_message', { loungeId, languageRoomId, messageText });
 ```
 
 **Listen:**
 ```typescript
-socket.on('chat message', (msg) => {
+socket.on('chat_message', (msg) => {
   setMessages(prev => [...prev, msg]);
 });
 
