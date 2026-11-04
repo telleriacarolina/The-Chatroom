@@ -20,9 +20,7 @@
     "pkgs:start": "npm run start --workspaces --if-present",
     "prisma:generate": "prisma generate --schema=packages/api/prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=packages/api/prisma/schema.prisma",
-    "test:startup": "node scripts/test-startup.js",
     "test:socket-regression": "node scripts/socket-regression.js",
-    "test:startup:bash": "bash scripts/test-startup.sh",
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist"
   },
   "dependencies": {
