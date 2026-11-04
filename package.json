@@ -26,8 +26,10 @@
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
+    "build:api": "npm run build -w @chatroom/api",
+    "build:socket": "npm run build -w @chatroom/socket",
     "build:web": "npm run build -w @chatroom/web",
-    "build": "npm run build:web"
+    "build": "npm run build:api && npm run build:socket && npm run build:web"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

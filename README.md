@@ -305,7 +305,9 @@ npm run dev:web          # Next.js frontend only
 
 
 ```bash
-npm run build            # Build required root target(s)
+npm run build            # Build required API, Socket, and web workspaces
+npm run build:api        # Build API workspace only
+npm run build:socket     # Build Socket workspace only
 npm run build:web        # Build web workspace only
 npm run pkgs:build       # Build all workspace packages that define a build script
 ```
