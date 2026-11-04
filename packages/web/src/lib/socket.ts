@@ -46,8 +46,6 @@ export interface ServerToClientEvents {
   [SERVER_EVENTS.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
   [SERVER_EVENTS.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
   [SERVER_EVENTS.ERROR]: (data: { code: string; message: string }) => void;
-  'lounge counts': (counts: Record<string, number>) => void;
-  'user count': (data: { loungeId: string; count: number }) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;

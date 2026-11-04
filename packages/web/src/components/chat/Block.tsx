@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 import ConnectionStatus from "@/components/ConnectionStatus";
 import { useSocket } from "@/hooks/useSocket";
-import { requestLoungeCounts, setAuthToken } from "@/lib/socket";
+import { setAuthToken } from "@/lib/socket";
 
 interface BlockProps {
   onShowLogin?: () => void;
@@ -44,31 +44,12 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
     }
   }, []);
 
-  // Listen for real-time lounge counts
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleLoungeCounts = (counts: Record<string, number>) => {
-      setLoungeCounts(counts);
-    };
-
-    const handleUserCount = ({ loungeId, count }: { loungeId: string; count: number }) => {
-      setLoungeCounts(prev => ({ ...prev, [loungeId]: count }));
-    };
-
-    socket.on('lounge counts', handleLoungeCounts);
-    socket.on('user count', handleUserCount);
-
-    return () => {
-      socket.off('lounge counts', handleLoungeCounts);
-      socket.off('user count', handleUserCount);
-    };
-  }, [socket]);
-
-  // Request initial lounge counts when connected
+  // Socket real-time counts are not part of the current server contract.
+  // Keep the local state for static lounge member counts without subscribing to unknown events.
   useEffect(() => {
     if (!socket || !isConnected) return;
-    requestLoungeCounts();
+
+    setLoungeCounts({});
   }, [socket, isConnected]);
 
   // Language categories with All Users Lounge + Country-specific lounges

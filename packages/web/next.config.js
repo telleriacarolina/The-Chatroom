@@ -30,6 +30,7 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_APP_RELEASE_ID
       || process.env.APP_RELEASE_ID
       || process.env.VERCEL_GIT_COMMIT_SHA
+      || process.env.RENDER_GIT_COMMIT
       || webVersion,
   },
   async rewrites() {

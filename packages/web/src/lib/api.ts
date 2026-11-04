@@ -130,11 +130,13 @@ export interface SigninData {
 }
 
 function buildVersionMismatchError(serverReleaseId: string, serverVersion: string | null): string {
-  const clientLabel = `${CLIENT_APP_VERSION} (${CLIENT_RELEASE_ID})`;
+  const clientLabel = CLIENT_APP_VERSION !== 'unknown'
+    ? `client ${CLIENT_APP_VERSION} (release ${CLIENT_RELEASE_ID})`
+    : `client release ${CLIENT_RELEASE_ID}`;
   const serverLabel = serverVersion
-    ? `API ${serverVersion} (${serverReleaseId})`
-    : `release ${serverReleaseId}`;
-  return `Deployment version mismatch detected (server ${serverLabel} vs client ${clientLabel}). Refresh the page to load the latest client build.`;
+    ? `server API ${serverVersion} (release ${serverReleaseId})`
+    : `server release ${serverReleaseId}`;
+  return `Deployment version mismatch detected (${serverLabel} vs ${clientLabel}). Refresh the page to load the latest client build.`;
 }
 
 function getHeaderValue(headers: Headers, name: string): string | null {
