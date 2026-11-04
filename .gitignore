@@ -33,7 +33,10 @@ node_modules/
 
 # Misc
 .vscode/
-.github/
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/workspace-scripts-validation.yml
 node_modules/
 dist/
 .env
@@ -47,4 +50,3 @@ coverage/
 
 # Test files
 test-forms.html
-

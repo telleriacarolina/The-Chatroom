@@ -6,7 +6,6 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
 
 // ============================================================================
 // Configuration
@@ -25,28 +24,30 @@ function resolveSocketUrl(): string {
 // ============================================================================
 
 export interface ServerToClientEvents {
-  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: unknown) => void;
-  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
-  [SOCKET_EVENTS.SERVER.ERROR]: (data: { code: string; message: string }) => void;
+  chat_message: (message: unknown) => void;
+  user_joined: (data: { userId: string; timestamp: string }) => void;
+  user_left: (data: { userId: string; timestamp: string }) => void;
+  user_typing: (data: { userId: string; isTyping: boolean }) => void;
+  error: (data: { code: string; message: string }) => void;
+  'lounge counts': (data: Record<string, number>) => void;
+  'user count': (data: { loungeId: string; count: number }) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;
 }
 
 export interface ClientToServerEvents {
-  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: {
+  chat_message: (data: {
     loungeId: string;
     languageRoomId: string;
     messageText: string;
     messageType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'SYSTEM';
     attachmentUrl?: string;
   }) => void;
-  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: { languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: { loungeId: string; languageRoomId: string }) => void;
+  join_room: (data: { loungeId: string; languageRoomId: string }) => void;
+  leave_room: (data: { languageRoomId: string }) => void;
+  typing_start: (data: { loungeId: string; languageRoomId: string }) => void;
+  typing_stop: (data: { loungeId: string; languageRoomId: string }) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -142,7 +143,7 @@ export function cleanupSocket(): void {
 export function joinRoom(loungeId: string, languageRoomId: string): void {
   const socket = getSocket();
   if (socket) {
-    socket.emit(SOCKET_EVENTS.CLIENT.JOIN_ROOM, { loungeId, languageRoomId });
+    socket.emit('join_room', { loungeId, languageRoomId });
   }
 }
 
@@ -156,7 +157,7 @@ export function joinLounge(loungeId: string, languageRoomId: string): void {
 export function leaveRoom(languageRoomId: string): void {
   const socket = getSocket();
   if (socket) {
-    socket.emit(SOCKET_EVENTS.CLIENT.LEAVE_ROOM, { languageRoomId });
+    socket.emit('leave_room', { languageRoomId });
   }
 }
 
@@ -176,7 +177,7 @@ export function sendMessage(data: {
 }): void {
   const socket = getSocket();
   if (socket) {
-    socket.emit(SOCKET_EVENTS.CLIENT.CHAT_MESSAGE, data);
+    socket.emit('chat_message', data);
   }
 }
 
@@ -187,7 +188,7 @@ export function sendTyping(loungeId: string, languageRoomId: string, isTyping: b
   const socket = getSocket();
   if (socket) {
     socket.emit(
-      isTyping ? SOCKET_EVENTS.CLIENT.TYPING_START : SOCKET_EVENTS.CLIENT.TYPING_STOP,
+      isTyping ? 'typing_start' : 'typing_stop',
       { loungeId, languageRoomId }
     );
   }

@@ -210,26 +210,13 @@ npm run prisma:migrate
 
 ### 4. Run Development Servers
 
-### Option A: All-in-One Script (Recommended)
-
-#### Option A: All-in-One Script (Recommended)
+### Option A: Start all services (Recommended)
 
 ```bash
 # Run all services
 npm run dev
 
-# Or run individually:
-# First time setup
-./start-all.sh --setup
-
-# Start all services
-./start-all.sh
-
-# View logs
-./start-all.sh --logs
-
-# Get help
-./start-all.sh --help
+# Root dev orchestrates API + Socket.IO + web, and fails if any service exits with an error.
 ```
 
 #### Option B: Individual Services
@@ -321,12 +308,11 @@ npm run dev:web          # Next.js frontend only
 
 
 ```bash
-npm run build            # Build all packages
-npm run build:web        # Build web only
-npm run start            # Start all services
-npm run start:api        # Start API only
-npm run start:socket     # Start Socket.IO only
-npm run start:web        # Start Next.js only
+npm run build            # Build required API, Socket, and web workspaces
+npm run build:api        # Build API workspace only
+npm run build:socket     # Build Socket workspace only
+npm run build:web        # Build web workspace only
+npm run pkgs:build       # Build all workspace packages that define a build script
 ```
 
 ### Database
@@ -346,7 +332,7 @@ npm run clean            # Clean all build artifacts and node_modules
 ## Dev Tips
 
 - Prefer workspace-specific runs: use npm run dev:web, npm run dev:api, and npm run dev:socket to start services individually.
-- Avoid npm run dev when you only need one service; it runs dev scripts across all workspaces.
+- npm run dev starts all three services from the root and stops all when one fails.
 - Expected ports: Web :3000, API :3001, Socket :3002.
 - If TypeScript errors appear from other packages, limit scope during web dev as configured in tsconfig.json.
 
