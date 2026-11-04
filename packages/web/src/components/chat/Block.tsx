@@ -221,8 +221,6 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
               </Button>
             </div>
 
-            <div className="mt-4 flex justify-center">
-            </div>
           </CardContent>
         </Card>
       </div>
