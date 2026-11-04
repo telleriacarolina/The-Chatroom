@@ -210,7 +210,9 @@ npm run prisma:migrate
 Migration gate notes:
 - `PRISMA_TEST_DATABASE_URL` is required and cannot be omitted.
 - It must use PostgreSQL and include a non-`public` schema (`?schema=...`) so validation stays isolated.
-- `npm run prisma:migrate:test` runs `prisma migrate reset`, so the test role needs permissions to create/drop objects in the disposable schema.
+- `npm run prisma:migrate:test` runs `prisma migrate deploy` only (no reset), so it never issues destructive reset operations.
+- The test role still needs permissions to create schemas/tables/indexes and to insert/read test rows in the disposable database.
+- The script creates timestamped disposable schemas for fresh/setup and upgrade checks; cleanup can be done with `DROP SCHEMA <schema_name> CASCADE`.
 - The script only injects the disposable URL into Prisma subprocesses and does not mutate your shell environment.
 
 ### 4. Run Development Servers
