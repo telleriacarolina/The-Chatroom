@@ -241,6 +241,21 @@ async function runSuite(label, starter) {
     const invalidEmptyMessage = await invalidEmptyMessagePromise;
     assert.ok(String(invalidEmptyMessage?.message || '').toLowerCase().includes('message text or an attachment'));
 
+    const malformedAttachmentPromise = waitForEvent(alice, 'error');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: 'hello', attachmentUrl: 123 });
+    const malformedAttachment = await malformedAttachmentPromise;
+    assert.ok(String(malformedAttachment?.message || '').toLowerCase().includes('must be strings'));
+
+    const emptyAttachmentPromise = waitForEvent(alice, 'error');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: '', attachmentUrl: '' });
+    const emptyAttachment = await emptyAttachmentPromise;
+    assert.ok(String(emptyAttachment?.message || '').toLowerCase().includes('message text or an attachment'));
+
+    const whitespaceTextPromise = waitForEvent(alice, 'error');
+    alice.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: ' \n\t ', attachmentUrl: null });
+    const whitespaceText = await whitespaceTextPromise;
+    assert.ok(String(whitespaceText?.message || '').toLowerCase().includes('message text or an attachment'));
+
     carol.emit('chat_message', { loungeId: 'lounge-1', languageRoomId: 'room-1', messageText: 'intrude' });
     const notJoinedErr = await waitForEvent(carol, 'error');
     assert.ok(String(notJoinedErr?.message || '').includes('Not joined'));
