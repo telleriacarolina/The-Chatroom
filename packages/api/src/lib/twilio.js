@@ -1,21 +1,31 @@
-const Twilio = require('twilio');
+function createSmsSender({
+  accountSid = process.env.TWILIO_ACCOUNT_SID,
+  authToken = process.env.TWILIO_AUTH_TOKEN,
+  fromNumber = process.env.TWILIO_FROM_NUMBER,
+  twilioFactory
+} = {}) {
+  const resolvedFactory = twilioFactory || (() => {
+    try {
+      return require('twilio');
+    } catch (_) {
+      return null;
+    }
+  })();
+  const client = accountSid && authToken && resolvedFactory ? resolvedFactory(accountSid, authToken) : null;
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const fromNumber = process.env.TWILIO_FROM_NUMBER;
+  return async function sendSms(to, body) {
+    if (!to || !body) {
+      throw new Error('SMS destination and body are required');
+    }
 
-let client = null;
-if (accountSid && authToken) {
-  client = Twilio(accountSid, authToken);
+    if (!client || !fromNumber) {
+      throw new Error('Twilio is not configured');
+    }
+
+    return client.messages.create({ to, from: fromNumber, body });
+  };
 }
 
-async function sendSms(to, body) {
-  if (!client || !fromNumber) {
-    console.warn('Twilio not configured; SMS not sent', { to, body });
-    return null;
-  }
+const sendSms = createSmsSender();
 
-  return client.messages.create({ to, from: fromNumber, body });
-}
-
-module.exports = { sendSms };
+module.exports = { sendSms, createSmsSender };

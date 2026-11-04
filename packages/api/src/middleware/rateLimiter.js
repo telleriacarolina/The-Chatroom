@@ -37,6 +37,24 @@ const apiLimiter = rateLimit({
   legacyHeaders: false
 });
 
+const resetRequestLimiter = rateLimit({
+  store: createStore('rl:password-reset-request:'),
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  message: 'Too many password reset requests. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const resetVerifyLimiter = rateLimit({
+  store: createStore('rl:password-reset-verify:'),
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: 'Too many reset code verification attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 const heartbeatLimiter = rateLimit({
   store: createStore('rl:heartbeat:'),
   windowMs: 1 * 60 * 1000,
@@ -49,5 +67,7 @@ const heartbeatLimiter = rateLimit({
 module.exports = {
   authLimiter,
   apiLimiter,
+  resetRequestLimiter,
+  resetVerifyLimiter,
   heartbeatLimiter
 };
