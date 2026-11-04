@@ -8,6 +8,22 @@
 import { io, Socket } from 'socket.io-client';
 import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
 
+const CLIENT_EVENTS = {
+  JOIN_ROOM: SOCKET_EVENTS.CLIENT.JOIN_ROOM as 'join_room',
+  LEAVE_ROOM: SOCKET_EVENTS.CLIENT.LEAVE_ROOM as 'leave_room',
+  CHAT_MESSAGE: SOCKET_EVENTS.CLIENT.CHAT_MESSAGE as 'chat_message',
+  TYPING_START: SOCKET_EVENTS.CLIENT.TYPING_START as 'typing_start',
+  TYPING_STOP: SOCKET_EVENTS.CLIENT.TYPING_STOP as 'typing_stop',
+} as const;
+
+const SERVER_EVENTS = {
+  CHAT_MESSAGE: SOCKET_EVENTS.SERVER.CHAT_MESSAGE as 'chat_message',
+  USER_JOINED: SOCKET_EVENTS.SERVER.USER_JOINED as 'user_joined',
+  USER_LEFT: SOCKET_EVENTS.SERVER.USER_LEFT as 'user_left',
+  USER_TYPING: SOCKET_EVENTS.SERVER.USER_TYPING as 'user_typing',
+  ERROR: SOCKET_EVENTS.SERVER.ERROR as 'error',
+} as const;
+
 // ============================================================================
 // Configuration
 // ============================================================================
@@ -25,28 +41,28 @@ function resolveSocketUrl(): string {
 // ============================================================================
 
 export interface ServerToClientEvents {
-  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: unknown) => void;
-  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
-  [SOCKET_EVENTS.SERVER.ERROR]: (data: { code: string; message: string }) => void;
+  [SERVER_EVENTS.CHAT_MESSAGE]: (message: unknown) => void;
+  [SERVER_EVENTS.USER_JOINED]: (data: { userId: string; timestamp: string }) => void;
+  [SERVER_EVENTS.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
+  [SERVER_EVENTS.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
+  [SERVER_EVENTS.ERROR]: (data: { code: string; message: string }) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;
 }
 
 export interface ClientToServerEvents {
-  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: {
+  [CLIENT_EVENTS.CHAT_MESSAGE]: (data: {
     loungeId: string;
     languageRoomId: string;
     messageText: string;
     messageType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'SYSTEM';
     attachmentUrl?: string;
   }) => void;
-  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: { languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: { loungeId: string; languageRoomId: string }) => void;
+  [CLIENT_EVENTS.JOIN_ROOM]: (data: { loungeId: string; languageRoomId: string }) => void;
+  [CLIENT_EVENTS.LEAVE_ROOM]: (data: { languageRoomId: string }) => void;
+  [CLIENT_EVENTS.TYPING_START]: (data: { loungeId: string; languageRoomId: string }) => void;
+  [CLIENT_EVENTS.TYPING_STOP]: (data: { loungeId: string; languageRoomId: string }) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -94,10 +110,31 @@ export function connect(): TypedSocket | null {
   return socket;
 }
 
+export function getStoredAuthToken(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const token = localStorage.getItem('guestToken');
+  return token && token.trim() ? token : null;
+}
+
+export function restoreStoredAuthToken(): string | null {
+  const storedToken = getStoredAuthToken();
+  if (storedToken) {
+    setAuthToken(storedToken);
+  }
+  return storedToken;
+}
+
 export function setAuthToken(token: string): void {
   const socket = getSocket();
-  if (!socket) return;
-  socket.auth = { token };
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('guestToken', token);
+  }
+  if (socket) {
+    socket.auth = { token };
+  }
 }
 
 /**
@@ -142,7 +179,7 @@ export function cleanupSocket(): void {
 export function joinRoom(loungeId: string, languageRoomId: string): void {
   const socket = getSocket();
   if (socket) {
-    socket.emit(SOCKET_EVENTS.CLIENT.JOIN_ROOM, { loungeId, languageRoomId });
+    socket.emit(CLIENT_EVENTS.JOIN_ROOM, { loungeId, languageRoomId });
   }
 }
 
@@ -156,7 +193,7 @@ export function joinLounge(loungeId: string, languageRoomId: string): void {
 export function leaveRoom(languageRoomId: string): void {
   const socket = getSocket();
   if (socket) {
-    socket.emit(SOCKET_EVENTS.CLIENT.LEAVE_ROOM, { languageRoomId });
+    socket.emit(CLIENT_EVENTS.LEAVE_ROOM, { languageRoomId });
   }
 }
 
@@ -176,7 +213,7 @@ export function sendMessage(data: {
 }): void {
   const socket = getSocket();
   if (socket) {
-    socket.emit(SOCKET_EVENTS.CLIENT.CHAT_MESSAGE, data);
+    socket.emit(CLIENT_EVENTS.CHAT_MESSAGE, data);
   }
 }
 
@@ -187,7 +224,7 @@ export function sendTyping(loungeId: string, languageRoomId: string, isTyping: b
   const socket = getSocket();
   if (socket) {
     socket.emit(
-      isTyping ? SOCKET_EVENTS.CLIENT.TYPING_START : SOCKET_EVENTS.CLIENT.TYPING_STOP,
+      isTyping ? CLIENT_EVENTS.TYPING_START : CLIENT_EVENTS.TYPING_STOP,
       { loungeId, languageRoomId }
     );
   }

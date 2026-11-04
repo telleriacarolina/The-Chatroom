@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { getSocket, connect, disconnect, TypedSocket } from '@/lib/socket';
+import { getSocket, connect, disconnect, restoreStoredAuthToken, setAuthToken, TypedSocket } from '@/lib/socket';
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -50,11 +50,18 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   // Initialize socket
   useEffect(() => {
     const socket = getSocket();
-    
+
     // Skip if SSR or socket not available
     if (!socket) return;
-    
+
     socketRef.current = socket;
+
+    // Restore any persisted session before connecting.
+    const storedToken = restoreStoredAuthToken();
+    if (storedToken) {
+      setAuthToken(storedToken);
+      socket.auth = { token: storedToken };
+    }
 
     // Set up event listeners
     const handleConnect = () => {
