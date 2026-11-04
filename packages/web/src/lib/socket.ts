@@ -41,28 +41,28 @@ function resolveSocketUrl(): string {
 // ============================================================================
 
 export interface ServerToClientEvents {
-  'chat_message': (message: unknown) => void;
-  'user_joined': (data: { userId: string; timestamp: string }) => void;
-  'user_left': (data: { userId: string; timestamp: string }) => void;
-  'user_typing': (data: { userId: string; isTyping: boolean }) => void;
-  'error': (data: { code: string; message: string }) => void;
+  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: unknown) => void;
+  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: { userId: string; timestamp: string }) => void;
+  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
+  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
+  [SOCKET_EVENTS.SERVER.ERROR]: (data: { code: string; message: string }) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;
 }
 
 export interface ClientToServerEvents {
-  'chat_message': (data: {
+  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: {
     loungeId: string;
     languageRoomId: string;
     messageText: string;
     messageType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'SYSTEM';
     attachmentUrl?: string;
   }) => void;
-  'join_room': (data: { loungeId: string; languageRoomId: string }) => void;
-  'leave_room': (data: { languageRoomId: string }) => void;
-  'typing_start': (data: { loungeId: string; languageRoomId: string }) => void;
-  'typing_stop': (data: { loungeId: string; languageRoomId: string }) => void;
+  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: { loungeId: string; languageRoomId: string }) => void;
+  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: { languageRoomId: string }) => void;
+  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: { loungeId: string; languageRoomId: string }) => void;
+  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: { loungeId: string; languageRoomId: string }) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
