@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
 const { validatePayload, userSchema, chatMessageSchema, MAX_PAGE_SIZE, sanitizeLogData } = require('../shared/schemas/index.js');
-const { enforceMessageThrottle } = require('../socket/messageThrottle.js');
+const { enforceMessageThrottle, resolveSocketUserId } = require('../socket/messageThrottle.js');
 
 const { authLimiter, apiLimiter } = require('../api/middleware/rateLimiter.js');
 
@@ -43,6 +43,13 @@ test('per-user message throttle blocks abuse after the threshold', () => {
     assert.equal(enforceMessageThrottle(userId), true);
   }
   assert.equal(enforceMessageThrottle(userId), false);
+});
+
+test('socket identity checks reject client-side user spoofing', () => {
+  const socket = { data: { userId: 'server-user' } };
+  assert.equal(resolveSocketUserId(socket, 'client-user').allowed, false);
+  assert.equal(resolveSocketUserId(socket, 'server-user').allowed, true);
+  assert.equal(resolveSocketUserId({ data: {} }, 'client-user').allowed, true);
 });
 
 test('auth and API rate limiters are configured as middleware objects', () => {

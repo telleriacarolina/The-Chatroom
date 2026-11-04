@@ -4,7 +4,7 @@ exports.initChat = void 0;
 const prisma = require("./lib/prisma");
 const logger = require("./lib/logger");
 const { validatePayload, chatMessageSchema } = require("../shared/schemas");
-const { enforceMessageThrottle } = require('./messageThrottle');
+const { enforceMessageThrottle, resolveSocketUserId } = require('./messageThrottle');
 /**
  * Socket connection tracking for presence management
  * Maps userId to array of socket IDs (for multiple device/tab support)
@@ -130,10 +130,15 @@ const initChat = (io) => {
          */
         socket.on("message", async ({ loungeId, languageRoomId, userId, content, displayUsername, messageType = "TEXT" }) => {
             try {
+                const identity = resolveSocketUserId(socket, userId);
+                if (!identity.allowed) {
+                    socket.emit("error", { message: "Invalid user identity", details: [identity.reason || "Missing user identity"] });
+                    return;
+                }
                 const payload = validatePayload({
                     loungeId,
                     languageRoomId,
-                    userId,
+                    userId: identity.userId,
                     content,
                     displayUsername,
                     messageType
@@ -142,7 +147,7 @@ const initChat = (io) => {
                     socket.emit("error", { message: "Invalid message payload", details: payload.errors });
                     return;
                 }
-                if (!enforceMessageThrottle(userId)) {
+                if (!enforceMessageThrottle(identity.userId)) {
                     socket.emit("error", { message: "Too many messages. Please slow down." });
                     return;
                 }
@@ -195,7 +200,12 @@ const initChat = (io) => {
          */
         socket.on("edit-message", async ({ messageId, userId, newContent, loungeId }) => {
             try {
-                const payload = validatePayload({ messageId, userId, newContent, loungeId }, chatMessageSchema.edit);
+                const identity = resolveSocketUserId(socket, userId);
+                if (!identity.allowed) {
+                    socket.emit("error", { message: "Invalid user identity", details: [identity.reason || "Missing user identity"] });
+                    return;
+                }
+                const payload = validatePayload({ messageId, userId: identity.userId, newContent, loungeId }, chatMessageSchema.edit);
                 if (!payload.valid) {
                     socket.emit("error", { message: "Invalid edit payload", details: payload.errors });
                     return;
@@ -249,7 +259,12 @@ const initChat = (io) => {
          */
         socket.on("delete-message", async ({ messageId, userId, loungeId }) => {
             try {
-                const payload = validatePayload({ messageId, userId, loungeId }, chatMessageSchema.delete);
+                const identity = resolveSocketUserId(socket, userId);
+                if (!identity.allowed) {
+                    socket.emit("error", { message: "Invalid user identity", details: [identity.reason || "Missing user identity"] });
+                    return;
+                }
+                const payload = validatePayload({ messageId, userId: identity.userId, loungeId }, chatMessageSchema.delete);
                 if (!payload.valid) {
                     socket.emit("error", { message: "Invalid delete payload", details: payload.errors });
                     return;
