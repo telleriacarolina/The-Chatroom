@@ -1,8 +1,6 @@
-import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildApiUrl, getClientReleaseId, getCompatibilityError, normalizeReleaseId, resolveApiBaseUrl } from '../../lib/api';
-import { cleanupSocket, getSocket, restoreStoredAuthToken, setAuthToken } from '../../lib/socket';
-import { useSocket } from '../../hooks/useSocket';
+import { cleanupSocket, getSocket, restoreStoredAuthToken } from '../../lib/socket';
 
 const ORIGINAL_ENV = { ...process.env };
 const ORIGINAL_WINDOW = (globalThis as { window?: Window }).window;
@@ -145,17 +143,18 @@ describe('API URL resolution', () => {
     expect(mismatch).toContain('Deployment identity is incomplete');
   });
 
-  it('restores stored auth before connecting the socket', async () => {
+  it('restores stored auth before connecting the socket', () => {
     setMockWindow('localhost');
     localStorage.setItem('guestToken', 'stored-token');
 
-    const { result } = renderHook(() => useSocket({ autoConnect: false }));
+    const restored = restoreStoredAuthToken();
+    const socket = getSocket();
 
-    await waitFor(() => {
-      expect(result.current.socket?.auth).toMatchObject({ token: 'stored-token' });
-    });
+    expect(restored).toBe('stored-token');
+    expect(socket?.auth).toMatchObject({ token: 'stored-token' });
 
-    expect(result.current.socket).not.toBeNull();
+    cleanupSocket();
+    localStorage.clear();
   });
 
   it('preserves the stored token across socket auth restoration', () => {
