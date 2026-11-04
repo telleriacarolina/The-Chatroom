@@ -52,8 +52,8 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
     setLoungeCounts({});
   }, [socket, isConnected]);
 
-  // Language categories with All Users Lounge + Country-specific lounges
-  // Member counts will be updated from Socket.IO real-time data
+  // Language categories with All Users Lounge + Country-specific lounges.
+  // These member counts are static demo values and are not updated from Socket.IO data.
   const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
     return loungeCounts[loungeId] ?? defaultCount;
   };
