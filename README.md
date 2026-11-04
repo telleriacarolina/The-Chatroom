@@ -302,6 +302,8 @@ TWILIO_FROM_NUMBER="+1234567890"
 PORT=3001
 SOCKET_PORT=3002
 FRONTEND_URL="http://localhost:3000"
+# Optional for production cross-subdomain auth cookies
+# COOKIE_DOMAIN=".example.com"
 NODE_ENV="development"
 ```
 
@@ -371,6 +373,7 @@ npm run clean            # Clean all build artifacts and node_modules
 ### Authentication Routes
 
 - **POST /api/auth/csrf** – Returns CSRF token and sets cookie
+  - Use returned token in `X-CSRF-Token` (or `X-CSRF`) for state-changing auth requests while sending cookies
 - **POST /api/auth/signup** – Register by phone; returns status and userId
   - Body: `phoneNumber`, `firstName`, `lastName`, `birthYear`
 - **POST /api/auth/signin** – Authenticate and set `accessToken` + `refreshToken`
@@ -406,7 +409,7 @@ See the full schema in [prisma/schema.prisma](prisma/schema.prisma) and detailed
 ## Security
 
 - **Encryption:** AES-256-GCM for phone numbers
-- **CSRF Protection:** Double-submit pattern (header + cookie)
+- **CSRF Protection:** Double-submit pattern (token from `/api/auth/csrf` + `csrfToken` cookie, enforced on state-changing auth routes)
 - **Rate Limiting:** `express-rate-limit` on auth, API, and heartbeat endpoints
 - **Security Headers:** Helmet enabled on API server
 - **Password Hashing:** bcryptjs with strong salt rounds
