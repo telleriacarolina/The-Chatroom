@@ -6,9 +6,7 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS as SHARED_SOCKET_EVENTS } from '@chatroom/shared';
-
-const SOCKET_EVENTS = SHARED_SOCKET_EVENTS as typeof SHARED_SOCKET_EVENTS;
+import { SOCKET_EVENTS } from '@chatroom/shared';
 
 // ============================================================================
 // Configuration
