@@ -11,7 +11,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "cli": "node dist/bin/cli.js",
-    "test": "jest",
+    "test": "node ../../scripts/run-workspace-jest.js",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

@@ -10,7 +10,6 @@
         "./*"
       ]
     },
-    "types": [],
     "allowImportingTsExtensions": false,
     "strict": false,
     "esModuleInterop": true,
@@ -35,8 +34,7 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true,
-    "types": []
+    "strictNullChecks": true
   },
   "include": [
     "**/*.ts",

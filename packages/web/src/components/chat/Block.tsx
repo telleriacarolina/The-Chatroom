@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import ConnectionStatus from "@/components/ConnectionStatus";
+import { createGuestSession } from "@/lib/api";
+import { setAuthToken } from "@/lib/socket";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 
 interface BlockProps {
@@ -25,6 +28,16 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
+  const setGuestToken = (token: string | null) => {
+    if (typeof window === "undefined") return;
+    if (token) {
+      localStorage.setItem("guestToken", token);
+    } else {
+      localStorage.removeItem("guestToken");
+    }
+    setAuthToken(token);
+  };
+
   // Restore session from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,39 +50,6 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
       }
     }
   }, []);
-
-  // Listen for real-time lounge counts
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleLoungeCounts = (counts: Record<string, number>) => {
-      setLoungeCounts(counts);
-    };
-
-    const handleUserCount = ({ loungeId, count }: { loungeId: string; count: number }) => {
-      setLoungeCounts(prev => ({ ...prev, [loungeId]: count }));
-    };
-
-    socket.on('lounge counts', handleLoungeCounts);
-    socket.on('user count', handleUserCount);
-
-    return () => {
-      socket.off('lounge counts', handleLoungeCounts);
-      socket.off('user count', handleUserCount);
-    };
-  }, [socket]);
-
-  // Request initial lounge counts when connected
-  useEffect(() => {
-    if (!socket || !isConnected) return;
-    requestLoungeCounts();
-  }, [socket, isConnected]);
-
-  // Language categories with All Users Lounge + Country-specific lounges
-  // Member counts will be updated from Socket.IO real-time data
-  const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
-    return loungeCounts[loungeId] ?? defaultCount;
-  };
 
   const languageCategories = {
     english: {
@@ -194,18 +174,15 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call to /api/auth/guest
-      // const response = await fetch('/api/auth/guest', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ username: trimmedUsername })
-      // });
-      // if (!response.ok) throw new Error('Failed to create guest session');
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setTempUsername(username);
+      const response = await createGuestSession("PLUS_18");
+      const tempSessionToken = response.data?.tempSessionToken;
+      if (response.error || !tempSessionToken) {
+        throw new Error(response.error || "Guest session token was not returned");
+      }
+
+      localStorage.setItem("guestUsername", trimmedUsername);
+      setGuestToken(tempSessionToken);
+      setTempUsername(trimmedUsername);
       setUsername("");
     } catch (err) {
       setError("Failed to create guest session. Please try again.");
@@ -294,7 +271,13 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => setTempUsername("")}
+            onClick={() => {
+              setTempUsername("");
+              setSelectedLanguage(null);
+              setSelectedLounge(null);
+              localStorage.removeItem("guestUsername");
+              setGuestToken(null);
+            }}
           >
             Change Username
           </Button>
@@ -496,6 +479,10 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
           size="sm"
           onClick={() => {
             setTempUsername("");
+            setSelectedLanguage(null);
+            setSelectedLounge(null);
+            localStorage.removeItem("guestUsername");
+            setGuestToken(null);
           }}
         >
           Change Username

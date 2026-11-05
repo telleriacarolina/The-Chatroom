@@ -32,7 +32,7 @@ export default function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormPro
     }, 3000);
 
     return () => clearTimeout(timeoutId);
-  }, [success]);
+  }, [success, onSuccess]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

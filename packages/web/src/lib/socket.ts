@@ -6,7 +6,12 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
+import {
+  SOCKET_EVENTS,
+  ChatMessagePayload,
+  ClientToServerEventPayloads,
+  ServerToClientEventPayloads,
+} from '@chatroom/shared/socket-protocol';
 
 // ============================================================================
 // Configuration
@@ -25,28 +30,23 @@ function resolveSocketUrl(): string {
 // ============================================================================
 
 export interface ServerToClientEvents {
-  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: unknown) => void;
-  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: { userId: string; timestamp: string }) => void;
-  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: { userId: string; isTyping: boolean }) => void;
-  [SOCKET_EVENTS.SERVER.ERROR]: (data: { code: string; message: string }) => void;
+  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.CHAT_MESSAGE]) => void;
+  [SOCKET_EVENTS.SERVER.ROOM_JOINED]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.ROOM_JOINED]) => void;
+  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_JOINED]) => void;
+  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_LEFT]) => void;
+  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_TYPING]) => void;
+  [SOCKET_EVENTS.SERVER.ERROR]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.ERROR]) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;
 }
 
 export interface ClientToServerEvents {
-  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: {
-    loungeId: string;
-    languageRoomId: string;
-    messageText: string;
-    messageType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'SYSTEM';
-    attachmentUrl?: string;
-  }) => void;
-  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: { languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: { loungeId: string; languageRoomId: string }) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: { loungeId: string; languageRoomId: string }) => void;
+  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]) => void;
+  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.JOIN_ROOM]) => void;
+  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.LEAVE_ROOM]) => void;
+  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.TYPING_START]) => void;
+  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.TYPING_STOP]) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -94,10 +94,17 @@ export function connect(): TypedSocket | null {
   return socket;
 }
 
-export function setAuthToken(token: string): void {
+export function setAuthToken(token: string | null): void {
   const socket = getSocket();
   if (!socket) return;
-  socket.auth = { token };
+
+  socket.auth = token ? { token } : {};
+
+  // If a connection is already open, reconnect so the new auth payload is applied.
+  if (socket.connected) {
+    socket.disconnect();
+    socket.connect();
+  }
 }
 
 /**
@@ -171,7 +178,7 @@ export function sendMessage(data: {
   loungeId: string;
   languageRoomId: string;
   messageText: string;
-  messageType?: 'TEXT' | 'IMAGE' | 'VIDEO' | 'LINK' | 'SYSTEM';
+  messageType?: ChatMessagePayload['messageType'];
   attachmentUrl?: string;
 }): void {
   const socket = getSocket();
@@ -204,7 +211,7 @@ export function requestLoungeCounts(): void {
 // Exports
 // ============================================================================
 
-export default {
+const socketClient = {
   getSocket,
   connect,
   setAuthToken,
@@ -219,3 +226,5 @@ export default {
   sendTyping,
   requestLoungeCounts,
 };
+
+export default socketClient;

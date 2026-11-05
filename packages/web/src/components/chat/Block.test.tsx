@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { buildApiUrl, resolveApiBaseUrl } from '../../lib/api';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { buildApiUrl, createGuestSession, getCSRFToken, resolveApiBaseUrl } from '../../lib/api';
 
 const ORIGINAL_ENV = { ...process.env };
 const ORIGINAL_WINDOW = (globalThis as { window?: Window }).window;
+const ORIGINAL_FETCH = globalThis.fetch;
 
 function clearApiEnv(): void {
   delete process.env.NEXT_PUBLIC_API_URL;
@@ -26,6 +27,8 @@ function clearWindow(): void {
 
 afterEach(() => {
   process.env = { ...ORIGINAL_ENV };
+  vi.restoreAllMocks();
+  globalThis.fetch = ORIGINAL_FETCH;
 
   if (ORIGINAL_WINDOW) {
     Object.defineProperty(globalThis, 'window', {
@@ -98,6 +101,56 @@ describe('API URL resolution', () => {
   it('rejects malformed base URLs', () => {
     expect(() => buildApiUrl('not-a-valid-url', '/api/auth/csrf')).toThrow(
       'Invalid API base URL configuration.'
+    );
+  });
+});
+
+describe('Guest and CSRF API requests', () => {
+  it('creates guest session using the production guest endpoint payload', async () => {
+    clearApiEnv();
+    setMockWindow('localhost');
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ tempSessionToken: 'temp-token', guestId: 'g-1' }),
+    });
+
+    globalThis.fetch = fetchMock as typeof globalThis.fetch;
+
+    const response = await createGuestSession('PLUS_18');
+    expect(response.error).toBeUndefined();
+    expect(response.data?.tempSessionToken).toBe('temp-token');
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3001/api/auth/guest',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify({ ageCategory: 'PLUS_18' }),
+      })
+    );
+  });
+
+  it('requests CSRF token from auth endpoint', async () => {
+    clearApiEnv();
+    setMockWindow('localhost');
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+      json: async () => ({ csrfToken: 'csrf-token' }),
+    });
+
+    globalThis.fetch = fetchMock as typeof globalThis.fetch;
+
+    const csrfToken = await getCSRFToken();
+    expect(csrfToken).toBe('csrf-token');
+    expect(fetchMock).toHaveBeenCalledWith(
+      'http://localhost:3001/api/auth/csrf',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+      })
     );
   });
 });
