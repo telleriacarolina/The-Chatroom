@@ -175,13 +175,13 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
     try {
       const response = await createGuestSession("PLUS_18");
-      const tempSessionToken = response.data?.tempSessionToken;
-      if (response.error || !tempSessionToken) {
+      const socketToken = response.data?.accessToken ?? response.data?.tempSessionToken;
+      if (response.error || !socketToken) {
         throw new Error(response.error || "Guest session token was not returned");
       }
 
       localStorage.setItem("guestUsername", trimmedUsername);
-      setGuestToken(tempSessionToken);
+      setGuestToken(socketToken);
       setTempUsername(trimmedUsername);
       setUsername("");
     } catch (err) {

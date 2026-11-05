@@ -84,14 +84,33 @@ router.post('/guest', async (req, res) => {
   const { ageCategory } = req.body || {};
   const temporaryUsername = `guest_${Math.random().toString(36).slice(2,8)}`;
   const token = require('uuid').v4();
+
   try {
+    const guestUser = await prisma.user.create({
+      data: {
+        permanentUsername: temporaryUsername,
+        preferredName: temporaryUsername,
+        accountType: 'GUEST',
+        ageVerified: true
+      }
+    });
+
     const temp = await prisma.tempSession.create({ data: {
+      userId: guestUser.id,
       temporaryUsername,
       ageCategory: ageCategory === '18+RED' ? 'PLUS_18_RED' : 'PLUS_18',
       sessionToken: token,
       expiresAt: new Date(Date.now() + 24*60*60*1000)
     }});
-    res.json({ tempSessionToken: token, guestId: temp.id, expiresAt: temp.expiresAt });
+
+    const accessToken = signAccess({ userId: guestUser.id });
+
+    res.json({
+      accessToken,
+      tempSessionToken: token,
+      guestId: guestUser.id,
+      expiresAt: temp.expiresAt
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Server error' });
