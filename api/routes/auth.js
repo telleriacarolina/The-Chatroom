@@ -20,12 +20,14 @@ router.post('/guest', async (req, res) => {
       throw new Error('ACCESS_TOKEN_SECRET must be set in production');
     }
     const ACCESS_SECRET = configuredSecret || 'dev_access_secret';
-    const sessionToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
-      expiresIn: '24h'
+    const tempSessionToken = require('uuid').v4();
+    const accessToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
+      expiresIn: '15m'
     });
 
     res.json({
-      tempSessionToken: sessionToken,
+      accessToken,
+      tempSessionToken,
       guestId,
       username: temporaryUsername,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
