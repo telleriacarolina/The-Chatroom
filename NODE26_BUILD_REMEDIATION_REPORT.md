@@ -58,7 +58,7 @@ Resolve Node 26 compatibility failures that blocked reproducible builds across r
 
 ## Regression Risks
 - `Block.tsx` now depends on backend guest endpoint availability; if API is unavailable, guest flow surfaces explicit error.
-- Web lint now uses Next rules; existing hook dependency warnings remain (non-blocking, visible in output).
+- Web lint now uses Next rules; no remaining lint warnings were observed in the final validation run.
 
 ## Validation Executed
 - `npm ci` ✅
@@ -67,6 +67,11 @@ Resolve Node 26 compatibility failures that blocked reproducible builds across r
 - `npm run build -w @chatroom/web` ✅
 - `npm run build -w @chatroom/socket` ✅
 - `npm run typecheck:web` ✅
+
+## Deployment / Preview Validation Status
+- No successful Vercel preview deployment was produced or verified in this execution environment.
+- This project requires external Vercel access and deployment credentials to validate a preview deployment; local Node 26 build success does not prove preview health.
+- The repo therefore documents deployment status as externally unverified rather than claiming a successful Vercel preview.
 
 ## Remaining Build-Adjacent Issues
 - No remaining web lint warnings after hook dependency and default-export cleanup in:

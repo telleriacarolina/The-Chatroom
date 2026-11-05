@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+/**
+ * Source-contract smoke test for CSRF + marketplace integrity checks.
+ * This script validates key strings and schema contracts in the repository,
+ * but it does not execute the full moderation route runtime flow or prove
+ * every marketplace endpoint behavior end-to-end.
+ */
+
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
@@ -46,7 +53,7 @@ function main() {
   testCsrfTokenGeneration();
   testMarketplaceSchemaContract();
   testMarketplaceModerationActionExists();
-  console.log('CSRF and marketplace regression checks passed.');
+  console.log('CSRF and marketplace source-contract smoke checks passed. Full behavioral route execution remains covered by separate runtime tests.');
 }
 
 main();

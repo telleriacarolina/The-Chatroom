@@ -41,10 +41,14 @@
 - Socket message validation parity improved to prevent whitespace-only payload bypass.
 
 ## Known Non-Blocking Items
-- None identified from the Node 26 validation matrix rerun.
+- Local Node 26 validation passed for the reported matrix.
+- Vercel preview deployment remains externally unverified because this environment does not have live Vercel deployment access or preview logs.
+- Direct package-level tests for `api`, `socket`, and `mobile` are still follow-up work items; they are not claimed as complete here.
 
 ## Final Decision
-**READY FOR REVIEW**
+**LOCAL VALIDATION COMPLETE; PREVIEW DEPLOYMENT STATUS REMAINS EXTERNALLY UNVERIFIED**
 
 Follow-up recommendations:
 1. Expand direct package-level tests for currently untested workspaces (`api`, `socket`, `admin`, `analytics`, `cli`, `email`, `mobile`) according to risk and ownership boundaries.
+2. Validate any Vercel preview/deployment result with actual deployment logs or a successful preview URL before claiming deployment success.
+3. Maintain the current smoke-test classification for CSRF and marketplace checks unless they are upgraded to full runtime behavioral coverage.
