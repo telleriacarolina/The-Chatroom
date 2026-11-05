@@ -13,11 +13,16 @@ router.post('/guest', async (req, res) => {
   try {
     const { ageCategory } = req.body || {};
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
-    const sessionToken = require('crypto').randomBytes(32).toString('hex');
-    
+    const guestId = require('crypto').randomBytes(8).toString('hex');
+    const jwt = require('jsonwebtoken');
+    const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+    const sessionToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
+      expiresIn: '24h'
+    });
+
     res.json({
       tempSessionToken: sessionToken,
-      guestId: require('crypto').randomBytes(8).toString('hex'),
+      guestId,
       username: temporaryUsername,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
     });
