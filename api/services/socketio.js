@@ -3,6 +3,10 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../utils/prisma');
 const logger = require('../utils/logger');
 
+if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || process.env.ACCESS_TOKEN_SECRET === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
+
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 
 function authenticateSocket(socket, next) {
@@ -141,8 +145,8 @@ function initializeSocketIO(server) {
           socket.emit('error', { message: 'loungeId and languageRoomId are required' });
           return;
         }
-        const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : !!messageText;
-        const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : !!attachmentUrl;
+        const hasText = typeof messageText === 'string' && messageText.trim().length > 0;
+        const hasAttachment = typeof attachmentUrl === 'string' && attachmentUrl.trim().length > 0;
         if (!hasText && !hasAttachment) {
           socket.emit('error', { message: 'Message text or an attachment is required' });
           return;
