@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { prisma } = require('../lib/prisma');
 const logger = require('../utils/logger');
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
@@ -35,22 +36,32 @@ function authenticateRequest(req, res, next) {
 }
 
 // Middleware for Socket.io connections
-function authenticateSocket(socket, next) {
+async function authenticateSocket(socket, next) {
   try {
     const token = socket.handshake.auth.token;
-    
+
     if (!token) {
       return next(new Error('Authentication token required'));
     }
 
     const payload = verifyAccessToken(token);
-
-    if (!payload || !payload.userId) {
-      return next(new Error('Invalid or expired token'));
+    if (payload && payload.userId) {
+      socket.userId = payload.userId;
+      return next();
     }
 
-    socket.userId = payload.userId;
-    next();
+    const guestTempSession = await prisma.tempSession.findUnique({
+      where: { sessionToken: token },
+      select: { id: true, temporaryUsername: true, userId: true }
+    });
+    if (guestTempSession) {
+      socket.userId = guestTempSession.userId || guestTempSession.id;
+      socket.tempSessionId = guestTempSession.id;
+      socket.tempSessionUsername = guestTempSession.temporaryUsername;
+      return next();
+    }
+
+    return next(new Error('Invalid or expired token'));
   } catch (error) {
     logger.error('Socket authentication error:', error);
     next(new Error('Authentication failed'));

@@ -6,8 +6,8 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import {
-  SOCKET_EVENTS,
+import { SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
+import type {
   ChatMessagePayload,
   ClientToServerEventPayloads,
   ServerToClientEventPayloads,
@@ -29,24 +29,41 @@ function resolveSocketUrl(): string {
 // Types
 // ============================================================================
 
+type ServerPayloadMap = {
+  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.CHAT_MESSAGE];
+  [SOCKET_EVENTS.SERVER.ROOM_JOINED]: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.ROOM_JOINED];
+  [SOCKET_EVENTS.SERVER.USER_JOINED]: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_JOINED];
+  [SOCKET_EVENTS.SERVER.USER_LEFT]: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_LEFT];
+  [SOCKET_EVENTS.SERVER.USER_TYPING]: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_TYPING];
+  [SOCKET_EVENTS.SERVER.ERROR]: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.ERROR];
+};
+
+type ClientPayloadMap = {
+  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.CHAT_MESSAGE];
+  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.JOIN_ROOM];
+  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.LEAVE_ROOM];
+  [SOCKET_EVENTS.CLIENT.TYPING_START]: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.TYPING_START];
+  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.TYPING_STOP];
+};
+
 export interface ServerToClientEvents {
-  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (message: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.CHAT_MESSAGE]) => void;
-  [SOCKET_EVENTS.SERVER.ROOM_JOINED]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.ROOM_JOINED]) => void;
-  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_JOINED]) => void;
-  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_LEFT]) => void;
-  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.USER_TYPING]) => void;
-  [SOCKET_EVENTS.SERVER.ERROR]: (data: ServerToClientEventPayloads[typeof SOCKET_EVENTS.SERVER.ERROR]) => void;
   connect: () => void;
   disconnect: () => void;
   connect_error: (error: Error) => void;
+  [SOCKET_EVENTS.SERVER.CHAT_MESSAGE]: (data: ServerPayloadMap[typeof SOCKET_EVENTS.SERVER.CHAT_MESSAGE]) => void;
+  [SOCKET_EVENTS.SERVER.ROOM_JOINED]: (data: ServerPayloadMap[typeof SOCKET_EVENTS.SERVER.ROOM_JOINED]) => void;
+  [SOCKET_EVENTS.SERVER.USER_JOINED]: (data: ServerPayloadMap[typeof SOCKET_EVENTS.SERVER.USER_JOINED]) => void;
+  [SOCKET_EVENTS.SERVER.USER_LEFT]: (data: ServerPayloadMap[typeof SOCKET_EVENTS.SERVER.USER_LEFT]) => void;
+  [SOCKET_EVENTS.SERVER.USER_TYPING]: (data: ServerPayloadMap[typeof SOCKET_EVENTS.SERVER.USER_TYPING]) => void;
+  [SOCKET_EVENTS.SERVER.ERROR]: (data: ServerPayloadMap[typeof SOCKET_EVENTS.SERVER.ERROR]) => void;
 }
 
 export interface ClientToServerEvents {
-  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]) => void;
-  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.JOIN_ROOM]) => void;
-  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.LEAVE_ROOM]) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.TYPING_START]) => void;
-  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: ClientToServerEventPayloads[typeof SOCKET_EVENTS.CLIENT.TYPING_STOP]) => void;
+  [SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]: (data: ClientPayloadMap[typeof SOCKET_EVENTS.CLIENT.CHAT_MESSAGE]) => void;
+  [SOCKET_EVENTS.CLIENT.JOIN_ROOM]: (data: ClientPayloadMap[typeof SOCKET_EVENTS.CLIENT.JOIN_ROOM]) => void;
+  [SOCKET_EVENTS.CLIENT.LEAVE_ROOM]: (data: ClientPayloadMap[typeof SOCKET_EVENTS.CLIENT.LEAVE_ROOM]) => void;
+  [SOCKET_EVENTS.CLIENT.TYPING_START]: (data: ClientPayloadMap[typeof SOCKET_EVENTS.CLIENT.TYPING_START]) => void;
+  [SOCKET_EVENTS.CLIENT.TYPING_STOP]: (data: ClientPayloadMap[typeof SOCKET_EVENTS.CLIENT.TYPING_STOP]) => void;
 }
 
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
