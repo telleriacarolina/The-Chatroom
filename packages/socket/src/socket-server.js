@@ -111,8 +111,8 @@ io.on('connection', (socket) => {
         socket.emit('error', { message: 'loungeId and languageRoomId are required' });
         return;
       }
-      const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : !!messageText;
-      const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : !!attachmentUrl;
+      const hasText = typeof messageText === 'string' && messageText.trim().length > 0;
+      const hasAttachment = typeof attachmentUrl === 'string' && attachmentUrl.trim().length > 0;
       if (!hasText && !hasAttachment) {
         socket.emit('error', { message: 'Message text or an attachment is required' });
         return;
