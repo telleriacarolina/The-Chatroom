@@ -41,8 +41,18 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
 
-  // Skip WebSocket requests
-  if (event.request.url.includes('socket.io')) return;
+  // Skip Socket.IO endpoint requests
+  try {
+    const requestUrl = new URL(event.request.url);
+    if (
+      requestUrl.origin === self.location.origin &&
+      requestUrl.pathname.startsWith('/socket.io')
+    ) {
+      return;
+    }
+  } catch (e) {
+    // If URL parsing fails, continue with normal handling
+  }
 
   event.respondWith(
     fetch(event.request)
