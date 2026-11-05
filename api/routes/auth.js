@@ -15,10 +15,11 @@ router.post('/guest', async (req, res) => {
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
     const guestId = require('crypto').randomBytes(8).toString('hex');
     const jwt = require('jsonwebtoken');
-    const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
-    if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || ACCESS_SECRET === 'dev_access_secret')) {
+    const configuredSecret = process.env.ACCESS_TOKEN_SECRET;
+    if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret === 'dev_access_secret')) {
       throw new Error('ACCESS_TOKEN_SECRET must be set in production');
     }
+    const ACCESS_SECRET = configuredSecret || 'dev_access_secret';
     const sessionToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
       expiresIn: '24h'
     });

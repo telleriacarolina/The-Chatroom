@@ -12,7 +12,11 @@ if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const configuredAccessSecret = process.env.ACCESS_TOKEN_SECRET;
+if (process.env.NODE_ENV === 'production' && (!configuredAccessSecret || configuredAccessSecret === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
+const ACCESS_SECRET = configuredAccessSecret || 'dev_access_secret';
 
 const app = express();
 const server = http.createServer(app);
