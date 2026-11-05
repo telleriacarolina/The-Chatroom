@@ -6,23 +6,24 @@
  */
 
 import { io, Socket } from 'socket.io-client';
+import { SOCKET_EVENTS as SHARED_SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
 
-const SOCKET_EVENTS = {
-  CLIENT: {
-    JOIN_ROOM: 'join_room',
-    LEAVE_ROOM: 'leave_room',
-    CHAT_MESSAGE: 'chat_message',
-    TYPING_START: 'typing_start',
-    TYPING_STOP: 'typing_stop',
-  },
-  SERVER: {
-    CHAT_MESSAGE: 'chat_message',
-    USER_JOINED: 'user_joined',
-    USER_LEFT: 'user_left',
-    USER_TYPING: 'user_typing',
-    ERROR: 'error',
-  },
-} as const;
+const SOCKET_EVENTS = SHARED_SOCKET_EVENTS as {
+  readonly CLIENT: {
+    readonly JOIN_ROOM: 'join_room';
+    readonly LEAVE_ROOM: 'leave_room';
+    readonly CHAT_MESSAGE: 'chat_message';
+    readonly TYPING_START: 'typing_start';
+    readonly TYPING_STOP: 'typing_stop';
+  };
+  readonly SERVER: {
+    readonly CHAT_MESSAGE: 'chat_message';
+    readonly USER_JOINED: 'user_joined';
+    readonly USER_LEFT: 'user_left';
+    readonly USER_TYPING: 'user_typing';
+    readonly ERROR: 'error';
+  };
+};
 
 // ============================================================================
 // Configuration
