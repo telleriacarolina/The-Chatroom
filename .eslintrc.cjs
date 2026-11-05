@@ -15,6 +15,10 @@ module.exports = {
   extends: ['eslint:recommended'],
   overrides: [
     {
+      files: ['packages/web/**/*.{js,jsx,ts,tsx}'],
+      extends: ['next/core-web-vitals'],
+    },
+    {
       files: ['**/*.ts', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       parserOptions: {
@@ -28,7 +32,7 @@ module.exports = {
       extends: ['plugin:@typescript-eslint/recommended'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
         '@typescript-eslint/no-require-imports': 'off',
       },
     },
@@ -42,9 +46,7 @@ module.exports = {
         },
       },
       rules: {
-        'no-undef': 'off',
-        'no-unused-vars': 'off',
-        'no-empty': 'off',
+        'no-unused-vars': 'warn',
       },
     },
   ],
