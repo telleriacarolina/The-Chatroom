@@ -6,24 +6,24 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import { SOCKET_EVENTS as SHARED_SOCKET_EVENTS } from '@chatroom/shared/socket-protocol';
+import { SOCKET_EVENTS as SHARED_SOCKET_EVENTS } from '@chatroom/shared';
 
-const SOCKET_EVENTS = SHARED_SOCKET_EVENTS as {
-  readonly CLIENT: {
-    readonly JOIN_ROOM: 'join_room';
-    readonly LEAVE_ROOM: 'leave_room';
-    readonly CHAT_MESSAGE: 'chat_message';
-    readonly TYPING_START: 'typing_start';
-    readonly TYPING_STOP: 'typing_stop';
-  };
-  readonly SERVER: {
-    readonly CHAT_MESSAGE: 'chat_message';
-    readonly USER_JOINED: 'user_joined';
-    readonly USER_LEFT: 'user_left';
-    readonly USER_TYPING: 'user_typing';
-    readonly ERROR: 'error';
-  };
-};
+const SOCKET_EVENTS = {
+  CLIENT: {
+    JOIN_ROOM: SHARED_SOCKET_EVENTS.CLIENT.JOIN_ROOM as 'join_room',
+    LEAVE_ROOM: SHARED_SOCKET_EVENTS.CLIENT.LEAVE_ROOM as 'leave_room',
+    CHAT_MESSAGE: SHARED_SOCKET_EVENTS.CLIENT.CHAT_MESSAGE as 'chat_message',
+    TYPING_START: SHARED_SOCKET_EVENTS.CLIENT.TYPING_START as 'typing_start',
+    TYPING_STOP: SHARED_SOCKET_EVENTS.CLIENT.TYPING_STOP as 'typing_stop',
+  },
+  SERVER: {
+    CHAT_MESSAGE: SHARED_SOCKET_EVENTS.SERVER.CHAT_MESSAGE as 'chat_message',
+    USER_JOINED: SHARED_SOCKET_EVENTS.SERVER.USER_JOINED as 'user_joined',
+    USER_LEFT: SHARED_SOCKET_EVENTS.SERVER.USER_LEFT as 'user_left',
+    USER_TYPING: SHARED_SOCKET_EVENTS.SERVER.USER_TYPING as 'user_typing',
+    ERROR: SHARED_SOCKET_EVENTS.SERVER.ERROR as 'error',
+  },
+} as const;
 
 // ============================================================================
 // Configuration

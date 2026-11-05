@@ -4,15 +4,5 @@
   "devCommand": "npm run dev -w @chatroom/web",
   "installCommand": "npm install",
   "framework": null,
-  "outputDirectory": "packages/web/.next",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://$API_INTERNAL_URL/api/$1"
-    },
-    {
-      "source": "/socket.io/(.*)",
-      "destination": "https://$SOCKET_INTERNAL_URL/socket.io/$1"
-    }
-  ]
+  "outputDirectory": "packages/web/.next"
 }
