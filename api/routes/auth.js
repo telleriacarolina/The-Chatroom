@@ -3,7 +3,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
-const { prisma } = require('../utils/prisma');
+const prisma = require('../utils/prisma');
 const router = express.Router();
 const logger = require('../utils/logger');
 
@@ -41,9 +41,22 @@ router.post('/guest', async (req, res) => {
     const tempSessionToken = uuidv4();
     const expiresAt = new Date(Date.now() + GUEST_SESSION_TTL_MS);
 
+    const guestUser = await prisma.user.create({
+      data: {
+        id: guestId,
+        permanentUsername: temporaryUsername,
+        accountType: 'GUEST',
+        ageVerified: true,
+        role: 'USER',
+        isOnline: false,
+        stayOnline: false,
+      },
+      select: { id: true, permanentUsername: true }
+    });
+
     const tempSession = await prisma.tempSession.create({
       data: {
-        userId: null,
+        userId: guestUser.id,
         temporaryUsername,
         ageCategory: normalizedAgeCategory,
         sessionToken: tempSessionToken,
@@ -51,14 +64,14 @@ router.post('/guest', async (req, res) => {
       }
     });
 
-    const accessToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
+    const accessToken = jwt.sign({ userId: guestUser.id, guestId: guestUser.id, username: temporaryUsername }, ACCESS_SECRET, {
       expiresIn: GUEST_ACCESS_TOKEN_TTL
     });
 
     res.json({
       accessToken,
       tempSessionToken: tempSession.sessionToken,
-      guestId,
+      guestId: guestUser.id,
       username: temporaryUsername,
       expiresAt: tempSession.expiresAt
     });
