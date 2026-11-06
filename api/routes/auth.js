@@ -37,7 +37,7 @@ router.post('/guest', async (req, res) => {
     }
 
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
-    const guestId = crypto.randomBytes(8).toString('hex');
+    const guestId = uuidv4();
     const tempSessionToken = uuidv4();
     const expiresAt = new Date(Date.now() + GUEST_SESSION_TTL_MS);
 
