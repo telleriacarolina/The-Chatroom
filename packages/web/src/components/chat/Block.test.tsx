@@ -126,13 +126,19 @@ describe('Guest and CSRF API requests', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       headers: { get: () => 'application/json' },
-      json: async () => ({ tempSessionToken: 'temp-token', guestId: 'g-1' }),
+      json: async () => ({
+        accessToken: 'jwt-access-token',
+        tempSessionToken: 'temp-token',
+        guestId: 'g-1',
+        expiresAt: '2035-01-01T00:00:00.000Z',
+      }),
     });
 
     globalThis.fetch = fetchMock as typeof globalThis.fetch;
 
     const response = await apiModule.createGuestSession('PLUS_18');
     expect(response.error).toBeUndefined();
+    expect(response.data?.accessToken).toBe('jwt-access-token');
     expect(response.data?.tempSessionToken).toBe('temp-token');
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:3001/api/auth/guest',
@@ -169,9 +175,9 @@ describe('Guest and CSRF API requests', () => {
 });
 
 describe('Block guest session lifecycle', () => {
-  it('creates a guest session, persists it, and syncs socket auth', async () => {
+  it('creates a guest session, persists it, and syncs socket auth with the access token', async () => {
     const createGuestSessionSpy = vi.spyOn(apiModule, 'createGuestSession').mockResolvedValue({
-      data: { tempSessionToken: 'session-123' },
+      data: { accessToken: 'jwt-access-token', tempSessionToken: 'session-123' },
     });
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
 
@@ -181,25 +187,39 @@ describe('Block guest session lifecycle', () => {
 
     await waitFor(() => expect(createGuestSessionSpy).toHaveBeenCalledWith('PLUS_18'));
     await waitFor(() => expect(localStorage.getItem('guestUsername')).toBe('GuestA'));
-    await waitFor(() => expect(localStorage.getItem('guestToken')).toBe('session-123'));
-    await waitFor(() => expect(setAuthTokenSpy).toHaveBeenCalledWith('session-123'));
+    await waitFor(() => expect(localStorage.getItem('guestToken')).toBe('jwt-access-token'));
+    await waitFor(() => expect(setAuthTokenSpy).toHaveBeenCalledWith('jwt-access-token'));
     expect(screen.getByText('GuestA')).toBeTruthy();
   });
 
   it('restores a previously saved guest session and syncs auth state', () => {
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
     localStorage.setItem('guestUsername', 'SavedGuest');
-    localStorage.setItem('guestToken', 'saved-token');
+    localStorage.setItem('guestAccessToken', 'saved-access-token');
+    localStorage.setItem('guestSessionExpiresAt', new Date(Date.now() + 60_000).toISOString());
 
     render(<Block />);
 
     expect(screen.getByText('SavedGuest')).toBeTruthy();
-    expect(setAuthTokenSpy).toHaveBeenCalledWith('saved-token');
+    expect(setAuthTokenSpy).toHaveBeenCalledWith('saved-access-token');
+  });
+
+  it('falls back to the temp session token when the access token is expired', () => {
+    const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
+    localStorage.setItem('guestUsername', 'ExpiredGuest');
+    localStorage.setItem('guestAccessToken', 'expired-access-token');
+    localStorage.setItem('guestTempSessionToken', 'active-temp-session-token');
+    localStorage.setItem('guestSessionExpiresAt', new Date(Date.now() - 60_000).toISOString());
+
+    render(<Block />);
+
+    expect(screen.getByText('ExpiredGuest')).toBeTruthy();
+    expect(setAuthTokenSpy).toHaveBeenCalledWith('active-temp-session-token');
   });
 
   it('clears persisted guest state when changing username', async () => {
     const createGuestSessionSpy = vi.spyOn(apiModule, 'createGuestSession').mockResolvedValue({
-      data: { tempSessionToken: 'new-token' },
+      data: { accessToken: 'new-access-token', tempSessionToken: 'new-token' },
     });
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
     localStorage.setItem('guestUsername', 'OldGuest');
@@ -217,7 +237,7 @@ describe('Block guest session lifecycle', () => {
 
     await waitFor(() => expect(createGuestSessionSpy).toHaveBeenCalledWith('PLUS_18'));
     await waitFor(() => expect(localStorage.getItem('guestUsername')).toBe('NewGuest'));
-    await waitFor(() => expect(localStorage.getItem('guestToken')).toBe('new-token'));
+    await waitFor(() => expect(localStorage.getItem('guestToken')).toBe('new-access-token'));
   });
 
   it('keeps stale guest session state out of the UI when guest creation fails', async () => {

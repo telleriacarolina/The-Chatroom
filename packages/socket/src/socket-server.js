@@ -29,10 +29,10 @@ const io = new Server(server, {
 
 app.use(express.static(path.join(__dirname, '../../public')));
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   try {
     const authToken = socket.handshake?.auth?.token;
-    const headerToken = socket.handshake?.headers?.authorization?.startsWith('Bearer ')
+    const headerToken = typeof socket.handshake?.headers?.authorization === 'string' && socket.handshake.headers.authorization.startsWith('Bearer ')
       ? socket.handshake.headers.authorization.slice(7)
       : null;
     const token = authToken || headerToken;
@@ -42,11 +42,27 @@ io.use((socket, next) => {
     }
 
     const payload = jwt.verify(token, ACCESS_SECRET);
-    if (!payload?.userId) {
+    if (payload?.userId) {
+      socket.userId = payload.userId;
+      return next();
+    }
+
+    const guestTempSession = await prisma.tempSession.findUnique({
+      where: { sessionToken: token },
+      select: { id: true, temporaryUsername: true, userId: true, expiresAt: true }
+    });
+
+    if (!guestTempSession) {
       return next(new Error('Invalid or expired token'));
     }
 
-    socket.userId = payload.userId;
+    if (guestTempSession.expiresAt && new Date(guestTempSession.expiresAt).getTime() <= Date.now()) {
+      return next(new Error('Guest session expired'));
+    }
+
+    socket.userId = guestTempSession.userId || guestTempSession.id;
+    socket.tempSessionId = guestTempSession.id;
+    socket.tempSessionUsername = guestTempSession.temporaryUsername;
     return next();
   } catch (error) {
     logger.error('Socket authentication error:', error);

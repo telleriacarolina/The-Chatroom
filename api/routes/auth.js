@@ -1,7 +1,17 @@
 // Authentication routes
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 const logger = require('../utils/logger');
+
+const configuredSecret = process.env.ACCESS_TOKEN_SECRET;
+const GUEST_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+const GUEST_ACCESS_TOKEN_TTL = '24h';
+
+if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
+const ACCESS_SECRET = configuredSecret || 'dev_access_secret';
 
 router.post('/csrf', (req, res) => {
   const token = require('crypto').randomBytes(32).toString('hex');
@@ -14,15 +24,9 @@ router.post('/guest', async (req, res) => {
     const { ageCategory } = req.body || {};
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
     const guestId = require('crypto').randomBytes(8).toString('hex');
-    const jwt = require('jsonwebtoken');
-    const configuredSecret = process.env.ACCESS_TOKEN_SECRET;
-    if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret === 'dev_access_secret')) {
-      throw new Error('ACCESS_TOKEN_SECRET must be set in production');
-    }
-    const ACCESS_SECRET = configuredSecret || 'dev_access_secret';
     const tempSessionToken = require('uuid').v4();
     const accessToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
-      expiresIn: '15m'
+      expiresIn: GUEST_ACCESS_TOKEN_TTL
     });
 
     res.json({
@@ -30,7 +34,7 @@ router.post('/guest', async (req, res) => {
       tempSessionToken,
       guestId,
       username: temporaryUsername,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      expiresAt: new Date(Date.now() + GUEST_SESSION_TTL_MS)
     });
   } catch (e) {
     logger.error('Error creating guest session:', e);

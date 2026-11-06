@@ -30,23 +30,85 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
   const setGuestToken = (token: string | null) => {
     if (typeof window === "undefined") return;
+
+    const value = token ?? "";
     if (token) {
       localStorage.setItem("guestToken", token);
+      if (token.includes('.') && token.split('.').length === 3) {
+        localStorage.setItem("guestAccessToken", token);
+        localStorage.removeItem("guestTempSessionToken");
+      } else {
+        localStorage.setItem("guestTempSessionToken", token);
+        localStorage.removeItem("guestAccessToken");
+      }
     } else {
       localStorage.removeItem("guestToken");
+      localStorage.removeItem("guestAccessToken");
+      localStorage.removeItem("guestTempSessionToken");
+      localStorage.removeItem("guestSessionExpiresAt");
     }
     setAuthToken(token);
+  };
+
+  const getValidGuestToken = () => {
+    if (typeof window === "undefined") return null;
+
+    const accessToken = localStorage.getItem("guestAccessToken") || localStorage.getItem("guestToken");
+    const tempToken = localStorage.getItem("guestTempSessionToken") || localStorage.getItem("guestToken");
+    const expiresAt = localStorage.getItem("guestSessionExpiresAt");
+
+    if (accessToken && (!expiresAt || new Date(expiresAt).getTime() > Date.now())) {
+      return accessToken;
+    }
+
+    return tempToken || accessToken || null;
+  };
+
+  const persistGuestSession = (guestSession: {
+    accessToken?: string | null;
+    tempSessionToken?: string | null;
+    expiresAt?: string | Date | null;
+    username?: string | null;
+  }) => {
+    if (typeof window === "undefined") return;
+
+    const accessToken = guestSession.accessToken || localStorage.getItem("guestAccessToken") || localStorage.getItem("guestToken");
+    const tempSessionToken = guestSession.tempSessionToken || localStorage.getItem("guestTempSessionToken") || localStorage.getItem("guestToken");
+    const nextExpiresAt = guestSession.expiresAt ? new Date(guestSession.expiresAt).toISOString() : localStorage.getItem("guestSessionExpiresAt");
+
+    if (accessToken) {
+      localStorage.setItem("guestAccessToken", accessToken);
+      localStorage.setItem("guestToken", accessToken);
+    } else {
+      localStorage.removeItem("guestAccessToken");
+    }
+
+    if (tempSessionToken) {
+      localStorage.setItem("guestTempSessionToken", tempSessionToken);
+    } else {
+      localStorage.removeItem("guestTempSessionToken");
+    }
+
+    if (nextExpiresAt) {
+      localStorage.setItem("guestSessionExpiresAt", nextExpiresAt);
+    } else {
+      localStorage.removeItem("guestSessionExpiresAt");
+    }
+
+    if (guestSession.username) {
+      localStorage.setItem("guestUsername", guestSession.username);
+    }
   };
 
   // Restore session from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUsername = localStorage.getItem('guestUsername');
-      const storedToken = localStorage.getItem('guestToken');
-      
-      if (storedUsername && storedToken) {
+      const restoredToken = getValidGuestToken();
+
+      if (storedUsername && restoredToken) {
         setTempUsername(storedUsername);
-        setGuestToken(storedToken);
+        setGuestToken(restoredToken);
       }
     }
   }, []);
@@ -180,7 +242,12 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
         throw new Error(response.error || "Guest session token was not returned");
       }
 
-      localStorage.setItem("guestUsername", trimmedUsername);
+      persistGuestSession({
+        accessToken: response.data?.accessToken ?? null,
+        tempSessionToken: response.data?.tempSessionToken ?? null,
+        expiresAt: response.data?.expiresAt ?? null,
+        username: trimmedUsername,
+      });
       setGuestToken(socketToken);
       setTempUsername(trimmedUsername);
       setUsername("");

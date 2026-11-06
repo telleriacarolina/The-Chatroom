@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken');
 const { prisma } = require('../lib/prisma');
 const logger = require('../utils/logger');
 
+if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || process.env.ACCESS_TOKEN_SECRET === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 
 function verifyAccessToken(token) {
@@ -38,23 +41,32 @@ function authenticateRequest(req, res, next) {
 // Middleware for Socket.io connections
 async function authenticateSocket(socket, next) {
   try {
-    const token = socket.handshake.auth.token;
+    const token = socket.handshake?.auth?.token;
+    const authHeader = socket.handshake?.headers?.authorization;
+    const headerToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null;
+    const resolvedToken = token || headerToken;
 
-    if (!token) {
+    if (!resolvedToken) {
       return next(new Error('Authentication token required'));
     }
 
-    const payload = verifyAccessToken(token);
+    const payload = verifyAccessToken(resolvedToken);
     if (payload && payload.userId) {
       socket.userId = payload.userId;
       return next();
     }
 
     const guestTempSession = await prisma.tempSession.findUnique({
-      where: { sessionToken: token },
-      select: { id: true, temporaryUsername: true, userId: true }
+      where: { sessionToken: resolvedToken },
+      select: { id: true, temporaryUsername: true, userId: true, expiresAt: true }
     });
     if (guestTempSession) {
+      const expired = guestTempSession.expiresAt && new Date(guestTempSession.expiresAt).getTime() <= Date.now();
+      if (expired) {
+        return next(new Error('Guest session expired'));
+      }
       socket.userId = guestTempSession.userId || guestTempSession.id;
       socket.tempSessionId = guestTempSession.id;
       socket.tempSessionUsername = guestTempSession.temporaryUsername;

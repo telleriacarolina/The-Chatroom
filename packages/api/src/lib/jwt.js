@@ -10,8 +10,8 @@ if (process.env.NODE_ENV === 'production') {
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || 'dev_refresh_secret';
 
-function signAccess(payload) {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });
+function signAccess(payload, options = {}) {
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m', ...options });
 }
 
 function signRefresh(payload) {
