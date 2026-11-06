@@ -95,25 +95,31 @@ router.post('/guest', async (req, res) => {
     const guestSessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const tempSessionToken = require('uuid').v4();
 
-    const guestUser = await prisma.user.create({
-      data: {
-        permanentUsername: temporaryUsername,
-        preferredName: temporaryUsername,
-        accountType: 'GUEST',
-        ageVerified: true,
-        role: 'USER',
-        isOnline: false,
-        stayOnline: false
-      }
-    });
+    const [guestUser, temp] = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          permanentUsername: temporaryUsername,
+          preferredName: temporaryUsername,
+          accountType: 'GUEST',
+          ageVerified: true,
+          role: 'USER',
+          isOnline: false,
+          stayOnline: false
+        }
+      });
 
-    const temp = await prisma.tempSession.create({ data: {
-      userId: guestUser.id,
-      temporaryUsername,
-      ageCategory: normalizedAgeCategory,
-      sessionToken: tempSessionToken,
-      expiresAt: guestSessionExpiresAt
-    }});
+      const createdTempSession = await tx.tempSession.create({
+        data: {
+          userId: createdUser.id,
+          temporaryUsername,
+          ageCategory: normalizedAgeCategory,
+          sessionToken: tempSessionToken,
+          expiresAt: guestSessionExpiresAt
+        }
+      });
+
+      return [createdUser, createdTempSession];
+    });
 
     const accessToken = signGuestAccess({
       userId: guestUser.id,
@@ -134,8 +140,7 @@ router.post('/guest', async (req, res) => {
     console.error(e);
     res.status(500).json({ error: 'Server error' });
   }
-});
-
+})
 router.post('/change-password', authLimiter, async (req, res) => {
   const { phoneNumber, currentPassword, newPassword } = req.body || {};
   if (!phoneNumber || !currentPassword || !newPassword) return res.status(400).json({ error: 'Missing fields' });

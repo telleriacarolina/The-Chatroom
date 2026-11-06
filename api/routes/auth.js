@@ -40,27 +40,31 @@ router.post('/guest', async (req, res) => {
     const expiresAt = new Date(Date.now() + GUEST_SESSION_TTL_MS);
     const tempSessionToken = uuidv4();
 
-    const guestUser = await prisma.user.create({
-      data: {
-        permanentUsername: temporaryUsername,
-        preferredName: temporaryUsername,
-        accountType: 'GUEST',
-        ageVerified: true,
-        role: 'USER',
-        isOnline: false,
-        stayOnline: false
-      },
-      select: { id: true, permanentUsername: true }
-    });
+    const [guestUser, tempSession] = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          permanentUsername: temporaryUsername,
+          preferredName: temporaryUsername,
+          accountType: 'GUEST',
+          ageVerified: true,
+          role: 'USER',
+          isOnline: false,
+          stayOnline: false
+        },
+        select: { id: true, permanentUsername: true }
+      });
 
-    const tempSession = await prisma.tempSession.create({
-      data: {
-        userId: guestUser.id,
-        temporaryUsername,
-        ageCategory: normalizedAgeCategory,
-        sessionToken: tempSessionToken,
-        expiresAt
-      }
+      const createdTempSession = await tx.tempSession.create({
+        data: {
+          userId: createdUser.id,
+          temporaryUsername,
+          ageCategory: normalizedAgeCategory,
+          sessionToken: tempSessionToken,
+          expiresAt
+        }
+      });
+
+      return [createdUser, createdTempSession];
     });
 
     const accessToken = jwt.sign({
