@@ -70,6 +70,7 @@ export function getSocket(): TypedSocket | null {
   if (!socket) {
     socket = io(resolveSocketUrl(), {
       transports: ['websocket', 'polling'],
+      withCredentials: true,
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
