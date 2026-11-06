@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-const { prisma } = require('../lib/prisma');
+const prisma = require('../lib/prisma');
 const { authenticateSocket } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { SOCKET_EVENTS, SOCKET_ERROR_CODES } = require('@chatroom/shared/socket-protocol');
