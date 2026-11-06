@@ -90,6 +90,7 @@ router.post('/guest', async (req, res) => {
   }
 
   try {
+    const crypto = require('crypto');
     const temporaryUsername = `guest_${crypto.randomBytes(4).toString('hex')}`;
     const guestSessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const tempSessionToken = require('uuid').v4();
