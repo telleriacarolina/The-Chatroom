@@ -127,9 +127,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.accessToken) {
         setAuthToken(data.accessToken);
         await AsyncStorage.setItem('accessToken', data.accessToken);
-      } else if (data.tempSessionToken) {
-        setAuthToken(data.tempSessionToken);
-        await AsyncStorage.setItem('accessToken', data.tempSessionToken);
       }
     } catch (error) {
       console.error('Guest session error:', error);
