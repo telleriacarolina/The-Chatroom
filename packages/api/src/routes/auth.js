@@ -10,9 +10,29 @@ const { authLimiter } = require('../middleware/rateLimiter');
 const csrfProtection = require('../middleware/csrf');
 
 const isProduction = process.env.NODE_ENV === 'production';
+const COOKIE_ENCRYPTION_SECRET = process.env.COOKIE_ENCRYPTION_SECRET || process.env.ACCESS_TOKEN_SECRET || 'dev_cookie_encryption_secret';
+const COOKIE_ENCRYPTION_KEY = crypto.createHash('sha256').update(String(COOKIE_ENCRYPTION_SECRET)).digest();
 
 function hashSessionToken(sessionToken) {
   return crypto.createHash('sha256').update(sessionToken).digest('hex');
+}
+
+function encryptCookieValue(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', COOKIE_ENCRYPTION_KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(String(value), 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, encrypted]).toString('base64');
+}
+
+function decryptCookieValue(value) {
+  const payload = Buffer.from(String(value), 'base64');
+  const iv = payload.subarray(0, 12);
+  const tag = payload.subarray(12, 28);
+  const encrypted = payload.subarray(28);
+  const decipher = crypto.createDecipheriv('aes-256-gcm', COOKIE_ENCRYPTION_KEY, iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
 }
 
 function getCookieOptions(opts = {}) {
@@ -28,7 +48,9 @@ function getCookieOptions(opts = {}) {
 }
 
 function setCookie(res, name, value, opts = {}) {
-  res.cookie(name, value, getCookieOptions(opts));
+  const sensitiveCookies = new Set(['accessToken', 'refreshToken']);
+  const cookieValue = sensitiveCookies.has(name) ? encryptCookieValue(value) : value;
+  res.cookie(name, cookieValue, getCookieOptions(opts));
 }
 
 function clearCookie(res, name, opts = {}) {
