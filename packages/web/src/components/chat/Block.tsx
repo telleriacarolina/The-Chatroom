@@ -28,10 +28,41 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
+  const isJwtExpired = (token: string | null): boolean => {
+    if (!token || typeof token !== 'string') return true;
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+
+    try {
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const expiresAt = Number(payload?.exp);
+      if (!Number.isFinite(expiresAt)) return true;
+      return expiresAt * 1000 <= Date.now();
+    } catch {
+      return true;
+    }
+  };
+
+  const isTempSessionExpired = (value?: string | null): boolean => {
+    if (!value) return true;
+    const expiresAt = new Date(value);
+    if (Number.isNaN(expiresAt.getTime())) return true;
+    return expiresAt.getTime() <= Date.now();
+  };
+
+  const clearGuestAuthState = () => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem("guestToken");
+    localStorage.removeItem("guestAccessToken");
+    localStorage.removeItem("guestTempSessionToken");
+    localStorage.removeItem("guestSessionExpiresAt");
+    localStorage.removeItem("guestUsername");
+    setAuthToken(null);
+  };
+
   const setGuestToken = (token: string | null) => {
     if (typeof window === "undefined") return;
 
-    const value = token ?? "";
     if (token) {
       localStorage.setItem("guestToken", token);
       if (token.includes('.') && token.split('.').length === 3) {
@@ -42,10 +73,7 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
         localStorage.removeItem("guestAccessToken");
       }
     } else {
-      localStorage.removeItem("guestToken");
-      localStorage.removeItem("guestAccessToken");
-      localStorage.removeItem("guestTempSessionToken");
-      localStorage.removeItem("guestSessionExpiresAt");
+      clearGuestAuthState();
     }
     setAuthToken(token);
   };
@@ -53,20 +81,27 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   const getValidGuestToken = () => {
     if (typeof window === "undefined") return null;
 
-    const accessToken = localStorage.getItem("guestAccessToken") || localStorage.getItem("guestToken");
-    const tempToken = localStorage.getItem("guestTempSessionToken") || localStorage.getItem("guestToken");
+    const accessToken = localStorage.getItem("guestAccessToken");
+    const tempToken = localStorage.getItem("guestTempSessionToken");
     const expiresAt = localStorage.getItem("guestSessionExpiresAt");
-    const sessionStillValid = !expiresAt || new Date(expiresAt).getTime() > Date.now();
 
-    if (accessToken && sessionStillValid) {
+    if (accessToken && !isJwtExpired(accessToken)) {
       return accessToken;
     }
 
-    if (tempToken) {
+    if (tempToken && !isTempSessionExpired(expiresAt)) {
       return tempToken;
     }
 
-    return accessToken || null;
+    if (accessToken && !isJwtExpired(accessToken) === false) {
+      return null;
+    }
+
+    if (tempToken && !isTempSessionExpired(expiresAt)) {
+      return tempToken;
+    }
+
+    return null;
   };
 
   const persistGuestSession = (guestSession: {
@@ -77,13 +112,12 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
   }) => {
     if (typeof window === "undefined") return;
 
-    const accessToken = guestSession.accessToken || localStorage.getItem("guestAccessToken") || localStorage.getItem("guestToken");
-    const tempSessionToken = guestSession.tempSessionToken || localStorage.getItem("guestTempSessionToken") || localStorage.getItem("guestToken");
+    const accessToken = guestSession.accessToken ?? localStorage.getItem("guestAccessToken");
+    const tempSessionToken = guestSession.tempSessionToken ?? localStorage.getItem("guestTempSessionToken");
     const nextExpiresAt = guestSession.expiresAt ? new Date(guestSession.expiresAt).toISOString() : localStorage.getItem("guestSessionExpiresAt");
 
     if (accessToken) {
       localStorage.setItem("guestAccessToken", accessToken);
-      localStorage.setItem("guestToken", accessToken);
     } else {
       localStorage.removeItem("guestAccessToken");
     }

@@ -37,19 +37,18 @@ router.post('/guest', async (req, res) => {
     }
 
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
-    const guestId = uuidv4();
-    const tempSessionToken = uuidv4();
     const expiresAt = new Date(Date.now() + GUEST_SESSION_TTL_MS);
+    const tempSessionToken = uuidv4();
 
     const guestUser = await prisma.user.create({
       data: {
-        id: guestId,
         permanentUsername: temporaryUsername,
+        preferredName: temporaryUsername,
         accountType: 'GUEST',
         ageVerified: true,
         role: 'USER',
         isOnline: false,
-        stayOnline: false,
+        stayOnline: false
       },
       select: { id: true, permanentUsername: true }
     });
@@ -64,9 +63,13 @@ router.post('/guest', async (req, res) => {
       }
     });
 
-    const accessToken = jwt.sign({ userId: guestUser.id, guestId: guestUser.id, username: temporaryUsername }, ACCESS_SECRET, {
-      expiresIn: GUEST_ACCESS_TOKEN_TTL
-    });
+    const accessToken = jwt.sign({
+      userId: guestUser.id,
+      guest: true,
+      guestId: guestUser.id,
+      tempSessionId: tempSession.id,
+      username: temporaryUsername
+    }, ACCESS_SECRET, { expiresIn: GUEST_ACCESS_TOKEN_TTL });
 
     res.json({
       accessToken,
@@ -75,8 +78,8 @@ router.post('/guest', async (req, res) => {
       username: temporaryUsername,
       expiresAt: tempSession.expiresAt
     });
-  } catch (e) {
-    logger.error('Error creating guest session:', e);
+  } catch (error) {
+    logger.error('Error creating guest session:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
