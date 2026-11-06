@@ -56,12 +56,17 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
     const accessToken = localStorage.getItem("guestAccessToken") || localStorage.getItem("guestToken");
     const tempToken = localStorage.getItem("guestTempSessionToken") || localStorage.getItem("guestToken");
     const expiresAt = localStorage.getItem("guestSessionExpiresAt");
+    const sessionStillValid = !expiresAt || new Date(expiresAt).getTime() > Date.now();
 
-    if (accessToken && (!expiresAt || new Date(expiresAt).getTime() > Date.now())) {
+    if (accessToken && sessionStillValid) {
       return accessToken;
     }
 
-    return tempToken || accessToken || null;
+    if (tempToken) {
+      return tempToken;
+    }
+
+    return accessToken || null;
   };
 
   const persistGuestSession = (guestSession: {

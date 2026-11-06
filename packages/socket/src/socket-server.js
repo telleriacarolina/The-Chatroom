@@ -41,10 +41,14 @@ io.use(async (socket, next) => {
       return next(new Error('Authentication token required'));
     }
 
-    const payload = jwt.verify(token, ACCESS_SECRET);
-    if (payload?.userId) {
-      socket.userId = payload.userId;
-      return next();
+    try {
+      const payload = jwt.verify(token, ACCESS_SECRET);
+      if (payload?.userId) {
+        socket.userId = payload.userId;
+        return next();
+      }
+    } catch (error) {
+      // Intentionally fall through so a valid temp-session token can still authenticate.
     }
 
     const guestTempSession = await prisma.tempSession.findUnique({

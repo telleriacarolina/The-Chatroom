@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET |
 
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
 
-function authenticateSocket(socket, next) {
+async function authenticateSocket(socket, next) {
   try {
     const authToken = socket.handshake?.auth?.token;
     const headerToken = socket.handshake?.headers?.authorization?.startsWith('Bearer ')
@@ -21,12 +21,32 @@ function authenticateSocket(socket, next) {
       return next(new Error('Authentication token required'));
     }
 
-    const payload = jwt.verify(token, ACCESS_SECRET);
-    if (!payload?.userId) {
+    try {
+      const payload = jwt.verify(token, ACCESS_SECRET);
+      if (payload?.userId) {
+        socket.userId = payload.userId;
+        return next();
+      }
+    } catch (error) {
+      // Expired or malformed JWTs are allowed to fall through to temp-session validation.
+    }
+
+    const guestTempSession = await prisma.tempSession.findUnique({
+      where: { sessionToken: token },
+      select: { id: true, temporaryUsername: true, userId: true, expiresAt: true }
+    });
+
+    if (!guestTempSession) {
       return next(new Error('Invalid or expired token'));
     }
 
-    socket.userId = payload.userId;
+    if (guestTempSession.expiresAt && new Date(guestTempSession.expiresAt).getTime() <= Date.now()) {
+      return next(new Error('Guest session expired'));
+    }
+
+    socket.userId = guestTempSession.userId || guestTempSession.id;
+    socket.tempSessionId = guestTempSession.id;
+    socket.tempSessionUsername = guestTempSession.temporaryUsername;
     return next();
   } catch (error) {
     logger.error('Socket authentication error:', error);

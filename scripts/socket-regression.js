@@ -47,6 +47,17 @@ async function connectAuthenticated(url, userId) {
   return socket;
 }
 
+async function connectGuestSession(url, guestSessionToken) {
+  const socket = createClient(url, {
+    auth: { token: guestSessionToken },
+    reconnection: false,
+    timeout: 3000,
+    transports: ['websocket']
+  });
+  await waitForEvent(socket, 'connect');
+  return socket;
+}
+
 async function expectConnectError(url) {
   const socket = createClient(url, {
     reconnection: false,
@@ -68,6 +79,8 @@ function createFakePrismaState() {
     { id: 'room-inactive', loungeId: 'lounge-1', isActive: false }
   ];
 
+  const tempSessions = new Map();
+
   const users = {
     alice: { id: 'alice', permanentUsername: 'alice', preferredName: 'Alice', avatarUrl: null, accountStatus: 'ACTIVE', isBanned: false, banExpiresAt: null, isMuted: false, muteExpiresAt: null },
     bob: { id: 'bob', permanentUsername: 'bob', preferredName: 'Bob', avatarUrl: null, accountStatus: 'ACTIVE', isBanned: false, banExpiresAt: null, isMuted: false, muteExpiresAt: null },
@@ -82,11 +95,22 @@ function createFakePrismaState() {
   const updates = [];
 
   return {
-    state: { rooms, users, messages, updates },
+    state: { rooms, users, messages, updates, tempSessions },
     prisma: {
       languageRoom: {
         async findFirst({ where }) {
           return rooms.find(r => r.id === where.id && r.loungeId === where.loungeId && r.isActive === where.isActive) || null;
+        }
+      },
+      tempSession: {
+        async findUnique({ where }) {
+          const session = tempSessions.get(where.sessionToken);
+          if (!session) return null;
+          return { ...session };
+        },
+        async create({ data }) {
+          tempSessions.set(data.sessionToken, { ...data, id: `temp-${tempSessions.size + 1}` });
+          return { ...tempSessions.get(data.sessionToken) };
         }
       },
       user: {
@@ -185,6 +209,17 @@ async function runSuite(label, starter) {
   try {
     console.log(`\n[${label}] Running regression checks...`);
     await expectConnectError(target.url);
+
+    const expiredGuestToken = jwt.sign({ userId: 'guest-expired', guestId: 'guest-expired', username: 'guest_expired' }, ACCESS_SECRET, { expiresIn: '-1h' });
+    const guestSocket = createClient(target.url, {
+      auth: { token: expiredGuestToken },
+      reconnection: false,
+      timeout: 3000,
+      transports: ['websocket']
+    });
+    const guestError = await waitForEvent(guestSocket, 'connect_error');
+    assert.ok(String(guestError?.message || '').toLowerCase().includes('auth') || String(guestError?.message || '').toLowerCase().includes('expired'));
+    guestSocket.close();
 
     const bob = await connectAuthenticated(target.url, 'bob');
     const carol = await connectAuthenticated(target.url, 'carol');

@@ -1,12 +1,16 @@
 // Authentication routes
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
+const { prisma } = require('../utils/prisma');
 const router = express.Router();
 const logger = require('../utils/logger');
 
 const configuredSecret = process.env.ACCESS_TOKEN_SECRET;
 const GUEST_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const GUEST_ACCESS_TOKEN_TTL = '24h';
+const VALID_AGE_CATEGORIES = new Set(['PLUS_18', 'PLUS_18_RED']);
 
 if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret === 'dev_access_secret')) {
   throw new Error('ACCESS_TOKEN_SECRET must be set in production');
@@ -22,19 +26,37 @@ router.post('/csrf', (req, res) => {
 router.post('/guest', async (req, res) => {
   try {
     const { ageCategory } = req.body || {};
+    const normalizedAgeCategory = typeof ageCategory === 'string' ? ageCategory : 'PLUS_18';
+
+    if (!VALID_AGE_CATEGORIES.has(normalizedAgeCategory)) {
+      return res.status(400).json({ error: 'Invalid age category' });
+    }
+
     const temporaryUsername = `guest_${Math.random().toString(36).slice(2, 8)}`;
-    const guestId = require('crypto').randomBytes(8).toString('hex');
-    const tempSessionToken = require('uuid').v4();
+    const guestId = crypto.randomBytes(8).toString('hex');
+    const tempSessionToken = uuidv4();
+    const expiresAt = new Date(Date.now() + GUEST_SESSION_TTL_MS);
+
+    const tempSession = await prisma.tempSession.create({
+      data: {
+        userId: null,
+        temporaryUsername,
+        ageCategory: normalizedAgeCategory,
+        sessionToken: tempSessionToken,
+        expiresAt
+      }
+    });
+
     const accessToken = jwt.sign({ userId: guestId, guestId, username: temporaryUsername }, ACCESS_SECRET, {
       expiresIn: GUEST_ACCESS_TOKEN_TTL
     });
 
     res.json({
       accessToken,
-      tempSessionToken,
+      tempSessionToken: tempSession.sessionToken,
       guestId,
       username: temporaryUsername,
-      expiresAt: new Date(Date.now() + GUEST_SESSION_TTL_MS)
+      expiresAt: tempSession.expiresAt
     });
   } catch (e) {
     logger.error('Error creating guest session:', e);

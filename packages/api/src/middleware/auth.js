@@ -62,18 +62,19 @@ async function authenticateSocket(socket, next) {
       where: { sessionToken: resolvedToken },
       select: { id: true, temporaryUsername: true, userId: true, expiresAt: true }
     });
-    if (guestTempSession) {
-      const expired = guestTempSession.expiresAt && new Date(guestTempSession.expiresAt).getTime() <= Date.now();
-      if (expired) {
-        return next(new Error('Guest session expired'));
-      }
-      socket.userId = guestTempSession.userId || guestTempSession.id;
-      socket.tempSessionId = guestTempSession.id;
-      socket.tempSessionUsername = guestTempSession.temporaryUsername;
-      return next();
+    if (!guestTempSession) {
+      return next(new Error('Invalid or expired token'));
     }
 
-    return next(new Error('Invalid or expired token'));
+    const expired = guestTempSession.expiresAt && new Date(guestTempSession.expiresAt).getTime() <= Date.now();
+    if (expired) {
+      return next(new Error('Guest session expired'));
+    }
+
+    socket.userId = guestTempSession.userId || guestTempSession.id;
+    socket.tempSessionId = guestTempSession.id;
+    socket.tempSessionUsername = guestTempSession.temporaryUsername;
+    return next();
   } catch (error) {
     logger.error('Socket authentication error:', error);
     next(new Error('Authentication failed'));
