@@ -118,7 +118,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await response.json();
       const userData = {
         id: data.guestId,
-        username,
+        username: data.username || username,
         accountType: 'guest' as const,
       };
 
