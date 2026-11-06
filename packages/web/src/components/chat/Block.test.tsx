@@ -13,6 +13,13 @@ const ORIGINAL_ENV = { ...process.env };
 const ORIGINAL_WINDOW = (globalThis as { window?: Window }).window;
 const ORIGINAL_FETCH = globalThis.fetch;
 
+function makeJwtToken(payload: Record<string, unknown>, expSecondsFromNow = 3600): string {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const body = btoa(JSON.stringify({ ...payload, exp: Math.floor(Date.now() / 1000) + expSecondsFromNow }));
+  const signature = 'signature';
+  return `${header}.${body}.${signature}`;
+}
+
 function clearApiEnv(): void {
   delete process.env.NEXT_PUBLIC_API_URL;
   delete process.env.API_INTERNAL_URL;
@@ -195,21 +202,21 @@ describe('Block guest session lifecycle', () => {
   it('restores a previously saved guest session and syncs auth state', () => {
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
     localStorage.setItem('guestUsername', 'SavedGuest');
-    localStorage.setItem('guestAccessToken', 'saved-access-token');
+    localStorage.setItem('guestAccessToken', makeJwtToken({ userId: 'saved-user' }, 3600));
     localStorage.setItem('guestSessionExpiresAt', new Date(Date.now() + 60_000).toISOString());
 
     render(<Block />);
 
     expect(screen.getByText('SavedGuest')).toBeTruthy();
-    expect(setAuthTokenSpy).toHaveBeenCalledWith('saved-access-token');
+    expect(setAuthTokenSpy).toHaveBeenCalledWith(localStorage.getItem('guestAccessToken'));
   });
 
   it('falls back to the temp session token when the access token is expired', () => {
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
     localStorage.setItem('guestUsername', 'ExpiredGuest');
-    localStorage.setItem('guestAccessToken', 'expired-access-token');
+    localStorage.setItem('guestAccessToken', makeJwtToken({ userId: 'expired-user' }, -60));
     localStorage.setItem('guestTempSessionToken', 'active-temp-session-token');
-    localStorage.setItem('guestSessionExpiresAt', new Date(Date.now() - 60_000).toISOString());
+    localStorage.setItem('guestSessionExpiresAt', new Date(Date.now() + 60_000).toISOString());
 
     render(<Block />);
 
@@ -224,6 +231,9 @@ describe('Block guest session lifecycle', () => {
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
     localStorage.setItem('guestUsername', 'OldGuest');
     localStorage.setItem('guestToken', 'old-token');
+    localStorage.setItem('guestAccessToken', makeJwtToken({ userId: 'old-user' }, 3600));
+    localStorage.setItem('guestTempSessionToken', 'old-session-token');
+    localStorage.setItem('guestSessionExpiresAt', new Date(Date.now() + 60_000).toISOString());
 
     render(<Block />);
     fireEvent.click(screen.getByRole('button', { name: 'Change Username' }));

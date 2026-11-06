@@ -28,19 +28,28 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
-  const isJwtExpired = (token: string | null): boolean => {
-    if (!token || typeof token !== 'string') return true;
+  const decodeJwtPayload = (token: string | null): Record<string, unknown> | null => {
+    if (!token || typeof token !== 'string') return null;
     const parts = token.split('.');
-    if (parts.length !== 3) return true;
+    if (parts.length !== 3) return null;
 
     try {
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-      const expiresAt = Number(payload?.exp);
-      if (!Number.isFinite(expiresAt)) return true;
-      return expiresAt * 1000 <= Date.now();
+      const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+      const decoded = atob(padded);
+      return JSON.parse(decoded) as Record<string, unknown>;
     } catch {
+      return null;
+    }
+  };
+
+  const isJwtExpired = (token: string | null): boolean => {
+    const payload = decodeJwtPayload(token);
+    if (!payload || typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
       return true;
     }
+
+    return payload.exp * 1000 <= Date.now();
   };
 
   const isTempSessionExpired = (value?: string | null): boolean => {
@@ -65,12 +74,11 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
     if (token) {
       localStorage.setItem("guestToken", token);
-      if (token.includes('.') && token.split('.').length === 3) {
+      const isJwtToken = token.includes('.') && token.split('.').length === 3;
+      if (isJwtToken) {
         localStorage.setItem("guestAccessToken", token);
-        localStorage.removeItem("guestTempSessionToken");
       } else {
         localStorage.setItem("guestTempSessionToken", token);
-        localStorage.removeItem("guestAccessToken");
       }
     } else {
       clearGuestAuthState();
@@ -93,12 +101,8 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
       return tempToken;
     }
 
-    if (accessToken && !isJwtExpired(accessToken) === false) {
-      return null;
-    }
-
-    if (tempToken && !isTempSessionExpired(expiresAt)) {
-      return tempToken;
+    if ((accessToken || tempToken) && (!accessToken || isJwtExpired(accessToken)) && (!tempToken || isTempSessionExpired(expiresAt))) {
+      clearGuestAuthState();
     }
 
     return null;
@@ -136,6 +140,8 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
     if (guestSession.username) {
       localStorage.setItem("guestUsername", guestSession.username);
+    } else {
+      localStorage.removeItem("guestUsername");
     }
   };
 
@@ -148,6 +154,9 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
       if (storedUsername && restoredToken) {
         setTempUsername(storedUsername);
         setGuestToken(restoredToken);
+      } else if (storedUsername) {
+        localStorage.removeItem('guestUsername');
+        clearGuestAuthState();
       }
     }
   }, []);
