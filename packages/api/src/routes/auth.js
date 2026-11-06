@@ -120,7 +120,7 @@ router.post('/guest', async (req, res) => {
       guestId: guestUser.id,
       tempSessionId: temp.id,
       username: temporaryUsername
-    }, { expiresAtMs: guestSessionExpiresAt.getTime() - Date.now() });
+    }, { ttlMs: guestSessionExpiresAt.getTime() - Date.now() });
 
     res.json({
       accessToken,
