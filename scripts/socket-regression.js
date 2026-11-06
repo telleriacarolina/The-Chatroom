@@ -47,17 +47,6 @@ async function connectAuthenticated(url, userId) {
   return socket;
 }
 
-async function connectGuestSession(url, guestSessionToken) {
-  const socket = createClient(url, {
-    auth: { token: guestSessionToken },
-    reconnection: false,
-    timeout: 3000,
-    transports: ['websocket']
-  });
-  await waitForEvent(socket, 'connect');
-  return socket;
-}
-
 async function expectConnectError(url) {
   const socket = createClient(url, {
     reconnection: false,
@@ -203,7 +192,9 @@ async function runSuite(label, starter) {
   const closeSocket = socket => {
     try {
       socket.close();
-    } catch {}
+    } catch (error) {
+      // Socket teardown is best-effort during test cleanup.
+    }
   };
 
   try {
@@ -218,7 +209,11 @@ async function runSuite(label, starter) {
       transports: ['websocket']
     });
     const guestError = await waitForEvent(guestSocket, 'connect_error');
-    assert.ok(String(guestError?.message || '').toLowerCase().includes('auth') || String(guestError?.message || '').toLowerCase().includes('expired'));
+    assert.ok(
+      String(guestError?.message || '').toLowerCase().includes('auth') ||
+      String(guestError?.message || '').toLowerCase().includes('expired'),
+      'Expected expired JWT to fail socket auth'
+    );
     guestSocket.close();
 
     const bob = await connectAuthenticated(target.url, 'bob');
