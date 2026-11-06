@@ -23,24 +23,45 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'http://localhost:3002';
   const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    // Load saved user
-    AsyncStorage.getItem('user').then((data) => {
-      if (data) {
-        setUser(JSON.parse(data));
+    AsyncStorage.multiGet(['user', 'accessToken']).then((entries) => {
+      const userEntry = entries.find(([key]) => key === 'user')?.[1];
+      const tokenEntry = entries.find(([key]) => key === 'accessToken')?.[1];
+
+      if (userEntry) {
+        setUser(JSON.parse(userEntry));
+      }
+      if (tokenEntry) {
+        setAuthToken(tokenEntry);
       }
     });
+  }, []);
 
-    // Initialize socket
-    const newSocket = io(SOCKET_URL);
-    
+  useEffect(() => {
+    if (!authToken) {
+      socket?.close();
+      setSocket(null);
+      setIsConnected(false);
+      return;
+    }
+
+    const newSocket = io(SOCKET_URL, {
+      auth: { token: authToken }
+    });
+
     newSocket.on('connect', () => {
       console.log('Connected to server');
       setIsConnected(true);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error.message);
+      setIsConnected(false);
     });
 
     newSocket.on('disconnect', () => {
@@ -53,7 +74,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       newSocket.close();
     };
-  }, []);
+  }, [authToken]);
 
   const login = async (username: string, password: string) => {
     try {
@@ -67,13 +88,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const data = await response.json();
       const userData = {
-        id: data.user.id,
-        username: data.user.phoneNumber,
-        accountType: data.user.accountType,
+        id: data.user?.id || '',
+        username: data.user?.phoneNumber || username,
+        accountType: data.user?.accountType || 'registered',
       };
 
       setUser(userData);
       await AsyncStorage.setItem('user', JSON.stringify(userData));
+      if (data.accessToken) {
+        setAuthToken(data.accessToken);
+        await AsyncStorage.setItem('accessToken', data.accessToken);
+      }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -99,6 +124,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(userData);
       await AsyncStorage.setItem('user', JSON.stringify(userData));
+      if (data.accessToken || data.tempSessionToken) {
+        const token = data.accessToken || data.tempSessionToken;
+        setAuthToken(token);
+        await AsyncStorage.setItem('accessToken', token);
+      }
     } catch (error) {
       console.error('Guest session error:', error);
       throw error;
@@ -107,7 +137,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     setUser(null);
-    await AsyncStorage.removeItem('user');
+    setAuthToken(null);
+    await AsyncStorage.multiRemove(['user', 'accessToken']);
     socket?.disconnect();
   };
 
