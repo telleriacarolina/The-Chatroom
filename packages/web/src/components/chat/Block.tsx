@@ -290,14 +290,15 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
         throw new Error(response.error || "Guest session token was not returned");
       }
 
+      const serverUsername = response.data?.username ?? trimmedUsername;
       persistGuestSession({
         accessToken: response.data?.accessToken ?? null,
         tempSessionToken: response.data?.tempSessionToken ?? null,
         expiresAt: response.data?.expiresAt ?? null,
-        username: trimmedUsername,
+        username: serverUsername,
       });
       setGuestToken(socketToken);
-      setTempUsername(trimmedUsername);
+      setTempUsername(serverUsername);
       setUsername("");
     } catch (err) {
       setError("Failed to create guest session. Please try again.");

@@ -182,9 +182,9 @@ describe('Guest and CSRF API requests', () => {
 });
 
 describe('Block guest session lifecycle', () => {
-  it('creates a guest session, persists it, and syncs socket auth with the access token', async () => {
+  it('creates a guest session, persists the server username, and syncs socket auth with the access token', async () => {
     const createGuestSessionSpy = vi.spyOn(apiModule, 'createGuestSession').mockResolvedValue({
-      data: { accessToken: 'jwt-access-token', tempSessionToken: 'session-123' },
+      data: { accessToken: 'jwt-access-token', tempSessionToken: 'session-123', username: 'server_guest_123' },
     });
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
 
@@ -193,10 +193,10 @@ describe('Block guest session lifecycle', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Enter' }));
 
     await waitFor(() => expect(createGuestSessionSpy).toHaveBeenCalledWith('PLUS_18'));
-    await waitFor(() => expect(localStorage.getItem('guestUsername')).toBe('GuestA'));
+    await waitFor(() => expect(localStorage.getItem('guestUsername')).toBe('server_guest_123'));
     await waitFor(() => expect(localStorage.getItem('guestToken')).toBe('jwt-access-token'));
     await waitFor(() => expect(setAuthTokenSpy).toHaveBeenCalledWith('jwt-access-token'));
-    expect(screen.getByText('GuestA')).toBeTruthy();
+    expect(screen.getByText('server_guest_123')).toBeTruthy();
   });
 
   it('restores a previously saved guest session and syncs auth state', () => {
