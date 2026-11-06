@@ -1,7 +1,16 @@
 const jwt = require('jsonwebtoken');
+const prisma = require('../lib/prisma');
 const logger = require('../utils/logger');
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || process.env.ACCESS_TOKEN_SECRET === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const JWT_TOKEN_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured');
+}
 
 function verifyAccessToken(token) {
   try {
@@ -11,8 +20,59 @@ function verifyAccessToken(token) {
   }
 }
 
+function isJwtLikeToken(value) {
+  return typeof value === 'string' && JWT_TOKEN_PATTERN.test(value);
+}
+
+async function validateGuestSessionForIdentity(userId, tempSessionId) {
+  if (!userId || !tempSessionId) return null;
+
+  try {
+    const tempSession = await prisma.tempSession.findUnique({
+      where: { id: tempSessionId },
+      select: { id: true, userId: true, expiresAt: true, sessionToken: true, temporaryUsername: true }
+    });
+
+    if (!tempSession || !tempSession.userId) {
+      return null;
+    }
+
+    if (tempSession.userId !== userId) {
+      return null;
+    }
+
+    if (tempSession.expiresAt && new Date(tempSession.expiresAt).getTime() <= Date.now()) {
+      return null;
+    }
+
+    return tempSession;
+  } catch (error) {
+    logger.error('Guest session validation failed:', error);
+    return null;
+  }
+}
+
+async function validateTempSessionCredential(token) {
+  if (!token || typeof token !== 'string') return null;
+
+  try {
+    const tempSession = await prisma.tempSession.findUnique({
+      where: { sessionToken: token },
+      select: { id: true, temporaryUsername: true, userId: true, expiresAt: true, sessionToken: true }
+    });
+
+    if (!tempSession || !tempSession.userId) return null;
+    if (tempSession.expiresAt && new Date(tempSession.expiresAt).getTime() <= Date.now()) return null;
+
+    return tempSession;
+  } catch (error) {
+    logger.error('Temp session validation failed:', error);
+    return null;
+  }
+}
+
 // Middleware for Express routes
-function authenticateRequest(req, res, next) {
+async function authenticateRequest(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -26,7 +86,20 @@ function authenticateRequest(req, res, next) {
       return res.status(401).json({ error: 'Invalid or expired token' });
     }
 
+    if (payload.guest === true || payload.guestId || payload.tempSessionId) {
+      const tempSessionId = payload.tempSessionId;
+      if (!tempSessionId) {
+        return res.status(401).json({ error: 'Invalid guest session' });
+      }
+
+      const validatedGuestSession = await validateGuestSessionForIdentity(payload.userId, tempSessionId);
+      if (!validatedGuestSession) {
+        return res.status(401).json({ error: 'Invalid guest session' });
+      }
+    }
+
     req.userId = payload.userId;
+    req.user = payload;
     next();
   } catch (error) {
     logger.error('Authentication error:', error);
@@ -35,22 +108,49 @@ function authenticateRequest(req, res, next) {
 }
 
 // Middleware for Socket.io connections
-function authenticateSocket(socket, next) {
+async function authenticateSocket(socket, next) {
   try {
-    const token = socket.handshake.auth.token;
-    
-    if (!token) {
+    const token = socket.handshake?.auth?.token;
+    const authHeader = socket.handshake?.headers?.authorization;
+    const headerToken = typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null;
+    const resolvedToken = token || headerToken;
+
+    if (!resolvedToken) {
       return next(new Error('Authentication token required'));
     }
 
-    const payload = verifyAccessToken(token);
+    const payload = verifyAccessToken(resolvedToken);
+    if (payload && payload.userId) {
+      const tempSessionId = payload.tempSessionId || null;
+      const validatedGuestSession = tempSessionId ? await validateGuestSessionForIdentity(payload.userId, tempSessionId) : null;
 
-    if (!payload || !payload.userId) {
+      if (payload.guest === true || payload.guestId || tempSessionId) {
+        if (!validatedGuestSession) {
+          return next(new Error('Guest session invalid or expired'));
+        }
+      }
+
+      socket.userId = payload.userId;
+      socket.tempSessionId = validatedGuestSession?.id ?? null;
+      socket.tempSessionUsername = validatedGuestSession?.temporaryUsername ?? null;
+      return next();
+    }
+
+    if (isJwtLikeToken(resolvedToken)) {
       return next(new Error('Invalid or expired token'));
     }
 
-    socket.userId = payload.userId;
-    next();
+    const guestTempSession = await validateTempSessionCredential(resolvedToken);
+    if (!guestTempSession) {
+      return next(new Error('Invalid or expired token'));
+    }
+
+    socket.userId = guestTempSession.userId;
+    socket.tempSessionId = guestTempSession.id;
+    socket.tempSessionUsername = guestTempSession.temporaryUsername;
+    return next();
   } catch (error) {
     logger.error('Socket authentication error:', error);
     next(new Error('Authentication failed'));
@@ -60,5 +160,7 @@ function authenticateSocket(socket, next) {
 module.exports = {
   authenticateRequest,
   authenticateSocket,
-  verifyAccessToken
+  verifyAccessToken,
+  validateGuestSessionForIdentity,
+  validateTempSessionCredential
 };

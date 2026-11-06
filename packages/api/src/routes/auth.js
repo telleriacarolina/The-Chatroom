@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const { signAccess, signRefresh, verifyRefresh } = require('../lib/jwt');
-const { prisma } = require('../lib/prisma');
+const { signAccess, signGuestAccess, signRefresh, verifyRefresh } = require('../lib/jwt');
+const prisma = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
 const { generateCSRFToken } = require('../utils/security');
 const { authLimiter } = require('../middleware/rateLimiter');
@@ -82,22 +82,65 @@ router.post('/signin', authLimiter, async (req, res) => {
 
 router.post('/guest', async (req, res) => {
   const { ageCategory } = req.body || {};
-  const temporaryUsername = `guest_${Math.random().toString(36).slice(2,8)}`;
-  const token = require('uuid').v4();
+  const normalizedAgeCategory = typeof ageCategory === 'string' ? ageCategory : 'PLUS_18';
+  const VALID_AGE_CATEGORIES = new Set(['PLUS_18', 'PLUS_18_RED']);
+
+  if (!VALID_AGE_CATEGORIES.has(normalizedAgeCategory)) {
+    return res.status(400).json({ error: 'Invalid age category' });
+  }
+
   try {
-    const temp = await prisma.tempSession.create({ data: {
-      temporaryUsername,
-      ageCategory: ageCategory === '18+RED' ? 'PLUS_18_RED' : 'PLUS_18',
-      sessionToken: token,
-      expiresAt: new Date(Date.now() + 24*60*60*1000)
-    }});
-    res.json({ tempSessionToken: token, guestId: temp.id, expiresAt: temp.expiresAt });
+    const crypto = require('crypto');
+    const temporaryUsername = `guest_${crypto.randomBytes(4).toString('hex')}`;
+    const guestSessionExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const tempSessionToken = require('uuid').v4();
+
+    const [guestUser, temp] = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          permanentUsername: temporaryUsername,
+          preferredName: temporaryUsername,
+          accountType: 'GUEST',
+          ageVerified: true,
+          role: 'USER',
+          isOnline: false,
+          stayOnline: false
+        }
+      });
+
+      const createdTempSession = await tx.tempSession.create({
+        data: {
+          userId: createdUser.id,
+          temporaryUsername,
+          ageCategory: normalizedAgeCategory,
+          sessionToken: tempSessionToken,
+          expiresAt: guestSessionExpiresAt
+        }
+      });
+
+      return [createdUser, createdTempSession];
+    });
+
+    const accessToken = signGuestAccess({
+      userId: guestUser.id,
+      guest: true,
+      guestId: guestUser.id,
+      tempSessionId: temp.id,
+      username: temporaryUsername
+    }, { ttlMs: guestSessionExpiresAt.getTime() - Date.now() });
+
+    res.json({
+      accessToken,
+      tempSessionToken: temp.sessionToken,
+      guestId: guestUser.id,
+      username: temporaryUsername,
+      expiresAt: temp.expiresAt
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Server error' });
   }
-});
-
+})
 router.post('/change-password', authLimiter, async (req, res) => {
   const { phoneNumber, currentPassword, newPassword } = req.body || {};
   if (!phoneNumber || !currentPassword || !newPassword) return res.status(400).json({ error: 'Missing fields' });

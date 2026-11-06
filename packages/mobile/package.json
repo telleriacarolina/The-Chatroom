@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "build:android": "eas build --platform android",
     "build:ios": "eas build --platform ios",
-    "test": "jest",
+    "test": "node ../../scripts/run-workspace-jest.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {

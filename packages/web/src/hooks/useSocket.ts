@@ -78,13 +78,6 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     socket.on('disconnect', handleDisconnect);
     socket.on('connect_error', handleConnectError);
 
-    // Auto-connect if enabled and not already attempted
-    if (autoConnect && !autoConnectAttemptedRef.current && !socket.connected) {
-      autoConnectAttemptedRef.current = true;
-      setStatus('connecting');
-      connect();
-    }
-
     // Cleanup on unmount
     return () => {
       socket.off('connect', handleConnect);
@@ -92,6 +85,18 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
       socket.off('connect_error', handleConnectError);
     };
   }, []);
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    if (!autoConnect) return;
+    if (autoConnectAttemptedRef.current) return;
+    if (socket.connected) return;
+
+    autoConnectAttemptedRef.current = true;
+    setStatus('connecting');
+    connect();
+  }, [autoConnect]);
 
   const handleConnect = useCallback(() => {
     if (socketRef.current && !socketRef.current.connected) {

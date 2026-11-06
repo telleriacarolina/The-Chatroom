@@ -118,16 +118,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await response.json();
       const userData = {
         id: data.guestId,
-        username,
+        username: data.username || username,
         accountType: 'guest' as const,
       };
 
       setUser(userData);
       await AsyncStorage.setItem('user', JSON.stringify(userData));
-      if (data.accessToken || data.tempSessionToken) {
-        const token = data.accessToken || data.tempSessionToken;
-        setAuthToken(token);
-        await AsyncStorage.setItem('accessToken', token);
+      if (data.accessToken) {
+        setAuthToken(data.accessToken);
+        await AsyncStorage.setItem('accessToken', data.accessToken);
       }
     } catch (error) {
       console.error('Guest session error:', error);
