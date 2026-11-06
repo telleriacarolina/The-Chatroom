@@ -15,7 +15,11 @@ const VALID_AGE_CATEGORIES = new Set(['PLUS_18', 'PLUS_18_RED']);
 if (process.env.NODE_ENV === 'production' && (!configuredSecret || configuredSecret === 'dev_access_secret')) {
   throw new Error('ACCESS_TOKEN_SECRET must be set in production');
 }
-const ACCESS_SECRET = configuredSecret || 'dev_access_secret';
+const ACCESS_SECRET = configuredSecret || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured');
+}
 
 router.post('/csrf', (req, res) => {
   const token = require('crypto').randomBytes(32).toString('hex');

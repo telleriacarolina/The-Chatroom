@@ -5,7 +5,12 @@ const logger = require('../utils/logger');
 if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || process.env.ACCESS_TOKEN_SECRET === 'dev_access_secret')) {
   throw new Error('ACCESS_TOKEN_SECRET must be set in production');
 }
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const JWT_TOKEN_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured');
+}
 
 function verifyAccessToken(token) {
   try {
@@ -13,6 +18,10 @@ function verifyAccessToken(token) {
   } catch (error) {
     return null;
   }
+}
+
+function isJwtLikeToken(value) {
+  return typeof value === 'string' && JWT_TOKEN_PATTERN.test(value);
 }
 
 // Middleware for Express routes
@@ -56,6 +65,10 @@ async function authenticateSocket(socket, next) {
     if (payload && payload.userId) {
       socket.userId = payload.userId;
       return next();
+    }
+
+    if (payload === null && isJwtLikeToken(resolvedToken)) {
+      return next(new Error('Invalid or expired token'));
     }
 
     const guestTempSession = await prisma.tempSession.findUnique({

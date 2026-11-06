@@ -7,7 +7,12 @@ if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET |
   throw new Error('ACCESS_TOKEN_SECRET must be set in production');
 }
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const JWT_TOKEN_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured');
+}
 
 async function authenticateSocket(socket, next) {
   try {
@@ -28,7 +33,11 @@ async function authenticateSocket(socket, next) {
         return next();
       }
     } catch (error) {
-      // Expired or malformed JWTs are allowed to fall through to temp-session validation.
+      // Invalid JWTs are rejected before temp-session fallback checks.
+    }
+
+    if (JWT_TOKEN_PATTERN.test(token)) {
+      return next(new Error('Invalid or expired token'));
     }
 
     const guestTempSession = await prisma.tempSession.findUnique({

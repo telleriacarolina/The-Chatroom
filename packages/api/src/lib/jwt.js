@@ -1,14 +1,20 @@
 const jwt = require('jsonwebtoken');
 
-// Validate secrets are provided in production
+const configuredAccessSecret = process.env.ACCESS_TOKEN_SECRET;
+const configuredRefreshSecret = process.env.REFRESH_TOKEN_SECRET;
+
 if (process.env.NODE_ENV === 'production') {
-  if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
+  if (!configuredAccessSecret || configuredAccessSecret === 'dev_access_secret' || !configuredRefreshSecret || configuredRefreshSecret === 'dev_refresh_secret') {
     throw new Error('JWT secrets must be provided in production environment');
   }
 }
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || 'dev_refresh_secret';
+const ACCESS_SECRET = configuredAccessSecret || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const REFRESH_SECRET = configuredRefreshSecret || (process.env.NODE_ENV === 'production' ? undefined : 'dev_refresh_secret');
+
+if (!ACCESS_SECRET || !REFRESH_SECRET) {
+  throw new Error('JWT secrets must be configured');
+}
 
 function signAccess(payload, options = {}) {
   return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m', ...options });
