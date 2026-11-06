@@ -8,11 +8,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://$API_INTERNAL_URL/api/:path*"
+      "destination": "$API_INTERNAL_URL/api/:path*"
     },
     {
       "source": "/socket.io/:path*",
-      "destination": "https://$SOCKET_INTERNAL_URL/socket.io/:path*"
+      "destination": "$SOCKET_INTERNAL_URL/socket.io/:path*"
     }
   ]
 }
