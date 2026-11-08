@@ -52,12 +52,7 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
     return payload.exp * 1000 <= Date.now();
   };
 
-  const isTempSessionExpired = (value?: string | null): boolean => {
-    if (!value) return true;
-    const expiresAt = new Date(value);
-    if (Number.isNaN(expiresAt.getTime())) return true;
-    return expiresAt.getTime() <= Date.now();
-  };
+  // (removed unused isTempSessionExpired helper; JWT `exp` governs guest session validity)
 
   const clearGuestAuthState = () => {
     if (typeof window === "undefined") return;
