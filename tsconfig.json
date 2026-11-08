@@ -13,13 +13,11 @@
   "resolveJsonModule": true,
   "isolatedModules": true,
   "jsx": "preserve",
-  "ignoreDeprecations": "6.0",
-  "baseUrl": ".",
   "paths": {
     "@/*": ["./*"],
-    "@/components/*": ["components/*"],
-    "@/lib/*": ["lib/*"],
-    "@/utils/*": ["utils/*"]
+    "@/components/*": ["./components/*"],
+    "@/lib/*": ["./lib/*"],
+    "@/utils/*": ["./utils/*"]
   },
   "plugins": [
     { "name": "next" }
