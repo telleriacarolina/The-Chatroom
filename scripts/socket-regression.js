@@ -6,7 +6,11 @@ const jwt = require('jsonwebtoken');
 const { io: createClient } = require('socket.io-client');
 
 const ROOT = path.resolve(__dirname, '..');
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured before running the socket regression checks');
+}
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
