@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -77,13 +77,14 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
       const isJwtToken = token.includes('.') && token.split('.').length === 3;
       if (isJwtToken) {
         localStorage.setItem("guestAccessToken", token);
+        setAuthToken(token);
       } else {
         localStorage.setItem("guestTempSessionToken", token);
+        setAuthToken(null);
       }
     } else {
       clearGuestAuthState();
     }
-    setAuthToken(token);
   };
 
   const getValidGuestToken = () => {
@@ -91,17 +92,12 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
     const accessToken = localStorage.getItem("guestAccessToken");
     const tempToken = localStorage.getItem("guestTempSessionToken");
-    const expiresAt = localStorage.getItem("guestSessionExpiresAt");
 
     if (accessToken && !isJwtExpired(accessToken)) {
       return accessToken;
     }
 
-    if (tempToken && !isTempSessionExpired(expiresAt)) {
-      return tempToken;
-    }
-
-    if ((accessToken || tempToken) && (!accessToken || isJwtExpired(accessToken)) && (!tempToken || isTempSessionExpired(expiresAt))) {
+    if (accessToken || tempToken) {
       clearGuestAuthState();
     }
 

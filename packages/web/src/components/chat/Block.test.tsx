@@ -211,7 +211,7 @@ describe('Block guest session lifecycle', () => {
     expect(setAuthTokenSpy).toHaveBeenCalledWith(localStorage.getItem('guestAccessToken'));
   });
 
-  it('falls back to the temp session token when the access token is expired', () => {
+  it('clears expired guest session state instead of reusing the temp session token for socket auth', () => {
     const setAuthTokenSpy = vi.spyOn(socketModule, 'setAuthToken');
     localStorage.setItem('guestUsername', 'ExpiredGuest');
     localStorage.setItem('guestAccessToken', makeJwtToken({ userId: 'expired-user' }, -60));
@@ -220,8 +220,9 @@ describe('Block guest session lifecycle', () => {
 
     render(<Block />);
 
-    expect(screen.getByText('ExpiredGuest')).toBeTruthy();
-    expect(setAuthTokenSpy).toHaveBeenCalledWith('active-temp-session-token');
+    expect(screen.getByPlaceholderText('Enter your username (4-10 characters)')).toBeTruthy();
+    expect(localStorage.getItem('guestUsername')).toBeNull();
+    expect(setAuthTokenSpy).toHaveBeenCalledWith(null);
   });
 
   it('clears persisted guest state when changing username', async () => {
