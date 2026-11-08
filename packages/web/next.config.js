@@ -34,6 +34,25 @@ function getSocketRewriteBase() {
   return normalizeRewriteBase(process.env.SOCKET_INTERNAL_URL || process.env.NEXT_PUBLIC_SOCKET_URL);
 }
 
+function warnIfMissingBackendRewriteConfig(apiRewriteBase, socketRewriteBase) {
+  const missing = [];
+
+  if (!apiRewriteBase) {
+    missing.push('API_INTERNAL_URL or NEXT_PUBLIC_API_URL (required for /api/:path*)');
+  }
+
+  if (!socketRewriteBase) {
+    missing.push('SOCKET_INTERNAL_URL or NEXT_PUBLIC_SOCKET_URL (required for /socket.io/:path*)');
+  }
+
+  if (missing.length > 0) {
+    console.warn(
+      '[chatroom] Missing deployment rewrite configuration. Backend routes are not proxied until the required Vercel Preview/Production env vars are configured: ' +
+        missing.join('; ')
+    );
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -42,6 +61,8 @@ const nextConfig = {
     const apiRewriteBase = getApiRewriteBase();
     const socketRewriteBase = getSocketRewriteBase();
     const rewrites = [];
+
+    warnIfMissingBackendRewriteConfig(apiRewriteBase, socketRewriteBase);
 
     if (apiRewriteBase) {
       rewrites.push({
