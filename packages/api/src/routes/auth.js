@@ -10,7 +10,10 @@ const { authLimiter } = require('../middleware/rateLimiter');
 const csrfProtection = require('../middleware/csrf');
 
 const isProduction = process.env.NODE_ENV === 'production';
-const COOKIE_ENCRYPTION_SECRET = process.env.COOKIE_ENCRYPTION_SECRET || process.env.ACCESS_TOKEN_SECRET || 'dev_cookie_encryption_secret';
+const COOKIE_ENCRYPTION_SECRET = process.env.COOKIE_ENCRYPTION_SECRET || process.env.ACCESS_TOKEN_SECRET;
+if (!COOKIE_ENCRYPTION_SECRET || COOKIE_ENCRYPTION_SECRET.length < 32) {
+  throw new Error('COOKIE_ENCRYPTION_SECRET (or ACCESS_TOKEN_SECRET) must be set and at least 32 characters long');
+}
 const COOKIE_ENCRYPTION_KEY = crypto.createHash('sha256').update(String(COOKIE_ENCRYPTION_SECRET)).digest();
 
 function hashSessionToken(sessionToken) {
