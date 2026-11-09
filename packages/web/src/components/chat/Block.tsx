@@ -69,8 +69,10 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
     if (token) {
       localStorage.setItem("guestToken", token);
-      const isJwtToken = token.includes('.') && token.split('.').length === 3;
-      if (isJwtToken) {
+      const storedAccessToken = localStorage.getItem("guestAccessToken");
+      const isExplicitAccessToken = storedAccessToken === token || (token.includes('.') && token.split('.').length === 3);
+
+      if (isExplicitAccessToken) {
         localStorage.setItem("guestAccessToken", token);
         setAuthToken(token);
       } else {
@@ -276,22 +278,23 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
     try {
       const response = await createGuestSession("PLUS_18");
-      const socketToken = response.data?.accessToken ?? response.data?.tempSessionToken;
+      const accessToken = response.data?.accessToken ?? null;
+      const tempSessionToken = response.data?.tempSessionToken ?? null;
+      const socketToken = accessToken ?? tempSessionToken;
       if (response.error || !socketToken) {
         throw new Error(response.error || "Guest session token was not returned");
       }
 
       const serverUsername = response.data?.username ?? trimmedUsername;
       persistGuestSession({
-        accessToken: response.data?.accessToken ?? null,
-        tempSessionToken: response.data?.tempSessionToken ?? null,
+        accessToken,
+        tempSessionToken,
         expiresAt: response.data?.expiresAt ?? null,
         username: serverUsername,
       });
-      setGuestToken(socketToken);
+      setGuestToken(accessToken ?? tempSessionToken ?? null);
       setTempUsername(serverUsername);
-      setUsername("");
-    } catch (err) {
+      setUsername("");    } catch (err) {
       setError("Failed to create guest session. Please try again.");
     } finally {
       setIsLoading(false);
