@@ -1,8 +1,9 @@
 const { prisma } = require('../lib/prisma');
 const logger = require('../utils/logger');
 
-// Store interval references for cleanup
-const intervals = [];
+const JOB_MIN_INTERVAL_MS = Number.parseInt(process.env.MAINTENANCE_JOB_INTERVAL_MS || '60000', 10);
+let lastRunStartedAt = 0;
+let isRunning = false;
 
 /** Transition users from Online -> Away after 5 minutes inactivity */
 async function transitionInactiveUsers() {
@@ -111,34 +112,50 @@ async function transitionOfflineUsers() {
   }
 }
 
+async function runMaintenanceJobs({ source = 'manual' } = {}) {
+  await transitionInactiveUsers();
+  await cleanupExpiredSessions();
+  await transitionOfflineUsers();
+  await processExpiredBans();
+  await processExpiredMutes();
+  logger.info(`Maintenance jobs completed (source=${source})`);
+}
+
+async function runMaintenanceJobsIfDue({ force = false, source = 'request' } = {}) {
+  const now = Date.now();
+
+  if (!force && now - lastRunStartedAt < JOB_MIN_INTERVAL_MS) {
+    return { ran: false, reason: 'interval_not_elapsed' };
+  }
+  if (isRunning) {
+    return { ran: false, reason: 'already_running' };
+  }
+
+  isRunning = true;
+  lastRunStartedAt = now;
+
+  try {
+    await runMaintenanceJobs({ source });
+    return { ran: true };
+  } finally {
+    isRunning = false;
+  }
+}
+
 function startBackgroundJobs() {
-  logger.info('Starting background jobs...');
-  
-  // Create intervals and store references
-  intervals.push(setInterval(transitionInactiveUsers, 60 * 1000));
-  intervals.push(setInterval(cleanupExpiredSessions, 15 * 60 * 1000));
-  intervals.push(setInterval(transitionOfflineUsers, 5 * 60 * 1000));
-  intervals.push(setInterval(processExpiredBans, 2 * 60 * 1000)); // Check every 2 minutes
-  intervals.push(setInterval(processExpiredMutes, 2 * 60 * 1000)); // Check every 2 minutes
-  
-  // Unref intervals to allow graceful shutdown
-  intervals.forEach(interval => interval.unref());
-  
-  // run once on startup
-  transitionInactiveUsers();
-  cleanupExpiredSessions();
-  transitionOfflineUsers();
-  processExpiredBans();
-  processExpiredMutes();
-  
-  logger.info('Background jobs started');
+  logger.info('Background jobs are request/cron-triggered; no process-level intervals are started.');
+  runMaintenanceJobsIfDue({ force: true, source: 'startup' }).catch((error) => {
+    logger.error('Startup maintenance run failed', error);
+  });
 }
 
 function stopBackgroundJobs() {
-  logger.info('Stopping background jobs...');
-  intervals.forEach(interval => clearInterval(interval));
-  intervals.splice(0, intervals.length); // Clear all elements from array
-  logger.info('Background jobs stopped');
+  logger.info('No process-level background intervals to stop.');
 }
 
-module.exports = { startBackgroundJobs, stopBackgroundJobs };
+module.exports = {
+  startBackgroundJobs,
+  stopBackgroundJobs,
+  runMaintenanceJobsIfDue,
+  runMaintenanceJobs
+};

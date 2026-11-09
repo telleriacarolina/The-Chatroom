@@ -40,7 +40,6 @@ function normalizeApiBase(rawValue?: string): string | null {
 
 export function resolveApiBaseUrl(): string {
   const browserApiUrl = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL);
-  const serverInternalApiUrl = normalizeApiBase(process.env.API_INTERNAL_URL);
 
   if (typeof window !== 'undefined') {
     if (browserApiUrl) {
@@ -52,10 +51,6 @@ export function resolveApiBaseUrl(): string {
     }
 
     return '';
-  }
-
-  if (serverInternalApiUrl) {
-    return serverInternalApiUrl;
   }
 
   if (browserApiUrl) {

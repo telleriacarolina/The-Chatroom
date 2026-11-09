@@ -3,7 +3,7 @@ function stripTrailingSlash(value) {
 }
 
 function getApiRewriteBase() {
-  const configuredUrl = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL;
+  const configuredUrl = process.env.NEXT_PUBLIC_API_URL;
 
   if (!configuredUrl) {
     return null;

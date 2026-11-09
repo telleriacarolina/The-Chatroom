@@ -196,11 +196,9 @@ FRONTEND_URL="http://localhost:3000"
 
 ```bash
 NEXT_PUBLIC_API_URL="http://localhost:3001"
-API_INTERNAL_URL="http://localhost:3001"
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ```
-
-`API_INTERNAL_URL` is server-side only and should be configured in Vercel Project Settings (Development, Preview, and Production) for the web project so `/api/*` rewrites can reach the Express API deployment without exposing private endpoints to browser code.
+In Vercel Services deployments, browser requests stay same-origin (`/api/*` and `/socket.io/*`) and are routed to the API service by `vercel.json` rewrites.
 
 ### 3. Set Up Database
 
@@ -297,6 +295,13 @@ ENCRYPTION_KEY="fallback-key"
 TWILIO_ACCOUNT_SID="optional"
 TWILIO_AUTH_TOKEN="optional"
 TWILIO_FROM_NUMBER="+1234567890"
+
+# Optional: Redis adapter for Socket.IO cross-instance broadcasts
+UPSTASH_REDIS_URL=""
+
+# Optional: maintenance job controls
+CRON_SECRET=""
+MAINTENANCE_JOB_INTERVAL_MS="60000"
 
 # Server Configuration
 PORT=3001
