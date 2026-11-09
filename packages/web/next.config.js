@@ -1,3 +1,10 @@
+const { version: webVersion } = require('./package.json');
+
+function normalizeReleaseId(value) {
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized && normalized !== 'null' ? normalized : null;
+}
+
 function stripTrailingSlash(value) {
   return value.replace(/\/+$/, '');
 }
@@ -19,9 +26,19 @@ function getApiRewriteBase() {
 }
 
 /** @type {import('next').NextConfig} */
+const releaseId =
+  normalizeReleaseId(process.env.NEXT_PUBLIC_APP_RELEASE_ID)
+  || normalizeReleaseId(process.env.APP_RELEASE_ID)
+  || normalizeReleaseId(process.env.VERCEL_GIT_COMMIT_SHA)
+  || normalizeReleaseId(process.env.RENDER_GIT_COMMIT);
+
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@chatroom/shared'],
+  env: {
+    NEXT_PUBLIC_APP_VERSION: normalizeReleaseId(process.env.NEXT_PUBLIC_APP_VERSION) || webVersion,
+    NEXT_PUBLIC_APP_RELEASE_ID: releaseId,
+  },
   async rewrites() {
     const rewriteBase = getApiRewriteBase();
 

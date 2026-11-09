@@ -25,7 +25,7 @@ export default function ConnectionStatus({
   // Passing autoConnect: true here will only initialize that shared connection,
   // and will NOT create multiple WebSocket connections when multiple
   // ConnectionStatus components are rendered.
-  const { status, isConnected, connect } = useSocket({ autoConnect: true });
+  const { status, isConnected, connect } = useSocket({ autoConnect: false });
 
   const statusConfig = {
     connected: {

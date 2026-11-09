@@ -5,6 +5,25 @@
 
 const LOCAL_API_ORIGIN = 'http://localhost:3001';
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
+const API_VERSION_HEADER = 'x-chatroom-api-version';
+const RELEASE_ID_HEADER = 'x-chatroom-release-id';
+
+export function normalizeReleaseId(value?: string | null): string | null {
+  const normalized = value?.trim();
+  return normalized && normalized !== 'null' && normalized !== 'undefined' ? normalized : null;
+}
+
+export function getClientAppVersion(): string {
+  return normalizeReleaseId(process.env.NEXT_PUBLIC_APP_VERSION) || 'unknown';
+}
+
+export function getClientReleaseId(): string | null {
+  return normalizeReleaseId(process.env.NEXT_PUBLIC_APP_RELEASE_ID)
+    ?? normalizeReleaseId(process.env.APP_RELEASE_ID)
+    ?? normalizeReleaseId(process.env.VERCEL_GIT_COMMIT_SHA)
+    ?? normalizeReleaseId(process.env.RENDER_GIT_COMMIT)
+    ?? null;
+}
 
 function ensureLeadingSlash(value: string): string {
   return value.startsWith('/') ? value : `/${value}`;
@@ -125,6 +144,57 @@ export interface SigninData {
   staySignedIn?: boolean;
 }
 
+function buildReleaseMismatchError(serverReleaseId: string, serverVersion: string | null): string {
+  const clientReleaseId = getClientReleaseId();
+  const clientVersion = getClientAppVersion();
+  const clientLabel = clientReleaseId
+    ? `client release ${clientReleaseId}${clientVersion !== 'unknown' ? ` (${clientVersion})` : ''}`
+    : 'client release unknown';
+  const serverLabel = serverVersion
+    ? `server API ${serverVersion} (release ${serverReleaseId})`
+    : `server release ${serverReleaseId}`;
+  return `Deployment release mismatch detected (${serverLabel} vs ${clientLabel}). Refresh the page to load the latest client build.`;
+}
+
+function buildVersionMismatchError(serverVersion: string, clientVersion: string): string {
+  return `API version mismatch detected (server API ${serverVersion} vs client ${clientVersion}). Refresh the page to load the latest client build.`;
+}
+
+function getHeaderValue(headers: Headers, name: string): string | null {
+  const rawValue = headers.get(name);
+  const normalized = rawValue?.trim();
+  return normalized || null;
+}
+
+export function getCompatibilityError(response: Response): string | null {
+  const serverReleaseId = normalizeReleaseId(getHeaderValue(response.headers, RELEASE_ID_HEADER));
+  const serverVersion = normalizeReleaseId(getHeaderValue(response.headers, API_VERSION_HEADER));
+  const clientReleaseId = getClientReleaseId();
+  const clientVersion = getClientAppVersion();
+
+  if (serverReleaseId && clientReleaseId && serverReleaseId !== clientReleaseId) {
+    return buildReleaseMismatchError(serverReleaseId, serverVersion);
+  }
+
+  if (!serverReleaseId && !clientReleaseId) {
+    return null;
+  }
+
+  if (serverReleaseId && !clientReleaseId) {
+    return `Deployment identity is incomplete (server release ${serverReleaseId} vs client release unknown). Refresh the page to load a matching deployment.`;
+  }
+
+  if (!serverReleaseId && clientReleaseId) {
+    return `Deployment identity is incomplete (server release unknown vs client release ${clientReleaseId}). Refresh the page to load a matching deployment.`;
+  }
+
+  if (serverVersion && clientVersion !== 'unknown' && serverVersion !== clientVersion) {
+    return buildVersionMismatchError(serverVersion, clientVersion);
+  }
+
+  return null;
+}
+
 /**
  * Generic fetch wrapper with error handling
  */
@@ -141,6 +211,11 @@ async function apiFetch<T>(
         ...options.headers,
       },
     });
+
+    const compatibilityError = getCompatibilityError(response);
+    if (compatibilityError) {
+      return { error: compatibilityError };
+    }
 
     const contentType = response.headers.get('content-type') || '';
     let data: any = null;

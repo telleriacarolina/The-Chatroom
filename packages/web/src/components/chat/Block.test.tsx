@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { buildApiUrl, resolveApiBaseUrl } from '../../lib/api';
+import { buildApiUrl, getClientReleaseId, getCompatibilityError, normalizeReleaseId, resolveApiBaseUrl } from '../../lib/api';
+import { cleanupSocket, getSocket, restoreStoredAuthToken } from '../../lib/socket';
 
 const ORIGINAL_ENV = { ...process.env };
 const ORIGINAL_WINDOW = (globalThis as { window?: Window }).window;
@@ -99,5 +100,72 @@ describe('API URL resolution', () => {
     expect(() => buildApiUrl('not-a-valid-url', '/api/auth/csrf')).toThrow(
       'Invalid API base URL configuration.'
     );
+  });
+
+  it('normalizes blank or null release IDs and keeps API version distinct', () => {
+    expect(normalizeReleaseId('   ')).toBeNull();
+    expect(normalizeReleaseId('null')).toBeNull();
+    expect(normalizeReleaseId('release-123')).toBe('release-123');
+    expect(getClientReleaseId()).toBeNull();
+  });
+
+  it('classifies release mismatch separately from API version mismatch', () => {
+    const response = new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        'x-chatroom-release-id': 'release-a',
+        'x-chatroom-api-version': '2.0.0',
+      },
+    });
+
+    process.env.NEXT_PUBLIC_APP_RELEASE_ID = 'release-b';
+    process.env.NEXT_PUBLIC_APP_VERSION = '1.0.0';
+
+    const mismatch = getCompatibilityError(response);
+    expect(mismatch).toContain('Deployment release mismatch detected');
+    expect(mismatch).not.toContain('API version mismatch detected');
+  });
+
+  it('treats missing release IDs as incomplete identity instead of compatible', () => {
+    const response = new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: {
+        'x-chatroom-release-id': 'release-a',
+      },
+    });
+
+    delete process.env.NEXT_PUBLIC_APP_RELEASE_ID;
+    delete process.env.APP_RELEASE_ID;
+    delete process.env.VERCEL_GIT_COMMIT_SHA;
+    delete process.env.RENDER_GIT_COMMIT;
+
+    const mismatch = getCompatibilityError(response);
+    expect(mismatch).toContain('Deployment identity is incomplete');
+  });
+
+  it('restores stored auth before connecting the socket', () => {
+    setMockWindow('localhost');
+    localStorage.setItem('guestToken', 'stored-token');
+
+    const restored = restoreStoredAuthToken();
+    const socket = getSocket();
+
+    expect(restored).toBe('stored-token');
+    expect(socket?.auth).toMatchObject({ token: 'stored-token' });
+
+    cleanupSocket();
+    localStorage.clear();
+  });
+
+  it('preserves the stored token across socket auth restoration', () => {
+    setMockWindow('localhost');
+    localStorage.setItem('guestToken', 'persisted-token');
+    const restored = restoreStoredAuthToken();
+
+    expect(restored).toBe('persisted-token');
+    expect(getSocket()?.auth).toMatchObject({ token: 'persisted-token' });
+
+    cleanupSocket();
+    localStorage.clear();
   });
 });
