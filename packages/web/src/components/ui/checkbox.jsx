@@ -1,3 +1,5 @@
+import React from "react";
+
 export function Checkbox({ checked, onCheckedChange, id }) {
   return (
     <input

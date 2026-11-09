@@ -47,6 +47,14 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function toExitCode(code, signal) {
+  if (typeof code === 'number') return code;
+  if (signal === 'SIGINT') return 130;
+  if (signal === 'SIGTERM') return 143;
+  if (signal === 'SIGKILL') return 137;
+  return null;
+}
+
 function makeTempFile(name) {
   return path.join(
     fs.mkdtempSync(path.join(os.tmpdir(), 'chatroom-startup-test-')),
@@ -82,27 +90,35 @@ async function runManagedProcess({ serviceCommands, expectedExitCode, signalAfte
     }, signalAfterMs);
   }
 
+  let exitPayload = null;
+  const exitPromise = new Promise((resolve) => {
+    child.on('exit', (code, signal) => {
+      exitPayload = { code, signal };
+      resolve({ code, signal, timedOut: false });
+    });
+  });
+
   const exitResult = await Promise.race([
-    new Promise((resolve) => {
-      child.on('exit', (code, signal) => resolve({ code, signal, timedOut: false }));
-    }),
+    exitPromise,
     delay(timeoutMs).then(() => ({ code: null, signal: null, timedOut: true }))
   ]);
 
   if (exitResult.timedOut) {
     child.kill('SIGTERM');
-    await Promise.race([
-      new Promise((resolve) => child.on('exit', resolve)),
-      delay(3000)
-    ]);
+    const postTimeoutResult = await Promise.race([exitPromise, delay(3000).then(() => null)]);
+    if (!postTimeoutResult) {
+      failures.push('Managed process did not exit after timeout termination signal.');
+    }
   }
 
-  const observedExitCode = exitResult.code !== null ? exitResult.code : 143;
-  if (observedExitCode !== expectedExitCode) {
+  const observedExitCode = toExitCode(exitPayload?.code, exitPayload?.signal);
+  if (observedExitCode === null) {
+    failures.push(`Unable to determine managed process exit code. Output: ${combinedOutput.trim()}`);
+  } else if (observedExitCode !== expectedExitCode) {
     failures.push(`Expected exit code ${expectedExitCode}, got ${observedExitCode}. Output: ${combinedOutput.trim()}`);
   }
 
-  await delay(400);
+  await delay(500);
   const pidEntries = fs.existsSync(pidFile)
     ? fs.readFileSync(pidFile, 'utf8')
       .split('\n')

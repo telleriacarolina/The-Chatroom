@@ -121,11 +121,19 @@ async function shutdown(code) {
 }
 
 function spawnService(service) {
-  const child = spawn(service.command, service.args, {
+  const isWindows = process.platform === 'win32';
+  const spawnOptions = {
     stdio: 'inherit',
     env: process.env,
-    detached: process.platform !== 'win32'
-  });
+    detached: !isWindows,
+    shell: isWindows
+  };
+
+  const command = isWindows
+    ? [service.command, ...service.args].join(' ')
+    : service.command;
+  const args = isWindows ? [] : service.args;
+  const child = spawn(command, args, spawnOptions);
 
   const childRef = {
     name: service.name,
