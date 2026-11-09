@@ -8,6 +8,7 @@ const SOCKET_EVENTS = {
   },
   SERVER: {
     CHAT_MESSAGE: 'chat_message',
+    ROOM_JOINED: 'room_joined',
     USER_JOINED: 'user_joined',
     USER_LEFT: 'user_left',
     USER_TYPING: 'user_typing',

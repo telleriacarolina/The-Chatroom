@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import ConnectionStatus from "@/components/ConnectionStatus";
+import { createGuestSession } from "@/lib/api";
+import { setAuthToken } from "@/lib/socket";
 import { Crown, Eye, UserCircle, Users, MessageSquare, ChevronRight, ChevronLeft, Clock, DollarSign, ShoppingCart, Zap, Package, Video, Calendar, LogIn, UserPlus, Loader2 } from "lucide-react";
 
 interface BlockProps {
@@ -25,51 +28,131 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
 
   const existingUsernames = ["Sarah M", "John D", "Carlos R", "Maria L", "Guest_1234", "Guest_5678"];
 
+  const decodeJwtPayload = (token: string | null): Record<string, unknown> | null => {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    try {
+      const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+      const decoded = atob(padded);
+      return JSON.parse(decoded) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
+  };
+
+  const isJwtExpired = (token: string | null): boolean => {
+    const payload = decodeJwtPayload(token);
+    if (!payload || typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+      return true;
+    }
+
+    return payload.exp * 1000 <= Date.now();
+  };
+
+  // (removed unused isTempSessionExpired helper; JWT `exp` governs guest session validity)
+
+  const clearGuestAuthState = () => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem("guestToken");
+    localStorage.removeItem("guestAccessToken");
+    localStorage.removeItem("guestTempSessionToken");
+    localStorage.removeItem("guestSessionExpiresAt");
+    localStorage.removeItem("guestUsername");
+    setAuthToken(null);
+  };
+
+  const setGuestToken = (token: string | null) => {
+    if (typeof window === "undefined") return;
+
+    if (token) {
+      localStorage.setItem("guestToken", token);
+      const storedAccessToken = localStorage.getItem("guestAccessToken");
+      const isExplicitAccessToken = storedAccessToken === token || (token.includes('.') && token.split('.').length === 3);
+
+      if (isExplicitAccessToken) {
+        localStorage.setItem("guestAccessToken", token);
+        setAuthToken(token);
+      } else {
+        localStorage.setItem("guestTempSessionToken", token);
+        setAuthToken(null);
+      }
+    } else {
+      clearGuestAuthState();
+    }
+  };
+
+  const getValidGuestToken = () => {
+    if (typeof window === "undefined") return null;
+
+    const accessToken = localStorage.getItem("guestAccessToken");
+    const tempToken = localStorage.getItem("guestTempSessionToken");
+
+    if (accessToken && !isJwtExpired(accessToken)) {
+      return accessToken;
+    }
+
+    if (accessToken || tempToken) {
+      clearGuestAuthState();
+    }
+
+    return null;
+  };
+
+  const persistGuestSession = (guestSession: {
+    accessToken?: string | null;
+    tempSessionToken?: string | null;
+    expiresAt?: string | Date | null;
+    username?: string | null;
+  }) => {
+    if (typeof window === "undefined") return;
+
+    const accessToken = guestSession.accessToken ?? localStorage.getItem("guestAccessToken");
+    const tempSessionToken = guestSession.tempSessionToken ?? localStorage.getItem("guestTempSessionToken");
+    const nextExpiresAt = guestSession.expiresAt ? new Date(guestSession.expiresAt).toISOString() : localStorage.getItem("guestSessionExpiresAt");
+
+    if (accessToken) {
+      localStorage.setItem("guestAccessToken", accessToken);
+    } else {
+      localStorage.removeItem("guestAccessToken");
+    }
+
+    if (tempSessionToken) {
+      localStorage.setItem("guestTempSessionToken", tempSessionToken);
+    } else {
+      localStorage.removeItem("guestTempSessionToken");
+    }
+
+    if (nextExpiresAt) {
+      localStorage.setItem("guestSessionExpiresAt", nextExpiresAt);
+    } else {
+      localStorage.removeItem("guestSessionExpiresAt");
+    }
+
+    if (guestSession.username) {
+      localStorage.setItem("guestUsername", guestSession.username);
+    } else {
+      localStorage.removeItem("guestUsername");
+    }
+  };
+
   // Restore session from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUsername = localStorage.getItem('guestUsername');
-      const storedToken = localStorage.getItem('guestToken');
-      
-      if (storedUsername && storedToken) {
+      const restoredToken = getValidGuestToken();
+
+      if (storedUsername && restoredToken) {
         setTempUsername(storedUsername);
-        setGuestToken(storedToken);
+        setGuestToken(restoredToken);
+      } else if (storedUsername) {
+        localStorage.removeItem('guestUsername');
+        clearGuestAuthState();
       }
     }
   }, []);
-
-  // Listen for real-time lounge counts
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleLoungeCounts = (counts: Record<string, number>) => {
-      setLoungeCounts(counts);
-    };
-
-    const handleUserCount = ({ loungeId, count }: { loungeId: string; count: number }) => {
-      setLoungeCounts(prev => ({ ...prev, [loungeId]: count }));
-    };
-
-    socket.on('lounge counts', handleLoungeCounts);
-    socket.on('user count', handleUserCount);
-
-    return () => {
-      socket.off('lounge counts', handleLoungeCounts);
-      socket.off('user count', handleUserCount);
-    };
-  }, [socket]);
-
-  // Request initial lounge counts when connected
-  useEffect(() => {
-    if (!socket || !isConnected) return;
-    requestLoungeCounts();
-  }, [socket, isConnected]);
-
-  // Language categories with All Users Lounge + Country-specific lounges
-  // Member counts will be updated from Socket.IO real-time data
-  const getLoungeMemberCount = (loungeId: string, defaultCount: number): number => {
-    return loungeCounts[loungeId] ?? defaultCount;
-  };
 
   const languageCategories = {
     english: {
@@ -194,18 +277,23 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call to /api/auth/guest
-      // const response = await fetch('/api/auth/guest', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ username: trimmedUsername })
-      // });
-      // if (!response.ok) throw new Error('Failed to create guest session');
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setTempUsername(username);
+      const response = await createGuestSession("PLUS_18");
+      const accessToken = response.data?.accessToken ?? null;
+      const tempSessionToken = response.data?.tempSessionToken ?? null;
+      const socketToken = accessToken ?? tempSessionToken;
+      if (response.error || !socketToken) {
+        throw new Error(response.error || "Guest session token was not returned");
+      }
+
+      const serverUsername = response.data?.username ?? trimmedUsername;
+      persistGuestSession({
+        accessToken,
+        tempSessionToken,
+        expiresAt: response.data?.expiresAt ?? null,
+        username: serverUsername,
+      });
+      setGuestToken(accessToken ?? tempSessionToken ?? null);
+      setTempUsername(serverUsername);
       setUsername("");
     } catch (err) {
       setError("Failed to create guest session. Please try again.");
@@ -294,7 +382,13 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => setTempUsername("")}
+            onClick={() => {
+              setTempUsername("");
+              setSelectedLanguage(null);
+              setSelectedLounge(null);
+              localStorage.removeItem("guestUsername");
+              setGuestToken(null);
+            }}
           >
             Change Username
           </Button>
@@ -496,6 +590,10 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
           size="sm"
           onClick={() => {
             setTempUsername("");
+            setSelectedLanguage(null);
+            setSelectedLounge(null);
+            localStorage.removeItem("guestUsername");
+            setGuestToken(null);
           }}
         >
           Change Username

@@ -16,9 +16,9 @@
   "baseUrl": ".",
   "paths": {
     "@/*": ["./*"],
-    "@/components/*": ["components/*"],
-    "@/lib/*": ["lib/*"],
-    "@/utils/*": ["utils/*"]
+    "@/components/*": ["./components/*"],
+    "@/lib/*": ["./lib/*"],
+    "@/utils/*": ["./utils/*"]
   },
   "plugins": [
     { "name": "next" }

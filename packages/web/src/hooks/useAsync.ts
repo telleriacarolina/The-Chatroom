@@ -124,14 +124,19 @@ export function useAsync<T = any>(
     }
   }, [asyncFunction, isLoading]);
 
-  // Execute immediately if requested
-  // We intentionally omit execute from deps to avoid infinite loops
-  // The execute function is stable due to useCallback with proper deps
+  const executeRef = useRef(execute);
+
+  useEffect(() => {
+    executeRef.current = execute;
+  }, [execute]);
+
+  // Execute immediately if requested.
+  // Use a ref to call the latest execute implementation without re-running
+  // this effect whenever execute identity changes.
   useEffect(() => {
     if (options.immediate) {
-      execute();
+      executeRef.current();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.immediate]); // Only re-run if immediate option changes
 
   const reset = useCallback(() => {

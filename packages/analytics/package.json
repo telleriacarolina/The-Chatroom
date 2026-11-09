@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "node ../../scripts/run-workspace-jest.js",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

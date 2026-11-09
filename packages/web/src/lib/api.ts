@@ -30,7 +30,7 @@ function normalizeApiBase(rawValue?: string): string | null {
 
   try {
     const parsed = new URL(trimmed);
-    const pathname = stripTrailingSlash(parsed.pathname);
+    const pathname = stripTrailingSlash(parsed.pathname).replace(/\/api$/, '');
     const normalizedPath = pathname && pathname !== '/' ? pathname : '';
     return `${parsed.origin}${normalizedPath}`;
   } catch {

@@ -1,17 +1,32 @@
 const jwt = require('jsonwebtoken');
 
-// Validate secrets are provided in production
+const configuredAccessSecret = process.env.ACCESS_TOKEN_SECRET;
+const configuredRefreshSecret = process.env.REFRESH_TOKEN_SECRET;
+
 if (process.env.NODE_ENV === 'production') {
-  if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
+  if (!configuredAccessSecret || configuredAccessSecret === 'dev_access_secret' || !configuredRefreshSecret || configuredRefreshSecret === 'dev_refresh_secret') {
     throw new Error('JWT secrets must be provided in production environment');
   }
 }
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || 'dev_refresh_secret';
+const ACCESS_SECRET = configuredAccessSecret || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const REFRESH_SECRET = configuredRefreshSecret || (process.env.NODE_ENV === 'production' ? undefined : 'dev_refresh_secret');
 
-function signAccess(payload) {
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });
+if (!ACCESS_SECRET || !REFRESH_SECRET) {
+  throw new Error('JWT secrets must be configured');
+}
+
+const GUEST_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+function signAccess(payload, options = {}) {
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m', ...options });
+}
+
+function signGuestAccess(payload, options = {}) {
+  const ttlMs = Number(options.ttlMs ?? GUEST_SESSION_TTL_MS);
+  const expiresInSeconds = Math.max(1, Math.ceil(ttlMs / 1000));
+  const { ttlMs: _ttlMs, ...jwtOptions } = options;
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: expiresInSeconds, ...jwtOptions });
 }
 
 function signRefresh(payload) {
@@ -26,4 +41,4 @@ function verifyRefresh(token) {
   return jwt.verify(token, REFRESH_SECRET);
 }
 
-module.exports = { signAccess, signRefresh, verifyAccess, verifyRefresh };
+module.exports = { signAccess, signGuestAccess, signRefresh, verifyAccess, verifyRefresh, GUEST_SESSION_TTL_MS };

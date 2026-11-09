@@ -3,9 +3,47 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../utils/prisma');
 const logger = require('../utils/logger');
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || process.env.ACCESS_TOKEN_SECRET === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
 
-function authenticateSocket(socket, next) {
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const JWT_TOKEN_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured');
+}
+
+async function validateGuestSessionForIdentity(userId, tempSessionId) {
+  if (!userId || !tempSessionId) return null;
+
+  const tempSession = await prisma.tempSession.findUnique({
+    where: { id: tempSessionId },
+    select: { id: true, userId: true, temporaryUsername: true, expiresAt: true }
+  });
+
+  if (!tempSession || !tempSession.userId) return null;
+  if (tempSession.userId !== userId) return null;
+  if (tempSession.expiresAt && new Date(tempSession.expiresAt).getTime() <= Date.now()) return null;
+
+  return tempSession;
+}
+
+async function validateTempSessionCredential(token) {
+  if (!token || typeof token !== 'string') return null;
+
+  const tempSession = await prisma.tempSession.findUnique({
+    where: { sessionToken: token },
+    select: { id: true, userId: true, temporaryUsername: true, expiresAt: true }
+  });
+
+  if (!tempSession || !tempSession.userId) return null;
+  if (tempSession.expiresAt && new Date(tempSession.expiresAt).getTime() <= Date.now()) return null;
+
+  return tempSession;
+}
+
+async function authenticateSocket(socket, next) {
   try {
     const authToken = socket.handshake?.auth?.token;
     const headerToken = socket.handshake?.headers?.authorization?.startsWith('Bearer ')
@@ -17,12 +55,39 @@ function authenticateSocket(socket, next) {
       return next(new Error('Authentication token required'));
     }
 
-    const payload = jwt.verify(token, ACCESS_SECRET);
-    if (!payload?.userId) {
+    try {
+      const payload = jwt.verify(token, ACCESS_SECRET);
+      if (payload?.userId) {
+        const tempSessionId = payload.tempSessionId || null;
+        const validatedGuestSession = tempSessionId ? await validateGuestSessionForIdentity(payload.userId, tempSessionId) : null;
+
+        if (payload.guest === true || payload.guestId || tempSessionId) {
+          if (!validatedGuestSession) {
+            return next(new Error('Guest session invalid or expired'));
+          }
+        }
+
+        socket.userId = payload.userId;
+        socket.tempSessionId = validatedGuestSession?.id ?? null;
+        socket.tempSessionUsername = validatedGuestSession?.temporaryUsername ?? null;
+        return next();
+      }
+    } catch (error) {
+      // Invalid JWTs are rejected before temp-session fallback checks.
+    }
+
+    if (JWT_TOKEN_PATTERN.test(token)) {
       return next(new Error('Invalid or expired token'));
     }
 
-    socket.userId = payload.userId;
+    const guestTempSession = await validateTempSessionCredential(token);
+    if (!guestTempSession) {
+      return next(new Error('Invalid or expired token'));
+    }
+
+    socket.userId = guestTempSession.userId;
+    socket.tempSessionId = guestTempSession.id;
+    socket.tempSessionUsername = guestTempSession.temporaryUsername;
     return next();
   } catch (error) {
     logger.error('Socket authentication error:', error);
@@ -141,8 +206,8 @@ function initializeSocketIO(server) {
           socket.emit('error', { message: 'loungeId and languageRoomId are required' });
           return;
         }
-        const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : !!messageText;
-        const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : !!attachmentUrl;
+        const hasText = typeof messageText === 'string' && messageText.trim().length > 0;
+        const hasAttachment = typeof attachmentUrl === 'string' && attachmentUrl.trim().length > 0;
         if (!hasText && !hasAttachment) {
           socket.emit('error', { message: 'Message text or an attachment is required' });
           return;

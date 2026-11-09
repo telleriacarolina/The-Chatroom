@@ -6,7 +6,11 @@ const jwt = require('jsonwebtoken');
 const { io: createClient } = require('socket.io-client');
 
 const ROOT = path.resolve(__dirname, '..');
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured before running the socket regression checks');
+}
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -68,6 +72,8 @@ function createFakePrismaState() {
     { id: 'room-inactive', loungeId: 'lounge-1', isActive: false }
   ];
 
+  const tempSessions = new Map();
+
   const users = {
     alice: { id: 'alice', permanentUsername: 'alice', preferredName: 'Alice', avatarUrl: null, accountStatus: 'ACTIVE', isBanned: false, banExpiresAt: null, isMuted: false, muteExpiresAt: null },
     bob: { id: 'bob', permanentUsername: 'bob', preferredName: 'Bob', avatarUrl: null, accountStatus: 'ACTIVE', isBanned: false, banExpiresAt: null, isMuted: false, muteExpiresAt: null },
@@ -82,11 +88,30 @@ function createFakePrismaState() {
   const updates = [];
 
   return {
-    state: { rooms, users, messages, updates },
+    state: { rooms, users, messages, updates, tempSessions },
     prisma: {
       languageRoom: {
         async findFirst({ where }) {
           return rooms.find(r => r.id === where.id && r.loungeId === where.loungeId && r.isActive === where.isActive) || null;
+        }
+      },
+      tempSession: {
+        async findUnique({ where }) {
+          if (where?.id) {
+            for (const session of tempSessions.values()) {
+              if (session.id === where.id) return { ...session };
+            }
+            return null;
+          }
+          if (where?.sessionToken) {
+            const session = tempSessions.get(where.sessionToken);
+            return session ? { ...session } : null;
+          }
+          return null;
+        },
+        async create({ data }) {
+          tempSessions.set(data.sessionToken, { ...data, id: `temp-${tempSessions.size + 1}` });
+          return { ...tempSessions.get(data.sessionToken) };
         }
       },
       user: {
@@ -179,12 +204,29 @@ async function runSuite(label, starter) {
   const closeSocket = socket => {
     try {
       socket.close();
-    } catch {}
+    } catch (error) {
+      // Socket teardown is best-effort during test cleanup.
+    }
   };
 
   try {
     console.log(`\n[${label}] Running regression checks...`);
     await expectConnectError(target.url);
+
+    const expiredGuestToken = jwt.sign({ userId: 'guest-expired', guestId: 'guest-expired', username: 'guest_expired' }, ACCESS_SECRET, { expiresIn: '-1h' });
+    const guestSocket = createClient(target.url, {
+      auth: { token: expiredGuestToken },
+      reconnection: false,
+      timeout: 3000,
+      transports: ['websocket']
+    });
+    const guestError = await waitForEvent(guestSocket, 'connect_error');
+    assert.ok(
+      String(guestError?.message || '').toLowerCase().includes('auth') ||
+      String(guestError?.message || '').toLowerCase().includes('expired'),
+      'Expected expired JWT to fail socket auth'
+    );
+    guestSocket.close();
 
     const bob = await connectAuthenticated(target.url, 'bob');
     const carol = await connectAuthenticated(target.url, 'carol');

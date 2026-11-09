@@ -1,9 +1,13 @@
 const { Server } = require('socket.io');
-const { prisma } = require('../lib/prisma');
+const prisma = require('../lib/prisma');
 const { authenticateSocket } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { SOCKET_EVENTS, SOCKET_ERROR_CODES } = require('@chatroom/shared/socket-protocol');
 const { isRoomMembershipValid, isUserRestrictedFromMessaging } = require('./socketGuards');
+
+if (process.env.NODE_ENV === 'production' && (!process.env.ACCESS_TOKEN_SECRET || process.env.ACCESS_TOKEN_SECRET === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
 
 const VALID_MESSAGE_TYPES = new Set(['TEXT', 'IMAGE', 'VIDEO', 'LINK', 'SYSTEM']);
 
@@ -92,8 +96,8 @@ function initializeSocketIO(server) {
           socket.emit('error', { message: 'loungeId and languageRoomId are required' });
           return;
         }
-        const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : !!messageText;
-        const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : !!attachmentUrl;
+        const hasText = typeof messageText === 'string' && messageText.trim().length > 0;
+        const hasAttachment = typeof attachmentUrl === 'string' && attachmentUrl.trim().length > 0;
         if (!hasText && !hasAttachment) {
           emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_MESSAGE, 'Message text or an attachment is required');
           return;

@@ -12,7 +12,16 @@ if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
 
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'dev_access_secret';
+const configuredAccessSecret = process.env.ACCESS_TOKEN_SECRET;
+if (process.env.NODE_ENV === 'production' && (!configuredAccessSecret || configuredAccessSecret === 'dev_access_secret')) {
+  throw new Error('ACCESS_TOKEN_SECRET must be set in production');
+}
+const ACCESS_SECRET = configuredAccessSecret || (process.env.NODE_ENV === 'production' ? undefined : 'dev_access_secret');
+const JWT_TOKEN_PATTERN = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+
+if (!ACCESS_SECRET) {
+  throw new Error('ACCESS_TOKEN_SECRET must be configured');
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -25,10 +34,39 @@ const io = new Server(server, {
 
 app.use(express.static(path.join(__dirname, '../../public')));
 
-io.use((socket, next) => {
+async function validateGuestSessionForIdentity(userId, tempSessionId) {
+  if (!userId || !tempSessionId) return null;
+
+  const tempSession = await prisma.tempSession.findUnique({
+    where: { id: tempSessionId },
+    select: { id: true, userId: true, temporaryUsername: true, expiresAt: true }
+  });
+
+  if (!tempSession || !tempSession.userId) return null;
+  if (tempSession.userId !== userId) return null;
+  if (tempSession.expiresAt && new Date(tempSession.expiresAt).getTime() <= Date.now()) return null;
+
+  return tempSession;
+}
+
+async function validateTempSessionCredential(token) {
+  if (!token || typeof token !== 'string') return null;
+
+  const tempSession = await prisma.tempSession.findUnique({
+    where: { sessionToken: token },
+    select: { id: true, userId: true, temporaryUsername: true, expiresAt: true }
+  });
+
+  if (!tempSession || !tempSession.userId) return null;
+  if (tempSession.expiresAt && new Date(tempSession.expiresAt).getTime() <= Date.now()) return null;
+
+  return tempSession;
+}
+
+io.use(async (socket, next) => {
   try {
     const authToken = socket.handshake?.auth?.token;
-    const headerToken = socket.handshake?.headers?.authorization?.startsWith('Bearer ')
+    const headerToken = typeof socket.handshake?.headers?.authorization === 'string' && socket.handshake.headers.authorization.startsWith('Bearer ')
       ? socket.handshake.headers.authorization.slice(7)
       : null;
     const token = authToken || headerToken;
@@ -37,12 +75,39 @@ io.use((socket, next) => {
       return next(new Error('Authentication token required'));
     }
 
-    const payload = jwt.verify(token, ACCESS_SECRET);
-    if (!payload?.userId) {
+    try {
+      const payload = jwt.verify(token, ACCESS_SECRET);
+      if (payload?.userId) {
+        const tempSessionId = payload.tempSessionId || null;
+        const validatedGuestSession = tempSessionId ? await validateGuestSessionForIdentity(payload.userId, tempSessionId) : null;
+
+        if (payload.guest === true || payload.guestId || tempSessionId) {
+          if (!validatedGuestSession) {
+            return next(new Error('Guest session invalid or expired'));
+          }
+        }
+
+        socket.userId = payload.userId;
+        socket.tempSessionId = validatedGuestSession?.id ?? null;
+        socket.tempSessionUsername = validatedGuestSession?.temporaryUsername ?? null;
+        return next();
+      }
+    } catch (error) {
+      // Invalid JWTs are rejected before temp-session fallback checks. Only a valid temp-session token may continue.
+    }
+
+    if (JWT_TOKEN_PATTERN.test(token)) {
       return next(new Error('Invalid or expired token'));
     }
 
-    socket.userId = payload.userId;
+    const guestTempSession = await validateTempSessionCredential(token);
+    if (!guestTempSession) {
+      return next(new Error('Invalid or expired token'));
+    }
+
+    socket.userId = guestTempSession.userId;
+    socket.tempSessionId = guestTempSession.id;
+    socket.tempSessionUsername = guestTempSession.temporaryUsername;
     return next();
   } catch (error) {
     logger.error('Socket authentication error:', error);
@@ -111,8 +176,10 @@ io.on('connection', (socket) => {
         socket.emit('error', { message: 'loungeId and languageRoomId are required' });
         return;
       }
-      if ((!messageText || !messageText.trim()) && !attachmentUrl) {
-        socket.emit('error', { message: 'Message content is required' });
+      const hasText = typeof messageText === 'string' && messageText.trim().length > 0;
+      const hasAttachment = typeof attachmentUrl === 'string' && attachmentUrl.trim().length > 0;
+      if (!hasText && !hasAttachment) {
+        socket.emit('error', { message: 'Message text or an attachment is required' });
         return;
       }
       if (socket.data.currentRoom !== languageRoomId || !socket.rooms.has(languageRoomId)) {
@@ -170,15 +237,17 @@ io.on('connection', (socket) => {
       }
 
       const safeMessageType = ['TEXT', 'IMAGE', 'VIDEO', 'LINK', 'SYSTEM'].includes(messageType) ? messageType : 'TEXT';
+      const normalizedMessageText = typeof messageText === 'string' ? messageText.trim() : '';
+      const normalizedAttachmentUrl = typeof attachmentUrl === 'string' ? attachmentUrl.trim() : attachmentUrl;
       const message = await prisma.chatMessage.create({
         data: {
           loungeId,
           languageRoomId,
           userId: socket.userId,
           displayUsername: user.permanentUsername || user.preferredName || 'Anonymous',
-          messageText: messageText?.trim() || '',
+          messageText: normalizedMessageText,
           messageType: safeMessageType,
-          attachmentUrl,
+          attachmentUrl: normalizedAttachmentUrl || null,
           moderationStatus: 'APPROVED'
         },
         include: {
