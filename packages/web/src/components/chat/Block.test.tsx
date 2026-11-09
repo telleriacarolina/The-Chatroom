@@ -6,7 +6,6 @@ const ORIGINAL_WINDOW = (globalThis as { window?: Window }).window;
 
 function clearApiEnv(): void {
   delete process.env.NEXT_PUBLIC_API_URL;
-  delete process.env.API_INTERNAL_URL;
   delete process.env.VERCEL_URL;
 }
 
@@ -57,14 +56,7 @@ describe('API URL resolution', () => {
     expect(resolveApiBaseUrl()).toBe('http://localhost:3001');
   });
 
-  it('uses API_INTERNAL_URL on server when configured', () => {
-    clearApiEnv();
-    clearWindow();
-    process.env.API_INTERNAL_URL = 'https://internal-api.example.com';
-    expect(resolveApiBaseUrl()).toBe('https://internal-api.example.com');
-  });
-
-  it('falls back to VERCEL_URL on server when API_INTERNAL_URL is missing', () => {
+  it('falls back to VERCEL_URL on server when NEXT_PUBLIC_API_URL is missing', () => {
     clearApiEnv();
     clearWindow();
     process.env.VERCEL_URL = 'chatroom-preview.vercel.app';

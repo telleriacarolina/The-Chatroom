@@ -7,6 +7,38 @@ const { isRoomMembershipValid, isUserRestrictedFromMessaging } = require('./sock
 
 const VALID_MESSAGE_TYPES = new Set(['TEXT', 'IMAGE', 'VIDEO', 'LINK', 'SYSTEM']);
 
+async function configureRedisAdapter(io) {
+  const redisUrl =
+    process.env.UPSTASH_REDIS_URL ||
+    process.env.REDIS_URL ||
+    process.env.KV_URL ||
+    '';
+
+  if (!redisUrl) {
+    logger.info('Socket.IO Redis adapter disabled: no Redis URL configured');
+    return;
+  }
+
+  try {
+    const { createAdapter } = require('@socket.io/redis-adapter');
+    const { createClient } = require('redis');
+
+    const pubClient = createClient({ url: redisUrl });
+    const subClient = pubClient.duplicate();
+
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+
+    io.on('close', async () => {
+      await Promise.allSettled([pubClient.quit(), subClient.quit()]);
+    });
+
+    logger.info('Socket.IO Redis adapter enabled');
+  } catch (error) {
+    logger.error('Failed to initialize Socket.IO Redis adapter', error);
+  }
+}
+
 function emitSocketError(socket, code, message) {
   socket.emit(SOCKET_EVENTS.SERVER.ERROR, { code, message });
 }
@@ -21,6 +53,9 @@ function initializeSocketIO(server) {
 
   // Use authentication middleware
   io.use(authenticateSocket);
+  configureRedisAdapter(io).catch((error) => {
+    logger.error('Socket.IO adapter setup failed', error);
+  });
 
   io.on('connection', (socket) => {
     socket.data.memberships = new Map();
