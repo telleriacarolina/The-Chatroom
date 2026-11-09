@@ -294,7 +294,8 @@ export default function Block({ onShowLogin, onShowSignup }: BlockProps) {
       });
       setGuestToken(accessToken ?? tempSessionToken ?? null);
       setTempUsername(serverUsername);
-      setUsername("");    } catch (err) {
+      setUsername("");
+    } catch (err) {
       setError("Failed to create guest session. Please try again.");
     } finally {
       setIsLoading(false);
