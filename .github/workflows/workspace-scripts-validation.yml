@@ -1,0 +1,86 @@
+name: Workspace Scripts Validation
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - scripts/start-all.js
+      - scripts/test-startup.js
+      - scripts/test-startup.sh
+      - packages/api/package.json
+      - packages/socket/package.json
+      - README.md
+      - .gitignore
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  startup-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate startup orchestration and cleanup
+        run: npm run test:startup
+
+  validate-root-scripts:
+    runs-on: ubuntu-latest
+    needs: startup-matrix
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API workspace
+        run: npm run build:api
+
+      - name: Build Socket workspace
+        run: npm run build:socket
+
+      - name: Build Web workspace
+        run: npm run build:web
+
+      - name: Run web unit regressions
+        run: npm run test:unit -w @chatroom/web
+
+      - name: Verify root build succeeds with healthy workspaces
+        run: npm run build
+
+      - name: Verify root build fails when a required workspace build fails
+        env:
+          FORCE_WORKSPACE_BUILD_FAIL: socket
+        run: |
+          if npm run build; then
+            echo "Expected root build to fail when a required workspace build fails."
+            exit 1
+          fi
+
+      - name: Verify Prisma commands use canonical schema from root
+        run: |
+          npm run prisma:generate
+          npm run prisma:migrate -- --help

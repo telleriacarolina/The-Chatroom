@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@chatroom/shared": "*",
@@ -27,7 +28,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.0.0",
-    "@types/react": "19.2.7",
+    "@types/react": "^18.2.0",
     "@vitest/coverage-v8": "^4.0.17",
     "@vitest/ui": "^4.0.17",
     "autoprefixer": "^10.4.0",
