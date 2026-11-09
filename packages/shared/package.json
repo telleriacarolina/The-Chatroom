@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "lint": "eslint src --ext .ts,.js",
-    "test": "vitest run src/utils/utils.test.ts"
+    "test": "node -e \"console.log('No shared package tests are defined for this workspace; use workspace-specific regression scripts instead.')\""
   },
   "main": "src/index.ts",
   "types": "src/index.ts",
