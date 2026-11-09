@@ -97,14 +97,23 @@ function createFakePrismaState() {
       },
       tempSession: {
         async findUnique({ where }) {
-          const session = tempSessions.get(where.sessionToken);
-          if (!session) return null;
-          return { ...session };
+          if (where?.id) {
+            for (const session of tempSessions.values()) {
+              if (session.id === where.id) return { ...session };
+            }
+            return null;
+          }
+          if (where?.sessionToken) {
+            const session = tempSessions.get(where.sessionToken);
+            return session ? { ...session } : null;
+          }
+          return null;
         },
         async create({ data }) {
           tempSessions.set(data.sessionToken, { ...data, id: `temp-${tempSessions.size + 1}` });
           return { ...tempSessions.get(data.sessionToken) };
         }
+      }
       },
       user: {
         async findUnique({ where }) {
