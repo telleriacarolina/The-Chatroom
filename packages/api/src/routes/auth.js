@@ -8,18 +8,27 @@ const { generateCSRFToken } = require('../utils/security');
 const { authLimiter } = require('../middleware/rateLimiter');
 
 function setCookie(res, name, value, opts = {}) {
-  const options = { httpOnly: !!opts.httpOnly, path: '/', maxAge: opts.maxAge || 0 };
-  if (!options.httpOnly) {
-    res.cookie(name, value, { maxAge: options.maxAge });
-  } else {
-    res.cookie(name, value, { httpOnly: true, maxAge: options.maxAge });
-  }
+  const options = {
+    httpOnly: opts.httpOnly !== undefined ? !!opts.httpOnly : true,
+    path: opts.path || '/',
+    maxAge: opts.maxAge || 0,
+    secure: opts.secure !== undefined ? !!opts.secure : process.env.NODE_ENV === 'production',
+    sameSite: opts.sameSite || 'strict'
+  };
+
+  res.cookie(name, value, {
+    httpOnly: options.httpOnly,
+    secure: options.secure,
+    sameSite: options.sameSite,
+    path: options.path,
+    maxAge: options.maxAge
+  });
 }
 
 router.post('/csrf', (req, res) => {
   const token = generateCSRFToken();
   // double-submit: set cookie and return token
-  res.cookie('csrfToken', token, { maxAge: 24 * 60 * 60 * 1000 });
+  setCookie(res, 'csrfToken', token, { httpOnly: false, maxAge: 24 * 60 * 60 * 1000, sameSite: 'strict' });
   res.json({ csrfToken: token });
 });
 
