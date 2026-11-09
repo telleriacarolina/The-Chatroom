@@ -8,14 +8,10 @@
   ],
   "scripts": {
     "comment_1": "=== PRIMARY: Root-level development ===",
-    "dev:api": "nodemon api/server.js",
-    "dev:socket": "nodemon socket/socket-server.js",
-    "dev:web": "cd web && npm run dev",
-    "build:web": "npm run build -w @chatroom/web",
-    "dev": "node scripts/start-all.js --run",
     "dev:api": "npm run dev -w @chatroom/api",
     "dev:socket": "npm run dev -w @chatroom/socket",
     "dev:web": "npm run dev -w @chatroom/web",
+    "build:web": "npm run build -w @chatroom/web",
     "dev": "npm run dev:api & npm run dev:socket & npm run dev:web",
     "comment_2": "=== SECONDARY: Package workspaces (optional) ===",
     "pkgs:dev": "npm run dev --workspaces --if-present",
@@ -32,7 +28,6 @@
     "clean": "rm -rf node_modules packages/*/node_modules web/.next packages/*/.next packages/*/dist",
     "test": "npm test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "build:web": "npm run build -w @chatroom/web",
     "build": "npm run build -w @chatroom/api && npm run build -w @chatroom/socket && npm run build -w @chatroom/web"
   },
   "dependencies": {
@@ -71,6 +66,7 @@
     "@types/react-native": "^0.73.0",
     "install": "^0.13.0",
     "npm": "^11.7.0",
+    "supertest": "^7.3.1",
     "turbo": "^2.7.2",
     "typescript": "5.9.3"
   },

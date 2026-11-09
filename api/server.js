@@ -9,6 +9,7 @@ const { startBackgroundJobs } = require('./services/backgroundJobs');
 const { initializeSocketIO } = require('./services/socketio');
 const authRoutes = require('./routes/auth');
 const loungeRoutes = require('./routes/lounges');
+const marketplaceRoutes = require('./routes/marketplace');
 const messagesRoutes = require('./routes/messages');
 const logger = require('./utils/logger');
 
@@ -35,6 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/lounges', loungeRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 // Message-related endpoints (including Message History API).
 // Detailed endpoint specification, usage examples, error codes,
 // and performance notes are documented in docs/MESSAGE_HISTORY_API.md.
