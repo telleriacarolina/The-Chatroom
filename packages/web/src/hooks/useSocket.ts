@@ -50,10 +50,10 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
   // Initialize socket
   useEffect(() => {
     const socket = getSocket();
-    
+
     // Skip if SSR or socket not available
     if (!socket) return;
-    
+
     socketRef.current = socket;
 
     // Set up event listeners
@@ -91,7 +91,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
       socket.off('disconnect', handleDisconnect);
       socket.off('connect_error', handleConnectError);
     };
-  }, []);
+  }, [autoConnect]);
 
   const handleConnect = useCallback(() => {
     if (socketRef.current && !socketRef.current.connected) {

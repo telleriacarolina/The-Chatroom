@@ -204,7 +204,7 @@ export function requestLoungeCounts(): void {
 // Exports
 // ============================================================================
 
-export default {
+const socketClient = {
   getSocket,
   connect,
   setAuthToken,
@@ -219,3 +219,5 @@ export default {
   sendTyping,
   requestLoungeCounts,
 };
+
+export default socketClient;

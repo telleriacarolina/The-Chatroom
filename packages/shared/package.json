@@ -9,7 +9,10 @@
     "./types": "./src/types/index.ts",
     "./schemas": "./src/schemas/index.ts",
     "./utils": "./src/utils/index.ts",
-    "./socket-protocol": "./src/socketProtocol.js"
+    "./socket-protocol": {
+      "types": "./src/socketProtocol.ts",
+      "default": "./src/socketProtocol.js"
+    }
   },
   "dependencies": {},
   "devDependencies": {
