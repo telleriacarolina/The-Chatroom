@@ -113,7 +113,6 @@ function createFakePrismaState() {
           tempSessions.set(data.sessionToken, { ...data, id: `temp-${tempSessions.size + 1}` });
           return { ...tempSessions.get(data.sessionToken) };
         }
-      }
       },
       user: {
         async findUnique({ where }) {
