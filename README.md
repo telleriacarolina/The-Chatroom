@@ -303,7 +303,14 @@ PORT=3001
 SOCKET_PORT=3002
 FRONTEND_URL="http://localhost:3000"
 NODE_ENV="development"
+
+# Vercel AI Gateway (server-side only)
+AI_GATEWAY_API_KEY=""
 ```
+
+### Vercel AI Gateway credential
+
+If you enable AI model requests through Vercel AI Gateway in this project, configure `AI_GATEWAY_API_KEY` as a sensitive server-side credential. Set it in Vercel Project Settings as an Environment Variable for each environment you use (Development, Preview, and Production). For local development, store it in a gitignored `.env` file (loaded by the Node servers via `dotenv`) and, if needed for Next.js server-side code, `web/.env.local`; never commit real credentials or expose this key via `NEXT_PUBLIC_*` variables.
 
 ## NPM Scripts
 
