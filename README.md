@@ -56,16 +56,31 @@ The-Chatroom/
 
 ### ✅ Currently Implemented
 
+The current implementation is backed by the live Socket.IO server in [packages/api/src/services/socketio.js](packages/api/src/services/socketio.js), the moderation routes in [packages/api/src/routes/moderation.js](packages/api/src/routes/moderation.js), the RBAC check in [packages/api/src/middleware/rbac.js](packages/api/src/middleware/rbac.js), the audit utility in [packages/api/src/utils/audit.js](packages/api/src/utils/audit.js), and the runtime regression coverage in [scripts/socket-regression.js](scripts/socket-regression.js) and [scripts/validate-moderation.js](scripts/validate-moderation.js). Features in this section are marked as implemented only when they are exercised by the active runtime checks, not merely because a route or helper exists.
+
 - **Multi-tier Authentication**
   - ✅ Guest sessions with temporary usernames
   - ✅ Age verification (18+ check at entry)
   - ✅ JWT token structure (access & refresh tokens)
+  - ✅ Authenticated Socket.IO access with JWT validation
 
-- **Real-time Chat Foundation**
+- **Real-time Chat**
   - ✅ Language-based room structure (8 languages)
   - ✅ Country-specific lounges
-  - ✅ Socket.IO server setup
+  - ✅ Socket.IO server setup and authenticated connections
+  - ✅ Room join/leave flows with join/leave notifications
+  - ✅ Presence tracking for users in chat rooms
+  - ✅ Typing indicators for room participants
+  - ✅ Message broadcasting to room members
+  - ✅ Message persistence to the database with moderation metadata
   - ✅ UI for room selection and messaging
+
+- **Moderation**
+  - ✅ User reporting flow
+  - ✅ Moderation actions and enforcement (mute, ban, warning, removals)
+  - ✅ Audit logging for moderation events
+  - ✅ Content flagging and message/item removal support
+  - ✅ Moderator-only routes and role-based access controls
 
 - **Account Tiers UI**
   - ✅ Creator account features displayed
@@ -80,24 +95,11 @@ The-Chatroom/
   - 🚧 Session persistence to database
   - 🚧 Sign in / Sign up flows
 
-- **Real-time Chat**
-  - 🚧 Message storage to database
-  - 🚧 Message history/pagination
-  - 🚧 Online/offline presence tracking
-  - 🚧 Typing indicators
-  - 🚧 User list per lounge
-
 - **Marketplace**
   - 🚧 User-generated content uploads
   - 🚧 Content sales & payments
   - 🚧 Payment transaction management
   - 🚧 Creator marketplace dashboard
-
-- **Moderation**
-  - 🚧 User reporting system
-  - 🚧 Moderation actions & enforcement
-  - 🚧 Audit logs for moderation events
-  - 🚧 Content flagging/removal
 
 - **Verification**
   - 🚧 ID/document verification
@@ -200,7 +202,7 @@ API_INTERNAL_URL="http://localhost:3001"
 NEXT_PUBLIC_SOCKET_URL="http://localhost:3002"
 ```
 
-`API_INTERNAL_URL` is server-side only and should be configured in Vercel Project Settings (Development, Preview, and Production) for the web project so `/api/*` rewrites can reach the Express API deployment without exposing private endpoints to browser code.
+`API_INTERNAL_URL` and `SOCKET_INTERNAL_URL` are server-side only and should be configured in Vercel Project Settings (Development, Preview, and Production) for the web project so `/api/*` and `/socket.io/*` rewrites can reach the Express API and Socket.IO deployments without exposing private endpoints to browser code.
 
 ### 3. Set Up Database
 

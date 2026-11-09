@@ -92,8 +92,15 @@ function initializeSocketIO(server) {
           socket.emit('error', { message: 'loungeId and languageRoomId are required' });
           return;
         }
-        const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : !!messageText;
-        const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : !!attachmentUrl;
+        const invalidTextType = messageText !== undefined && messageText !== null && typeof messageText !== 'string';
+        const invalidAttachmentType = attachmentUrl !== undefined && attachmentUrl !== null && typeof attachmentUrl !== 'string';
+        const hasText = typeof messageText === 'string' ? messageText.trim().length > 0 : false;
+        const hasAttachment = typeof attachmentUrl === 'string' ? attachmentUrl.trim().length > 0 : false;
+
+        if (invalidTextType || invalidAttachmentType) {
+          emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_MESSAGE, 'Message text and attachment values must be strings');
+          return;
+        }
         if (!hasText && !hasAttachment) {
           emitSocketError(socket, SOCKET_ERROR_CODES.INVALID_MESSAGE, 'Message text or an attachment is required');
           return;
