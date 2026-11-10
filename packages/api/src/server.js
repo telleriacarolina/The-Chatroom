@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const helmet = require('helmet');
 
-const { startBackgroundJobs } = require('./services/backgroundJobs');
+
 const { initializeSocketIO } = require('./services/socketio');
 const authRoutes = require('./routes/auth');
 const chatroomRoutes = require('./routes/chatroom');
@@ -49,7 +49,6 @@ app.use((err, req, res, next) => {
 
 server.listen(PORT, () => {
   logger.info(`API server running on port ${PORT}`);
-  startBackgroundJobs();
 });
 
 module.exports = { app, server, io };
