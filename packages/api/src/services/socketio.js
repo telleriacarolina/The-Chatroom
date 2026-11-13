@@ -11,10 +11,36 @@ function emitSocketError(socket, code, message) {
   socket.emit(SOCKET_EVENTS.SERVER.ERROR, { code, message });
 }
 
+const trustedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+async function hasActiveSession(socket) {
+  if (!socket.sessionId || !socket.userId) return false;
+
+  const activeSession = await prisma.session.findFirst({
+    where: {
+      id: socket.sessionId,
+      userId: socket.userId,
+      isActive: true,
+      expiresAt: { gt: new Date() }
+    },
+    select: { id: true }
+  });
+
+  return !!activeSession;
+}
+
 function initializeSocketIO(server) {
   const io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      origin(origin, callback) {
+        if (!origin || trustedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Origin not allowed by CORS'));
+      },
       credentials: true
     }
   });
@@ -25,6 +51,35 @@ function initializeSocketIO(server) {
   io.on('connection', (socket) => {
     socket.data.memberships = new Map();
     logger.info(`User connected: ${socket.userId}`);
+
+    socket.use(async (packet, next) => {
+      try {
+        const validSession = await hasActiveSession(socket);
+        if (!validSession) {
+          socket.emit('error', { message: 'Session expired. Please sign in again.' });
+          socket.disconnect(true);
+          return next(new Error('Invalid or expired session'));
+        }
+        return next();
+      } catch (error) {
+        logger.error('Socket session revalidation error:', error);
+        socket.disconnect(true);
+        return next(new Error('Authentication failed'));
+      }
+    });
+
+    const revalidationInterval = setInterval(async () => {
+      try {
+        const validSession = await hasActiveSession(socket);
+        if (!validSession) {
+          socket.emit('error', { message: 'Session expired. Please sign in again.' });
+          socket.disconnect(true);
+        }
+      } catch (error) {
+        logger.error('Socket session interval check error:', error);
+        socket.disconnect(true);
+      }
+    }, 60 * 1000);
 
     // Join a language room
     socket.on(SOCKET_EVENTS.CLIENT.JOIN_ROOM, async ({ loungeId, languageRoomId }) => {
@@ -223,6 +278,10 @@ function initializeSocketIO(server) {
     // Handle disconnection
     socket.on('disconnect', () => {
       logger.info(`User disconnected: ${socket.userId}`);
+      clearInterval(revalidationInterval);
+      
+      if (socket.currentRoom) {
+        socket.to(socket.currentRoom).emit('user_left', {
 
       if (socket.data.currentRoom) {
         socket.to(socket.data.currentRoom).emit('user_left', {

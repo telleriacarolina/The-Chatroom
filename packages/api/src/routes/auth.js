@@ -1,26 +1,75 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { signAccess, signRefresh, verifyRefresh } = require('../lib/jwt');
 const { prisma } = require('../lib/prisma');
 const { encryptPhone } = require('../lib/crypto');
 const { generateCSRFToken } = require('../utils/security');
 const { authLimiter } = require('../middleware/rateLimiter');
+const csrfProtection = require('../middleware/csrf');
+
+const isProduction = process.env.NODE_ENV === 'production';
+const COOKIE_ENCRYPTION_SECRET = process.env.COOKIE_ENCRYPTION_SECRET || process.env.ACCESS_TOKEN_SECRET;
+if (!COOKIE_ENCRYPTION_SECRET || COOKIE_ENCRYPTION_SECRET.length < 32) {
+  throw new Error('COOKIE_ENCRYPTION_SECRET (or ACCESS_TOKEN_SECRET) must be set and at least 32 characters long');
+}
+const COOKIE_ENCRYPTION_KEY = crypto.createHash('sha256').update(String(COOKIE_ENCRYPTION_SECRET)).digest();
+
+function hashSessionToken(sessionToken) {
+  return crypto.createHash('sha256').update(sessionToken).digest('hex');
+}
+
+function encryptCookieValue(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', COOKIE_ENCRYPTION_KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(String(value), 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return Buffer.concat([iv, tag, encrypted]).toString('base64');
+}
+
+function decryptCookieValue(value) {
+  const payload = Buffer.from(String(value), 'base64');
+  const iv = payload.subarray(0, 12);
+  const tag = payload.subarray(12, 28);
+  const encrypted = payload.subarray(28);
+  const decipher = crypto.createDecipheriv('aes-256-gcm', COOKIE_ENCRYPTION_KEY, iv);
+  decipher.setAuthTag(tag);
+  return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
+}
+
+function getCookieOptions(opts = {}) {
+  const sameSite = isProduction ? 'none' : 'lax';
+  const secure = isProduction;
+  return {
+    path: '/',
+    maxAge: opts.maxAge || 0,
+    sameSite,
+    secure,
+    ...('httpOnly' in opts ? { httpOnly: !!opts.httpOnly } : {}),
+  };
+}
 
 function setCookie(res, name, value, opts = {}) {
-  const options = { httpOnly: !!opts.httpOnly, path: '/', maxAge: opts.maxAge || 0 };
-  if (!options.httpOnly) {
-    res.cookie(name, value, { maxAge: options.maxAge });
-  } else {
-    res.cookie(name, value, { httpOnly: true, maxAge: options.maxAge });
-  }
+  const sensitiveCookies = new Set(['accessToken', 'refreshToken']);
+  const cookieValue = sensitiveCookies.has(name) ? encryptCookieValue(value) : value;
+  res.cookie(name, cookieValue, getCookieOptions(opts));
+}
+
+function clearCookie(res, name, opts = {}) {
+  res.clearCookie(name, getCookieOptions(opts));
 }
 
 router.post('/csrf', (req, res) => {
   const token = generateCSRFToken();
   // double-submit: set cookie and return token
-  res.cookie('csrfToken', token, { maxAge: 24 * 60 * 60 * 1000 });
+  setCookie(res, 'csrfToken', token, { maxAge: 24 * 60 * 60 * 1000 });
   res.json({ csrfToken: token });
+});
+
+router.use((req, res, next) => {
+  if (req.path === '/csrf') return next();
+  return csrfProtection(req, res, next);
 });
 
 router.post('/signup', authLimiter, async (req, res) => {
@@ -62,11 +111,12 @@ router.post('/signin', authLimiter, async (req, res) => {
 
     const accessToken = signAccess({ userId: user.id });
     const refreshToken = signRefresh({ userId: user.id });
+    const refreshTokenHash = hashSessionToken(refreshToken);
 
     await prisma.session.create({ data: {
       userId: user.id,
-      sessionToken: refreshToken,
-      refreshToken: refreshToken, // Store in both fields for compatibility
+      sessionToken: refreshTokenHash,
+      refreshToken: refreshTokenHash, // Store in both fields for compatibility
       expiresAt: new Date(Date.now() + (staySignedIn ? 30*24*60*60*1000 : 24*60*60*1000))
     }});
 
@@ -121,13 +171,16 @@ router.post('/refresh', async (req, res) => {
   try {
     const refresh = req.cookies?.refreshToken;
     if (!refresh) return res.status(401).json({ error: 'No refresh token' });
+    const refreshTokenHash = hashSessionToken(refresh);
     const payload = verifyRefresh(refresh);
     const userId = payload.userId;
-    const session = await prisma.session.findUnique({ where: { sessionToken: refresh } });
-    if (!session || !session.isActive) return res.status(401).json({ error: 'Invalid session' });
+    const session = await prisma.session.findUnique({ where: { sessionToken: refreshTokenHash } });
+    if (!session || !session.isActive || session.userId !== userId || session.expiresAt <= new Date()) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
     const accessToken = signAccess({ userId });
     setCookie(res, 'accessToken', accessToken, { httpOnly: true, maxAge: 15 * 60 * 1000 });
-    res.json({ accessToken });
+    res.json({ ok: true });
   } catch (e) {
     console.error(e);
     res.status(401).json({ error: 'Invalid refresh token' });
@@ -137,9 +190,13 @@ router.post('/refresh', async (req, res) => {
 router.post('/logout', async (req, res) => {
   try {
     const refresh = req.cookies?.refreshToken;
-    if (refresh) await prisma.session.updateMany({ where: { sessionToken: refresh }, data: { isActive: false } }).catch(() => {});
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    if (refresh) {
+      const refreshTokenHash = hashSessionToken(refresh);
+      await prisma.session.updateMany({ where: { sessionToken: refreshTokenHash }, data: { isActive: false } }).catch(() => {});
+    }
+    clearCookie(res, 'accessToken', { httpOnly: true });
+    clearCookie(res, 'refreshToken', { httpOnly: true });
+    clearCookie(res, 'csrfToken');
     res.json({ ok: true });
   } catch (e) {
     console.error(e);
